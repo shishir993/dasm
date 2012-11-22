@@ -1,0 +1,15 @@
+------
+|DASM|
+------
+A disassembler for x86 windows binaries. Coded completely from scratch with a small part of it from Matt Pietrek's PEDUMP.exe (see http://www.wheaty.net/downloads.htm). It supports all integer, floating-point, MMX and SSE1 instructions. The new AES instruction set is also supported. Support for SSE2 and newer instruction will be added in future.
+
+Please feel free to reuse code from this project. Kindly include a reference to me in your code. :)
+
+---------
+|CONTACT|
+---------
+* Shishir Prasad *
+- shishir89@gmail.com
+- www.shishirprasad.net
+- twitter.com/shishir993
+- facebook.com/shishir993

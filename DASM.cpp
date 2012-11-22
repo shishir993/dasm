@@ -33,53 +33,20 @@ int wmain(int argc, WCHAR **argv)
 	DWORD dwCodeSecOffset = 0;
 	DWORD dwSizeOfCodeSection = 0;
 
-	NCODE_LOCS NNonCodeLocs;
-
-	//wprintf_s(L"%d %d %d\n", sizeof(long long), sizeof(INT), sizeof(DWORD));
-	//wprintf_s(L"sizeof(IMAGE_IMPORT_DESCRIPTOR) = %d\n", sizeof(IMAGE_IMPORT_DESCRIPTOR));
-
 	#ifdef NDEBUG
 	// Opening statement
 	wprintf(L"Shishir's Garage project::DASM v%s, a disassembler for 32bit PE files\
-				\nCoder: Shishir K Prasad {shishir993@yahoo.com}\
+				\nCoder: Shishir Prasad {shishir89@gmail.com} : www.shishirprasad.net\
 				\nCopyright: None but don't forget to include my name as a reference in your code/webpage. :)\n\n", DASM_VERSION_STR);
 	#endif
-
-	/*
-	 * If no arguments are specified, then prompt user for path to
-	 * file to disassemble.
-	 * If one argument is given, then assume that as the file to be
-	 * disassembled.
-	 * If there are 2 arguments, then assume the first one as the 
-	 * exe/dll/... file, and the second one as the output file in
-	 * which we must write the output.
-	 *
-	 * todo: No support for output file yet!!
-	 */
-	//if(argc == 1)
-	//{
-	//	wprintf_s(L"Enter the path to file: ");
-	//	wscanf_s(L"%s", wszFilepath);
-	//}
-	//else if(argc == 2)
-	//{
-	//	// input file in argv[1]
-	//	wcscpy_s(wszFilepath, MAX_PATH+1, argv[1]);
-	//}
-	//else
-	//{
-	//	wprintf_s(L"usage: %s [<inputFile>]\n", argv[0]);
-	//	return 1;
-	//}
 
 	if(!fCmdArgsHandler(argc, argv, wszFilepath, _countof(wszFilepath)))
 	{
 		wprintf_s(L"main(): Unable to parse command line arguments\n");
-		wprintf_s(L"usage: %s\n\t[inputFile]\n\t[-exports|-e]\n\t[-imports|-i]\n\t[-headers|-h]\n\t[-disasm|-d]\n", argv[0]);
+		wprintf_s(L"usage: %s\n\t[inputFile]\n\t[/exports|/e]\n\t[/imports|/i]\n\t[/headers|/h]\n\t[/disasm|/d]\n", argv[0]);
 		return 1;
 	}
 
-	//wprintf_s(L"Using input file: %s\nOutput file: %s\n", wszFilepath, wszOutFile);
 	wprintf_s(L"Using input file: %s\n", wszFilepath);
 
 	if( ! fOpenAndMapFile(wszFilepath, &hFile, &hFileObj, &hFileView) )
@@ -110,17 +77,6 @@ int wmain(int argc, WCHAR **argv)
 				return 1;
 			}
 
-			//memset(&NNonCodeLocs, 0, sizeof(NNonCodeLocs));
-
-			// Check if the IAT is present within the .text section
-			// Doing this will lead to a clearer disassembly
-		
-			//NNonCodeLocs.hFileBase = hFileView;
-
-			// Notes: Under construction
-			// begin disassembly
-			// fDisassembler(&NNonCodeLocs, g_binFileInfo.dwVirtBaseOfCode);
-
 			fDoDisassembly( (DWORD*)dwCodeSecOffset, dwSizeOfCodeSection, 
 							g_binFileInfo.dwVirtBaseOfCode );
 		}// if(g_fDisasm)
@@ -142,7 +98,6 @@ BOOL fCmdArgsHandler(int argc, WCHAR **argv, WCHAR *pwszInFile,
 					DWORD dwInFileBufSize)
 {
 	BOOL fInFile = FALSE;
-	//BOOL fOutFile = FALSE;
 
 	BOOL fLocHeaders = FALSE;
 	BOOL fLocDisasm = FALSE;
@@ -170,6 +125,11 @@ BOOL fCmdArgsHandler(int argc, WCHAR **argv, WCHAR *pwszInFile,
 			wcscmp(argv[argc], L"/d") == 0 )
 		{
 			fLocDisasm = TRUE;
+		}
+		else if( *(argv[argc]) == '/' )	// unrecognized command line option
+		{
+			wprintf_s(L"Invalid command line option: %s\n", argv[argc]);
+			return FALSE;
 		}
 		else
 		{

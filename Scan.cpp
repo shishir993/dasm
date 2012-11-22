@@ -261,11 +261,14 @@ BOOL fFindIAT_InText(HANDLE hFileBase, IMAGE_NT_HEADERS *pNTHeader,
 	// from the DataDirectory
 	//IMAGE_THUNK_DATA
 
-	return TRUE;
+	// under construction
+
+	return FALSE;
 }// fFindIAT_InText()
 
 //
 // ** Mostly from Matt Pietrek's PEDUMP.exe **
+// See http://www.wheaty.net/
 //
 BOOL fDumpExports(DWORD dwFileBase, IMAGE_NT_HEADERS *pNTHeader, 
 		IMAGE_DATA_DIRECTORY *pDataDir_Exp)

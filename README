@@ -1,12 +1,34 @@
 ------
-|DASM|
+*DASM*
 ------
-A disassembler for x86 windows binaries. Coded completely from scratch with a small part of it from Matt Pietrek's PEDUMP.exe (see http://www.wheaty.net/downloads.htm). It supports all integer, floating-point, MMX and SSE1 instructions. The new AES instruction set is also supported. Support for SSE2 and newer instruction will be added in future.
+A disassembler for x86 windows binaries. Runs on WinNT platform. Coded completely from scratch with a small part of it from Matt Pietrek's PEDUMP.exe (see http://www.wheaty.net/downloads.htm). It supports all integer, floating-point, MMX and SSE1 instructions. The new AES instruction set is also supported. Support for SSE2 and newer instruction will be added in future.
 
 Please feel free to reuse code from this project. Kindly include a reference to me in your code. :)
 
+-------
+*USAGE*
+-------
+usage: .\DASM.exe
+		[/exports|/e]
+		[/imports|/i]
+		[/headers|/h]
+		[/disasm|/d]
+		[inputFile]
+		
+Command line options:
+	<none> 		: dumps header information and disassembly
+	/e			: dumps EXPORTS information only
+	/i			: dumps IMPORTS information only
+	/d			: generates disassembly only
+	/h			: dumps headers only
+
+Warning: All output printed to stdout. It would be wise to redirect output to a file.
+
+Example: ./dasm.exe /h /d S:\MyBriefcase\Coding\C\DASMv\test\operandSizes.exe > operandSizes.dasm
+	This generates header information and disassembly of file operandSizes.exe
+	
 ---------
-|CONTACT|
+*CONTACT*
 ---------
 * Shishir Prasad *
 - shishir89@gmail.com

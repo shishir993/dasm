@@ -1,4 +1,10 @@
 
+// ---------------------------------------------------
+// Author: Shishir Bhat (www.shishirbhat.com)
+// The MIT License (MIT)
+// Copyright (c) 2016
+//
+
 #ifndef _DASM_H
 #define _DASM_H
 

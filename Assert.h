@@ -1,4 +1,10 @@
 
+// ---------------------------------------------------
+// Author: Shishir Bhat (www.shishirbhat.com)
+// The MIT License (MIT)
+// Copyright (c) 2016
+//
+
 
 /***********************
 * ASSERT(x) is a debug-mode-only macro that is used to catch errors that must not

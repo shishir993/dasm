@@ -1,4 +1,10 @@
 
+// ---------------------------------------------------
+// Author: Shishir Bhat (www.shishirbhat.com)
+// The MIT License (MIT)
+// Copyright (c) 2016
+//
+
 #include "Assert.h"
 
 void _Assert(char *pszMsg, unsigned uLine)

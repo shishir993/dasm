@@ -1,4 +1,10 @@
 
+// ---------------------------------------------------
+// Author: Shishir Bhat (www.shishirbhat.com)
+// The MIT License (MIT)
+// Copyright (c) 2016
+//
+
 #ifndef _DASMINC_H
 #define _DASMINC_H
 
@@ -8,6 +14,7 @@
 #include <strsafe.h>
 
 #include "Assert.h"
+#include "Logger.h"
 
 //#define UNIT_TESTS_ONLY
 

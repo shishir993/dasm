@@ -1,4 +1,10 @@
 
+// ---------------------------------------------------
+// Author: Shishir Bhat (www.shishirbhat.com)
+// The MIT License (MIT)
+// Copyright (c) 2016
+//
+
 #include "Scan.h"
 
 extern DWORD g_dwInputFileType;
@@ -28,7 +34,7 @@ static WCHAR *awszDataDirNames[IMAGE_NUMBEROF_DIRECTORY_ENTRIES] =
 
 
 BOOL fBeginFileScan(HANDLE hFile, HANDLE hFileMapObj,
-					HANDLE hFileView)
+    HANDLE hFileView, BOOL *pf64bit)
 {
 	PIMAGE_DOS_HEADER pDOSHeader = (PIMAGE_DOS_HEADER)hFileView;
 	PIMAGE_NT_HEADERS pNTHeaders = NULL;
@@ -62,7 +68,7 @@ BOOL fBeginFileScan(HANDLE hFile, HANDLE hFileMapObj,
 
 		wprintf_s(L"Valid PE signature found at FilePtr:0x%08x\n", (DWORD)pNTHeaders-(DWORD)hFileView);
 
-		if( ! fDumpFileHeader(pNTHeaders) )
+        if (!fDumpFileHeader(pNTHeaders, pf64bit))
 			return FALSE;
 
 		// optional header: IMAGE_OPTIONAL_HEADER
@@ -123,7 +129,7 @@ BOOL fBeginFileScan(HANDLE hFile, HANDLE hFileMapObj,
 
 }// fBeginFileScan()
 
-BOOL fDumpFileHeader(IMAGE_NT_HEADERS *pNTHeader)
+BOOL fDumpFileHeader(IMAGE_NT_HEADERS *pNTHeader, BOOL *pf64bit)
 {
 	ASSERT(pNTHeader != NULL);
 
@@ -140,6 +146,8 @@ BOOL fDumpFileHeader(IMAGE_NT_HEADERS *pNTHeader)
 					L"DLL",					L"UP_SYSTEM_ONLY",
 					L"BYTES_REVERSED_HI" };
 
+    *pf64bit = FALSE;
+
 	wprintf_s(L"\n* IMAGE_FILE_HEADER *\n");
 	wprintf_s(L"Machine Type            : ");
 
@@ -148,7 +156,13 @@ BOOL fDumpFileHeader(IMAGE_NT_HEADERS *pNTHeader)
 	{
 		case IMAGE_FILE_MACHINE_I386:
 			wprintf_s(L"i386\n");
+            *pf64bit = FALSE;
 			break;
+        
+        case IMAGE_FILE_MACHINE_AMD64:
+            wprintf_s(L"x64\n");
+            *pf64bit = TRUE;
+            break;
 
 		default:
 			wprintf_s(L"Unsupported machine format: %x\n", pNTHeader->FileHeader.Machine);
@@ -252,7 +266,7 @@ BOOL fDumpSectionHeaders(IMAGE_NT_HEADERS *pNTHeaders)
 // Find the starting address - virtual address and file pointer - and the 
 // size of the IAT within the .text section if present.
 BOOL fFindIAT_InText(HANDLE hFileBase, IMAGE_NT_HEADERS *pNTHeader,
-					__out NONCODE_LOC *pNonCodeBlocks)
+    __out NONCODE_LOC *pNonCodeBlocks)
 {
 	ASSERT(hFileBase != NULL);
 	ASSERT(pNTHeader != NULL && pNonCodeBlocks != NULL);
@@ -261,17 +275,14 @@ BOOL fFindIAT_InText(HANDLE hFileBase, IMAGE_NT_HEADERS *pNTHeader,
 	// from the DataDirectory
 	//IMAGE_THUNK_DATA
 
-	// under construction
-
-	return FALSE;
+	return TRUE;
 }// fFindIAT_InText()
 
 //
 // ** Mostly from Matt Pietrek's PEDUMP.exe **
-// See http://www.wheaty.net/
 //
 BOOL fDumpExports(DWORD dwFileBase, IMAGE_NT_HEADERS *pNTHeader, 
-		IMAGE_DATA_DIRECTORY *pDataDir_Exp)
+    IMAGE_DATA_DIRECTORY *pDataDir_Exp)
 {
 	ASSERT(pNTHeader != NULL && pDataDir_Exp != NULL);
 
@@ -341,7 +352,7 @@ BOOL fDumpExports(DWORD dwFileBase, IMAGE_NT_HEADERS *pNTHeader,
         if ( (entryPointRVA >= dwExportsBeginRVA)
              && (entryPointRVA <= dwExportsEndRVA) )
         {
-            printf(" (forwarder -> %s)", entryPointRVA - delta + dwFileBase );
+            printf(" (forwarder -> %s)", (char*)(entryPointRVA - delta + dwFileBase) );
         }
         
         printf("\n");

@@ -1,4 +1,10 @@
 
+// ---------------------------------------------------
+// Author: Shishir Bhat (www.shishirbhat.com)
+// The MIT License (MIT)
+// Copyright (c) 2016
+//
+
 #ifndef _DASM_ENGINE_H
 #define _DASM_ENGINE_H
 
@@ -482,7 +488,7 @@ typedef struct _InsSplit {
  */
 BOOL fDisassembler(NCODE_LOCS *pCodeLocs, DWORD dwVirtCodeBase);
 BOOL fDoDisassembly(DWORD *pdwCodeSection, DWORD dwSizeOfCodeSection,
-					DWORD dwVirtCodeBase);
+    DWORD dwVirtCodeBase, BOOL f64bit);
 
 /* Disasm states */
 BOOL fStateReset();

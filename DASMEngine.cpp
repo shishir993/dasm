@@ -1,4 +1,10 @@
 
+// ---------------------------------------------------
+// Author: Shishir Bhat (www.shishirbhat.com)
+// The MIT License (MIT)
+// Copyright (c) 2016
+//
+
 #include "DasmEngine.h"
 
 // Lookup table for instruction names
@@ -554,6 +560,7 @@ static WCHAR awszPtrStr[][MAX_PTR_STR] = {L"", L"byte ptr ", L"word ptr ", L"dwo
  */
 
 // We will read the code section byte by byte.
+static BOOL g_f64bit;
 static PBYTE pByteInCode = NULL;
 static long lDelta = 0;
 
@@ -611,10 +618,14 @@ BOOL fDisassembler(NCODE_LOCS *pCodeLocs, DWORD dwVirtCodeBase)
 	wprintf_s(L"\n\n**** Disassembly starting from FilePtr = 0x%08x ****\n", 
 				(long)pCodeLocs->aNonCodeLocs[0].dwFilePointer - (long)pCodeLocs->hFileBase);
 	
-	for(INT i = 0; i < pCodeLocs->nNonCodeParts; ++i)
-		if(pCodeLocs->aNonCodeLocs[i].iPartType == CODE_PART_CODE)
-			fDoDisassembly((DWORD*)pCodeLocs->aNonCodeLocs[i].dwFilePointer,
-				pCodeLocs->aNonCodeLocs[i].dwPartSize, dwVirtCodeBase);
+    for (INT i = 0; i < pCodeLocs->nNonCodeParts; ++i)
+    {
+        if (pCodeLocs->aNonCodeLocs[i].iPartType == CODE_PART_CODE)
+        {
+            fDoDisassembly((DWORD*)pCodeLocs->aNonCodeLocs[i].dwFilePointer,
+                pCodeLocs->aNonCodeLocs[i].dwPartSize, dwVirtCodeBase, FALSE);
+        }
+    }
 
 	return FALSE;
 	
@@ -638,9 +649,11 @@ BOOL fDisassembler(NCODE_LOCS *pCodeLocs, DWORD dwVirtCodeBase)
  *		TRUE/FALSE depending on whether there was an error or not.
  */
 BOOL fDoDisassembly(DWORD *pdwCodeSection, DWORD dwSizeOfCodeSection,
-					DWORD dwVirtCodeBase)
+    DWORD dwVirtCodeBase, BOOL f64bit)
 {
 	ASSERT(pdwCodeSection != NULL);
+
+    g_f64bit = f64bit;
 
 	// We will read the code section byte by byte.
 	pByteInCode = (BYTE*)pdwCodeSection;
@@ -975,8 +988,6 @@ BOOL OPCHndlr_2ByteHandler(BYTE bOpcode)
  */
 BOOL OPCHndlr_3ByteHandler(BYTE bOpcode)
 {
-	WORD wIndex;
-
 	// pByteInCode is now pointing to the third byte of the opcode;
 	// i.e., the byte after 0x3a or 0x38
 	bFullOpcode = *pByteInCode;
@@ -2382,7 +2393,7 @@ BOOL fStateImm()
 BOOL fStateDumpOnOpcodeError()
 {
 	// 1: address
-	wprintf_s(L"  %08X: ", (pByteInCode-nBytesCurIns)+lDelta);
+	wprintf_s(L"  %08X: ", (UINT)(pByteInCode-nBytesCurIns)+lDelta);
 	wprintf_s(L"%02X\n", *(pByteInCode-nBytesCurIns));
 	return TRUE;
 }
@@ -2402,7 +2413,7 @@ BOOL fStateDump()
 	// Eg.:	0040108F: 89 04 95 D0 60 D5 00	mov			dword ptr [edx*4+0D560D0h],eax
 
 	// 1: address
-	wprintf_s(L"  %08X: ", (pByteInCode-nBytesCurIns)+lDelta);
+	wprintf_s(L"  %08X: ", (UINT)((pByteInCode-nBytesCurIns)+lDelta));
 
 	// 2: Bytes that make up the current instruction
 	// Print the first 6 bytes on the current line; if there are more
@@ -7951,7 +7962,7 @@ BOOL OPCHndlrMem_BT(BYTE bOpcode)			// Bit Test
 	}
 	else
 	{
-		wprintf_s(L"OPCHndlrMem_BT(): Invalid opcode %xh\n");
+		wprintf_s(L"OPCHndlrMem_BT(): Invalid opcode %xh\n", bOpcode);
 		return FALSE;
 	}
 
@@ -7986,7 +7997,7 @@ BOOL OPCHndlrMem_BTS(BYTE bOpcode)			// Bit Test and Set
 	}
 	else
 	{
-		wprintf_s(L"OPCHndlrMem_BTS(): Invalid opcode %xh\n");
+		wprintf_s(L"OPCHndlrMem_BTS(): Invalid opcode %xh\n", bOpcode);
 		return FALSE;
 	}
 
@@ -8049,7 +8060,7 @@ BOOL OPCHndlrMem_BTR(BYTE bOpcode)
 	}
 	else
 	{
-		wprintf_s(L"OPCHndlrMem_BTR(): Invalid opcode %xh\n");
+		wprintf_s(L"OPCHndlrMem_BTR(): Invalid opcode %xh\n", bOpcode);
 		return FALSE;
 	}
 
@@ -8217,7 +8228,7 @@ BOOL OPCHndlrMem_BTC(BYTE bOpcode)
 	}
 	else
 	{
-		wprintf_s(L"OPCHndlrMem_BTC(): Invalid opcode %xh\n");
+		wprintf_s(L"OPCHndlrMem_BTC(): Invalid opcode %xh\n", bOpcode);
 		return FALSE;
 	}
 

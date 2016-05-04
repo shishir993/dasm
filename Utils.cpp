@@ -1,4 +1,10 @@
 
+// ---------------------------------------------------
+// Author: Shishir Bhat (www.shishirbhat.com)
+// The MIT License (MIT)
+// Copyright (c) 2016
+//
+
 #include "Utils.h"
 
 
@@ -153,7 +159,7 @@ BOOL fGetPtrToCode(DWORD dwFileBase, IMAGE_NT_HEADERS *pNTHeaders,
 		  (dwSecChars & IMAGE_SCN_MEM_EXECUTE)) )
 	{
 		wprintf_s(L"Retrieved section header %S but does not contain code or is not executable\n",
-					pImgSecHeader->Name);
+					(char*)pImgSecHeader->Name);
 		return FALSE;
 	}
 
@@ -240,11 +246,11 @@ BOOL Util_fDumpIMAGE_IMPORT_DESCRIPTORS(DWORD rva, DWORD dwSize,
 			_wctime_s(wszTimeStamp, _countof(wszTimeStamp), (time_t*)&pImports->TimeDateStamp)
 			== 0 )
 		{
-			wprintf_s(L"    TimeDateStamp:       %xh %S\n", pImports->TimeDateStamp, wszTimeStamp);
+			wprintf_s(L"    TimeDateStamp:       %xh %s\n", pImports->TimeDateStamp, wszTimeStamp);
 		}
 		wprintf_s(L"    ForwarderChain:      %xh\n", pImports->ForwarderChain);
 		if(pImports->Name)
-			wprintf_s(L"    Name:                %S\n", pImports->Name + iFilePtrRVADelta + dwFileBase);
+			wprintf_s(L"    Name:                %S\n", (char*)pImports->Name + iFilePtrRVADelta + dwFileBase);
 		wprintf_s(L"    FirstThunk:          %xh\n", pImports->FirstThunk);
 		wprintf_s(L"    IAT:\n");
 
@@ -264,7 +270,7 @@ BOOL Util_fDumpIMAGE_IMPORT_DESCRIPTORS(DWORD rva, DWORD dwSize,
 				{
 					PIMAGE_IMPORT_BY_NAME pImpByName = (PIMAGE_IMPORT_BY_NAME)(pImgThunkData->u1.AddressOfData + 
 														iFilePtrRVADelta + dwFileBase);
-					wprintf_s(L"Hint: %4u Name: %S\n", pImpByName->Hint, pImpByName->Name);
+					wprintf_s(L"Hint: %4u Name: %S\n", pImpByName->Hint, (char*)pImpByName->Name);
 				}
 
 				++pImgThunkData;

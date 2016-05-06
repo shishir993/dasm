@@ -12,11 +12,11 @@
 #include <strsafe.h>
 
 #ifdef _DEBUG
-#define logdbg(msg, ...)    PrintDebugString(__FUNCTIONW__, __LINE__, msg, __VA_ARGS__)
+#define logdbg(fmt, ...)    PrintDebugString(L"[%s:%d] " fmt L"\n", __FUNCTIONW__, __LINE__, ##__VA_ARGS__)
 #else
-#define logdbg(msg, ...)
+#define logdbg(fmt, ...)
 #endif
 
-void PrintDebugString(wchar_t const *pszFunc, int lineNum, wchar_t const *pszFmt, ...);
+void PrintDebugString(wchar_t const *pszFmt, ...);
 
 #endif // _DASM_LOGGER_H

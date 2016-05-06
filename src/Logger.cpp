@@ -8,7 +8,7 @@
 #include "Logger.h"
 #include "DasmAssert.h"
 
-void PrintDebugString(wchar_t const *pszFunc, int lineNum, wchar_t const *pszFmt, ...)
+void PrintDebugString(wchar_t const *pszFmt, ...)
 {
     static wchar_t g_szBuffer[1024];
 

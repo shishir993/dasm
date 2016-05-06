@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <strsafe.h>
+#include <time.h>
 
 #include "DasmAssert.h"
 #include "Logger.h"

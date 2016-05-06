@@ -7,6 +7,9 @@
 
 #include "Scan.h"
 
+// ctime_s requires a string buffer of at least 26 chars
+#define STRLEN_CTIME    32
+
 extern DWORD g_dwInputFileType;
 extern BINFILEINFO g_binFileInfo;
 extern BOOL g_fExports;
@@ -33,8 +36,7 @@ static WCHAR *awszDataDirNames[IMAGE_NUMBEROF_DIRECTORY_ENTRIES] =
 			{ L"Reserved"} };
 
 
-BOOL fBeginFileScan(HANDLE hFile, HANDLE hFileMapObj,
-    HANDLE hFileView, BOOL *pf64bit)
+BOOL fBeginFileScan(HANDLE hFileView, BOOL *pf64bit)
 {
 	PIMAGE_DOS_HEADER pDOSHeader = (PIMAGE_DOS_HEADER)hFileView;
 	PIMAGE_NT_HEADERS pNTHeaders = NULL;
@@ -133,7 +135,7 @@ BOOL fDumpFileHeader(IMAGE_NT_HEADERS *pNTHeader, BOOL *pf64bit)
 {
 	ASSERT(pNTHeader != NULL);
 
-	char szTimestampStr[32];
+	char szTimestampStr[STRLEN_CTIME];
 	WORD wFileCharacs;
 
 	static WCHAR awszCharacteristics[][32] = { 
@@ -173,12 +175,15 @@ BOOL fDumpFileHeader(IMAGE_NT_HEADERS *pNTHeader, BOOL *pf64bit)
 
 	wprintf_s(L"No. of sections         : %d\n", pNTHeader->FileHeader.NumberOfSections);
 	wprintf_s(L"TimeDateStamp           : 0x%x ", pNTHeader->FileHeader.TimeDateStamp);
-	if( ctime_s(szTimestampStr, _countof(szTimestampStr), 
-				(time_t*)(&(pNTHeader->FileHeader.TimeDateStamp))) == 0)
-		wprintf_s(L"%S", szTimestampStr);
-	else
-		// Buffer returned from ctime_s() will have \n\0 at the end if successful
-		wprintf_s(L"\n");
+    if (ctime_s(szTimestampStr, _countof(szTimestampStr), (time_t*)(&(pNTHeader->FileHeader.TimeDateStamp))) == 0)
+    {
+        // Buffer returned from ctime_s() will have \n\0 at the end if successful
+        wprintf_s(L"%S", szTimestampStr);
+    }
+    else
+    {
+        wprintf_s(L"\n");
+    }
 	wprintf_s(L"Pointer to symtable     : 0x%x\n", pNTHeader->FileHeader.PointerToSymbolTable);
 	wprintf_s(L"No. of symbols          : %d\n", pNTHeader->FileHeader.NumberOfSymbols);
 	wprintf_s(L"OptionalHeader Size     : %d\n", pNTHeader->FileHeader.SizeOfOptionalHeader);
@@ -186,21 +191,25 @@ BOOL fDumpFileHeader(IMAGE_NT_HEADERS *pNTHeader, BOOL *pf64bit)
 
 	wFileCharacs = pNTHeader->FileHeader.Characteristics;
 
-	DWORD dw;
-	int index;
-	for(dw = IMAGE_FILE_RELOCS_STRIPPED, index = 0; 
-		dw <= IMAGE_FILE_BYTES_REVERSED_HI;
-		dw = dw << 1, ++index)
+	DWORD dw = IMAGE_FILE_RELOCS_STRIPPED;
+	int index = 0;
+	for(; dw <= IMAGE_FILE_BYTES_REVERSED_HI; dw <<= 1, ++index)
 	{
-		if(dw & wFileCharacs)
-			wprintf_s(L"                        : %s\n", awszCharacteristics[index]);
+        if (dw & wFileCharacs)
+        {
+            wprintf_s(L"                        : %s\n", awszCharacteristics[index]);
+        }
 	}
 
 	// file characteristics
-	if(wFileCharacs & IMAGE_FILE_DLL)
-		g_dwInputFileType = DASM_FTYPE_DLL;
-	else if(wFileCharacs & IMAGE_FILE_EXECUTABLE_IMAGE)
-		g_dwInputFileType = DASM_FTYPE_EXE;
+    if (wFileCharacs & IMAGE_FILE_DLL)
+    {
+        g_dwInputFileType = DASM_FTYPE_DLL;
+    }
+    else if (wFileCharacs & IMAGE_FILE_EXECUTABLE_IMAGE)
+    {
+        g_dwInputFileType = DASM_FTYPE_EXE;
+    }
 
 	return TRUE;
 }
@@ -298,6 +307,8 @@ BOOL fDumpExports(DWORD dwFileBase, IMAGE_NT_HEADERS *pNTHeader,
     PWORD ordinals;
     PSTR *name;
 
+    char szTimestampStr[STRLEN_CTIME];
+
 	if(pDataDir_Exp->VirtualAddress == 0 || pDataDir_Exp->Size == 0)
 	{
 		wprintf_s(L"fDumpExports(): No Exports Found\n");
@@ -317,11 +328,18 @@ BOOL fDumpExports(DWORD dwFileBase, IMAGE_NT_HEADERS *pNTHeader,
 	printf("Exports table:\n\n");
     printf("  Name:            %s\n", filename);
     printf("  Characteristics: %08X\n", pExportDir->Characteristics);
-    printf("  TimeDateStamp:   %08X -> %s",
-    			pExportDir->TimeDateStamp,
-    			ctime((time_t*)&pExportDir->TimeDateStamp) );
-    printf("  Version:         %u.%02u\n", pExportDir->MajorVersion,
-            pExportDir->MinorVersion);
+    printf("  TimeDateStamp:   %08X -> ", pExportDir->TimeDateStamp);
+    if (ctime_s(szTimestampStr, _countof(szTimestampStr), (time_t*)&pExportDir->TimeDateStamp) == 0)
+    {
+        // Buffer returned from ctime_s() will have \n\0 at the end when successful
+        wprintf_s(L"%S", szTimestampStr);
+    }
+    else
+    {
+        wprintf_s(L"\n");
+    }
+    
+    printf("  Version:         %u.%02u\n", pExportDir->MajorVersion, pExportDir->MinorVersion);
     printf("  Ordinal base:    %08X\n", pExportDir->Base);
     printf("  # of functions:  %08X\n", pExportDir->NumberOfFunctions);
     printf("  # of Names:      %08X\n", pExportDir->NumberOfNames);

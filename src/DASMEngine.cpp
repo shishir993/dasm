@@ -819,7 +819,7 @@ BOOL fStateReset()
  */
 BOOL fStatePrefix()
 {
-	INT nPrefixes = 0;
+	BYTE nPrefixes = 0;
 
 	// There may be upto 4 prefixes of 1byte each.
 	// We must scan forward until we find a byte that
@@ -1043,7 +1043,7 @@ void DEngine_FPUUnitTest()
 		bOpcodeLow = bFullOpcode & 0x0f;
 		bOpcodeHigh = (bFullOpcode & 0xf0) >> 4;
 
-		for(INT iReg = 0; iReg <= 7; ++iReg)
+		for(BYTE iReg = 0; iReg <= 7; ++iReg)
 		{
 			bFPUModRM = iReg;
 			bFPUModRM = bFPUModRM << 3;
@@ -1062,7 +1062,7 @@ void DEngine_FPUUnitTest()
 
 		for(iModRM = 0xC0; iModRM <= 0xFF; ++iModRM)
 		{
-			bFPUModRM = iModRM;
+			bFPUModRM = (BYTE)iModRM;
 			OPCHndlrFPU_All(bFullOpcode);
 		}
 		wprintf_s(L"\n");
@@ -1370,7 +1370,7 @@ BOOL fStateModRM()
  *	Reg field is the opcode extension. Mod+RM fields give the effective 
  *	address of the operand. Next state will be set if this returns TRUE.
  */
-BOOL MODRM_fTypeDigit(BYTE bModRM, BYTE bMod, BYTE bRM)
+BOOL MODRM_fTypeDigit(BYTE /*bModRM*/, BYTE bMod, BYTE bRM)
 {
 	BYTE bOprSize;
 	OPRTYPE_RETVAL oprType;
@@ -1507,7 +1507,7 @@ BOOL MODRM_fTypeDigit(BYTE bModRM, BYTE bMod, BYTE bRM)
  *
  *	Next state will be set if this returns TRUE.
  */
-BOOL MODRM_fTypeR(BYTE bModRM, BYTE bMod, BYTE bReg, BYTE bRM)
+BOOL MODRM_fTypeR(BYTE /*bModRM*/, BYTE bMod, BYTE bReg, BYTE bRM)
 {
 	ASSERT(bMod >= 0 && bMod <= 3);
 	ASSERT(bRM >= 0 && bRM <= 7);
@@ -1944,7 +1944,7 @@ OPRTYPE_RETVAL MODRM_GetOperandFromModRM(BYTE bMod, BYTE bRM, BYTE bOprSize, BYT
 
 		default:
 			wprintf_s(L"MODRM_GetOperandFromModRM(): Invalid bMod value %d\n", bMod);
-			return OPRTYPE_ERROR;
+            break;
 	}// switch(bMod)
 
 	return OPRTYPE_ERROR;
@@ -2003,11 +2003,11 @@ OPRTYPE_RETVAL MODRM_GetOperandFromReg(BYTE bReg, BYTE bOprSize, BYTE bRegType,
 
 		default:
 			wprintf_s(L"MODRM_GetOperandFromReg(): Invalid bRegType %u\n", bRegType);
-			return OPRTYPE_ERROR;
+            break;
 
 	}// switch(bRegType)
 
-	return OPRTYPE_REG;
+	return OPRTYPE_ERROR;
 }
 
 
@@ -2822,8 +2822,6 @@ BOOL fStateDump()
 
 			case OPRTYPE_DISP32:	// ds:[disp32]	ds:[0040BD08h]
 			{
-				WCHAR *pwszSegStr = NULL;
-
 				if(insCurIns.wPrefixTypes & PREFIX_SEG)
 				{
 					// We have a segment override prefix. Get it.
@@ -6224,7 +6222,6 @@ BOOL OPCHndlrPrefix_Ovride(BYTE bOpcode)	// override prefixes
 	// PREFIX state
 	#ifdef _DEBUG
 		wprintf_s(L"!! %s(): %xh\n", __FUNCTIONW__, bOpcode);
-		return TRUE;
 	#endif
 
 	return TRUE;
@@ -6319,10 +6316,10 @@ BOOL OPCHndlrMulti_8x(BYTE bOpcode)		// 0x80 - 0x83
 
 		default:
 			wprintf_s(L"OPCHndlrMulti_8x(): Invalid opcode extension %u\n", bOpcodeEx);
-			return FALSE;
+            break;
 	}
 
-	return TRUE;	// unreachable I know
+	return FALSE;
 }
 
 /*
@@ -6402,10 +6399,10 @@ BOOL OPCHndlrMulti_fx(BYTE bOpcode)		// 0xf6 and 0xf7
 
 		default:
 			wprintf_s(L"OPCHndlrMulti_fx(): Invalid opcode extension %u\n", bOpcodeEx);
-			return FALSE;
+            break;
 	}
 
-	return TRUE;
+    return FALSE;
 }
 
 /* 
@@ -6439,10 +6436,9 @@ BOOL OPCHndlrMulti_IncDec(BYTE bOpcode)	// 0xfe: INC/DEC
 	else
 	{
 		wprintf_s(L"OPCHndlrMulti_IncDec(): Invalid opcode extension %u\n", bOpcodeEx);
-		return FALSE;
 	}
 
-	return TRUE;	// unreachable
+    return FALSE;
 }
 
 /*
@@ -6507,10 +6503,10 @@ BOOL OPCHndlrMulti_FF(BYTE bOpcode)		// 0xff
 
 		default:
 			wprintf_s(L"OPCHndlrMulti_FF(): Invalid opcode extension %u\n", bOpcodeEx);
-			return FALSE;
+            break;
 	}
 	
-	return TRUE; // unreachable
+    return FALSE;
 }
 
 
@@ -8681,10 +8677,10 @@ BOOL OPCHndlrMulti_BitTestX(BYTE bOpcode)		// 0f ba
 
 		default:
 			wprintf_s(L"OPCHndlrMulti_BitTestX(): Invalid opcode extension %u\n", bOpcodeEx);
-			return FALSE;
+            break;
 	}
 
-	return TRUE;	// unreachable I know
+    return FALSE;
 }
 
 
@@ -8863,7 +8859,8 @@ BOOL OPCHndlrMMX_PMulti7x(BYTE bOpcode)	//
 	// get the 'reg' field from the ModRM byte
 	Util_vSplitModRMByte(*pByteInCode, NULL, &bOpcodeEx, NULL);
 
-	ASSERT(bOpcodeEx == 2 ||bOpcodeEx == 4 || bOpcodeEx == 6);	// assert always?
+    // TODO: For 0x0F 0x71 opcode, this assert fails because bOpcodeEx is 1
+	ASSERT(bOpcodeEx == 2 || bOpcodeEx == 4 || bOpcodeEx == 6);	// assert always?
 
 	bOpcodeEx = bOpcodeEx/2 - 1;	// get zero-based index
 	iIndex = (bOpcode - 0x71) * 3 + bOpcodeEx;

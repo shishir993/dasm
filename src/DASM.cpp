@@ -24,10 +24,12 @@ int wmain(int argc, WCHAR **argv)
 {
 
 #ifdef UNIT_TESTS_ONLY
+    DBG_UNREFERENCED_PARAMETER(argc);
+    DBG_UNREFERENCED_PARAMETER(argv);
 	vRunTests();
-	//DEngine_FPUUnitTest();
+	DEngine_FPUUnitTest();
 	//DEngine_MMXUnitTest();
-	//DEngine_SSEUnitTest();
+	DEngine_SSEUnitTest();
 	return 0;
 #else
 
@@ -35,18 +37,12 @@ int wmain(int argc, WCHAR **argv)
 	WCHAR wszOutFile[MAX_PATH+1] = L"";
 
 	HANDLE hFile = NULL, hFileObj = NULL, hFileView = NULL;
-	IMAGE_NT_HEADERS *pNTHeaders = NULL;
 	DWORD dwCodeSecOffset = 0;
 	DWORD dwSizeOfCodeSection = 0;
 
-    BOOL f64bit;
-
-	NCODE_LOCS NNonCodeLocs;
+    BOOL f64bit = FALSE;
 
     logdbg(L"Disassembler started: %s", L"hello,world!");
-
-	//wprintf_s(L"%d %d %d\n", sizeof(long long), sizeof(INT), sizeof(DWORD));
-	//wprintf_s(L"sizeof(IMAGE_IMPORT_DESCRIPTOR) = %d\n", sizeof(IMAGE_IMPORT_DESCRIPTOR));
 
 	#ifdef NDEBUG
 	// Opening statement
@@ -62,7 +58,6 @@ int wmain(int argc, WCHAR **argv)
 		return 1;
 	}
 
-	//wprintf_s(L"Using input file: %s\nOutput file: %s\n", wszFilepath, wszOutFile);
 	wprintf_s(L"Using input file: %s\n", wszFilepath);
 
 	if( ! fOpenAndMapFile(wszFilepath, &hFile, &hFileObj, &hFileView) )
@@ -71,13 +66,12 @@ int wmain(int argc, WCHAR **argv)
 		return 1;
 	}
 
-	wprintf_s(L"********************************\nDisassembling file: %s\n",
-				wszFilepath);
+	wprintf_s(L"********************************\nDisassembling file: %s\n", wszFilepath);
 
 	__try
 	{
 		// dump information from headers
-        if (!fBeginFileScan(hFile, hFileObj, hFileView, &f64bit))
+        if (!fBeginFileScan(hFileView, &f64bit))
 		{
 			wprintf_s(L"main(): fBeginFileScan() error\n");
 			return 1;
@@ -93,27 +87,17 @@ int wmain(int argc, WCHAR **argv)
 				return 1;
 			}
 
-			//memset(&NNonCodeLocs, 0, sizeof(NNonCodeLocs));
-
-			// Check if the IAT is present within the .text section
-			// Doing this will lead to a clearer disassembly
-		
-			//NNonCodeLocs.hFileBase = hFileView;
-
-			// Notes: Under construction
-			// begin disassembly
-			// fDisassembler(&NNonCodeLocs, g_binFileInfo.dwVirtBaseOfCode);
-
-			fDoDisassembly( (DWORD*)dwCodeSecOffset, dwSizeOfCodeSection, 
-							g_binFileInfo.dwVirtBaseOfCode, f64bit);
+			fDoDisassembly((DWORD*)dwCodeSecOffset, dwSizeOfCodeSection, g_binFileInfo.dwVirtBaseOfCode, f64bit);
 		}// if(g_fDisasm)
 
 		return 0;
 	}
 	__finally
 	{
-		if(hFile != NULL && hFileObj != NULL && hFileView != NULL)
-			fCloseFile(hFile, hFileObj, hFileView);
+        if (hFile != NULL && hFileObj != NULL && hFileView != NULL)
+        {
+            fCloseFile(hFile, hFileObj, hFileView);
+        }
 	}
 
 #endif	// UNIT_TESTS_ONLY
@@ -125,7 +109,6 @@ BOOL fCmdArgsHandler(int argc, WCHAR **argv, WCHAR *pwszInFile,
 					DWORD dwInFileBufSize)
 {
 	BOOL fInFile = FALSE;
-	//BOOL fOutFile = FALSE;
 
 	BOOL fLocHeaders = FALSE;
 	BOOL fLocDisasm = FALSE;
@@ -211,12 +194,14 @@ BOOL fOpenAndMapFile(WCHAR *pwszFilePath, HANDLE *hFile, HANDLE *hFileMapObj,
 	if(*hFile == INVALID_HANDLE_VALUE)
 	{
 		DWORD dwError = GetLastError();
+        DBG_UNREFERENCED_LOCAL_VARIABLE(dwError);
 		return FALSE;
 	}
 
 	if( (dwRetVal = GetFileSize(*hFile, &dwFileSize)) == INVALID_FILE_SIZE )
 	{
 		DWORD dwError = GetLastError();
+        DBG_UNREFERENCED_LOCAL_VARIABLE(dwError);
 		return FALSE;
 	}
 
@@ -228,8 +213,7 @@ BOOL fOpenAndMapFile(WCHAR *pwszFilePath, HANDLE *hFile, HANDLE *hFileMapObj,
 
 	// create a memory mapping for the file with GENERIC_READ and GENERIC_EXECUTE
 	// that is, create the file mapping object
-	if( (*hFileMapObj = CreateFileMapping(*hFile, NULL, PAGE_EXECUTE_READ, 
-							0, 0, EXEFILEMAP_NAME)) == NULL )
+	if( (*hFileMapObj = CreateFileMapping(*hFile, NULL, PAGE_EXECUTE_READ, 0, 0, EXEFILEMAP_NAME)) == NULL )
 	{
 		CloseHandle(*hFile);
 		return FALSE;

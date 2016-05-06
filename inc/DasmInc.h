@@ -13,7 +13,7 @@
 #include <stdio.h>
 #include <strsafe.h>
 
-#include "Assert.h"
+#include "DasmAssert.h"
 #include "Logger.h"
 
 //#define UNIT_TESTS_ONLY

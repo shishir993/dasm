@@ -6,7 +6,7 @@
 //
 
 #include "Logger.h"
-#include "Assert.h"
+#include "DasmAssert.h"
 
 void PrintDebugString(wchar_t const *pszFunc, int lineNum, wchar_t const *pszFmt, ...)
 {

@@ -102,16 +102,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\Assert.cpp" />
     <ClCompile Include="src\DASM.cpp" />
+    <ClCompile Include="src\DasmAssert.cpp" />
     <ClCompile Include="src\DASMEngine.cpp" />
     <ClCompile Include="src\Logger.cpp" />
     <ClCompile Include="src\Scan.cpp" />
     <ClCompile Include="src\Utils.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="inc\Assert.h" />
     <ClInclude Include="inc\DASM.h" />
+    <ClInclude Include="inc\DasmAssert.h" />
     <ClInclude Include="inc\DASMEngine.h" />
     <ClInclude Include="inc\DasmInc.h" />
     <ClInclude Include="inc\Logger.h" />

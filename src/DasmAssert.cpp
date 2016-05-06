@@ -5,7 +5,7 @@
 // Copyright (c) 2016
 //
 
-#include "Assert.h"
+#include "DasmAssert.h"
 
 void _Assert(char *pszMsg, unsigned uLine)
 {

@@ -10,13 +10,13 @@
 
 void PrintDebugString(wchar_t const *pszFmt, ...)
 {
-    static wchar_t g_szBuffer[1024];
+    wchar_t szBuffer[1024];
 
     HRESULT hr;
     va_list pArgs;
 
     va_start(pArgs, pszFmt);
-    hr = StringCchVPrintf(g_szBuffer, ARRAYSIZE(g_szBuffer), pszFmt, pArgs);
+    hr = StringCchVPrintf(szBuffer, ARRAYSIZE(szBuffer), pszFmt, pArgs);
     va_end(pArgs);
 
     if (FAILED(hr) && (hr != STRSAFE_E_INSUFFICIENT_BUFFER))
@@ -25,7 +25,8 @@ void PrintDebugString(wchar_t const *pszFmt, ...)
         goto errExit;
     }
 
-    OutputDebugString(g_szBuffer);
+    OutputDebugString(szBuffer);
+    wprintf(szBuffer);
     return;
 
 errExit:

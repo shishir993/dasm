@@ -31,16 +31,16 @@
 
 #ifdef _DEBUG
 
-	void _Assert(char*, unsigned);
-	#define ASSERT(x)	\
-		if(x) {}		\
-		else			\
-			_Assert(__FILE__, __LINE__)
+void _Assert(char*, unsigned);
+#define ASSERT(x)    \
+        if(x) {}        \
+        else            \
+            _Assert(__FILE__, __LINE__)
 
 #else
 
-	#define ASSERT(x)
+#define ASSERT(x)
 
 #endif
 
-#endif	// _ASSERT_H
+#endif    // _ASSERT_H

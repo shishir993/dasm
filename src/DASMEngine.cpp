@@ -10,207 +10,168 @@
 // Lookup table for instruction names
 WCHAR awszOpcodeLUT1[][MAX_OPCODE_NAME_LEN + 1] =
 {
-    //        0            1            2           3            4            5            6            7        
-    //        8            9            A           B            C            D            E            F
-    /*0*/    L"add",    L"add",     L"add",     L"add",     L"add",     L"add",     L"push",        L"pop",
-    /*0*/    L"or",     L"or",      L"or",      L"or",      L"or",      L"or",      L"push",        L"!twobyte",
-
-    /*1*/    L"adc",    L"adc",     L"adc",     L"adc",        L"adc",        L"adc",        L"push",    L"pop",
-    /*1*/    L"sbb",    L"sbb",     L"sbb",     L"sbb",        L"sbb",        L"sbb",        L"push",    L"pop",
-
-    /*2*/    L"and",    L"and",     L"and",     L"and",        L"and",        L"and",        L"sges",    L"daa",
-    /*2*/    L"sub",    L"sub",     L"sub",     L"sub",        L"sub",        L"sub",        L"sgcs",    L"das",
-
-    /*3*/    L"xor",    L"xor",     L"xor",     L"xor",        L"xor",        L"xor",        L"sgds",    L"aaa",
-    /*3*/    L"cmp",    L"cmp",     L"cmp",     L"cmp",        L"cmp",        L"cmp",        L"sgds",    L"aas",
-
-    /*4*/    L"inc",    L"inc",     L"inc",     L"inc",        L"inc",        L"inc",        L"inc",        L"inc",
-    /*4*/    L"dec",    L"dec",     L"dec",     L"dec",        L"dec",        L"dec",        L"dec",        L"dec",
-
-    /*5*/    L"push",   L"push",    L"push",    L"push",    L"push",    L"push",    L"push",    L"push",
-    /*5*/    L"pop",    L"pop",     L"pop",     L"pop",        L"pop",        L"pop",        L"pop",        L"pop",
-
-    //        0            1            2            3            4            5            6            7        
-    //        8            9            A            B            C            D            E            F
-    /*6*/    L"pushad",    L"popad",    L"bound",    L"arpl",    L"!sgfs",    L"!sggs",    L"!szop",    L"!szad",
-    /*6*/    L"push",    L"imul",    L"push",    L"imul",    L"ins",        L"ins",        L"outs",    L"outs",
-
-    /*7*/    L"jo",        L"jno",        L"jb",        L"jnb",        L"je",        L"jne",        L"jbe",        L"ja",
-    /*7*/    L"js",        L"jns",        L"jpe",        L"jpo",        L"jl",        L"jge",        L"jle",        L"jg",
-
-    /*8*/    L"",        L"",        L"",        L"",        L"test",    L"test",    L"xchg",    L"xchg",
-    /*8*/    L"mov",        L"mov",        L"mov",        L"mov",        L"mov",        L"lea",        L"mov",        L"pop",
-
-    /*9*/    L"nop",        L"xchg",    L"xchg",    L"xchg",    L"xchg",    L"xchg",    L"xchg",    L"xchg",
-    /*9*/    L"cwd",        L"cdq",        L"callf",    L"wait",    L"pushfd",    L"popfd",    L"sahf",    L"lahf",
-
-    /*A*/    L"mov",        L"mov",        L"mov",        L"mov",        L"movs",    L"movs",    L"cmps",    L"cmps",
-    /*A*/    L"test",    L"test",    L"stos",    L"stos",    L"lods",    L"lods",    L"scas",    L"scas",
-
-    /*B*/    L"mov",        L"mov",        L"mov",        L"mov",        L"mov",        L"mov",        L"mov",        L"mov",
-    /*B*/    L"mov",        L"mov",        L"mov",        L"mov",        L"mov",        L"mov",        L"mov",        L"mov",
-
-    /*C*/    L"!shift",    L"!shift",    L"ret",        L"ret",        L"les",        L"lds",        L"mov",        L"mov",
-    /*C*/    L"enter",    L"leave",    L"retf",    L"retf",    L"int",        L"int",        L"into",    L"iretd",
-
-    /*D*/    L"!shift",    L"!shift",    L"!shift",    L"!shift",    L"aam",        L"aad",        L"salc",    L"xlat",
-    /*D*/    L"!fpu",    L"!fpu",    L"!fpu",    L"!fpu",    L"!fpu",    L"!fpu",    L"!fpu",    L"!fpu",
-
-    /*E*/    L"loopnz",    L"loopz",    L"loop",    L"jecxz",    L"in",        L"in",        L"out",        L"out",
-    /*E*/    L"call",    L"jmp",        L"jmpf",    L"jmp",        L"in",        L"in",        L"out",        L"out",
-
-    /*F*/    L"lock",    L"int1",    L"repne",    L"repe",    L"hlt",        L"cmc",        L"!",        L"!",
-    /*F*/    L"clc",        L"stc",        L"cli",        L"sti",        L"cld",        L"std",        L"!inc",    L"!"
+    //     0              1              2              3              4              5          6          7              
+    //     8              9              A              B              C              D          E          F
+    /*0*/  L"add",        L"add",        L"add",        L"add",        L"add",        L"add",    L"push",   L"pop",
+    /*0*/  L"or",         L"or",         L"or",         L"or",         L"or",         L"or",     L"push",   L"!twobyte",
+    /*1*/  L"adc",        L"adc",        L"adc",        L"adc",        L"adc",        L"adc",    L"push",   L"pop",
+    /*1*/  L"sbb",        L"sbb",        L"sbb",        L"sbb",        L"sbb",        L"sbb",    L"push",   L"pop",
+    /*2*/  L"and",        L"and",        L"and",        L"and",        L"and",        L"and",    L"sges",   L"daa",
+    /*2*/  L"sub",        L"sub",        L"sub",        L"sub",        L"sub",        L"sub",    L"sgcs",   L"das",
+    /*3*/  L"xor",        L"xor",        L"xor",        L"xor",        L"xor",        L"xor",    L"sgds",   L"aaa",
+    /*3*/  L"cmp",        L"cmp",        L"cmp",        L"cmp",        L"cmp",        L"cmp",    L"sgds",   L"aas",
+    /*4*/  L"inc",        L"inc",        L"inc",        L"inc",        L"inc",        L"inc",    L"inc",    L"inc",
+    /*4*/  L"dec",        L"dec",        L"dec",        L"dec",        L"dec",        L"dec",    L"dec",    L"dec",
+    /*5*/  L"push",       L"push",       L"push",       L"push",       L"push",       L"push",   L"push",   L"push",
+    /*5*/  L"pop",        L"pop",        L"pop",        L"pop",        L"pop",        L"pop",    L"pop",    L"pop",
+    //     0              1              2              3              4              5          6          7              
+    //     8              9              A              B              C              D          E          F
+    /*6*/  L"pushad",     L"popad",      L"bound",      L"arpl",       L"!sgfs",      L"!sggs",  L"!szop",  L"!szad",
+    /*6*/  L"push",       L"imul",       L"push",       L"imul",       L"ins",        L"ins",    L"outs",   L"outs",
+    /*7*/  L"jo",         L"jno",        L"jb",         L"jnb",        L"je",         L"jne",    L"jbe",    L"ja",
+    /*7*/  L"js",         L"jns",        L"jpe",        L"jpo",        L"jl",         L"jge",    L"jle",    L"jg",
+    /*8*/  L"",           L"",           L"",           L"",           L"test",       L"test",   L"xchg",   L"xchg",
+    /*8*/  L"mov",        L"mov",        L"mov",        L"mov",        L"mov",        L"lea",    L"mov",    L"pop",
+    /*9*/  L"nop",        L"xchg",       L"xchg",       L"xchg",       L"xchg",       L"xchg",   L"xchg",   L"xchg",
+    /*9*/  L"cwd",        L"cdq",        L"callf",      L"wait",       L"pushfd",     L"popfd",  L"sahf",   L"lahf",
+    /*A*/  L"mov",        L"mov",        L"mov",        L"mov",        L"movs",       L"movs",   L"cmps",   L"cmps",
+    /*A*/  L"test",       L"test",       L"stos",       L"stos",       L"lods",       L"lods",   L"scas",   L"scas",
+    /*B*/  L"mov",        L"mov",        L"mov",        L"mov",        L"mov",        L"mov",    L"mov",    L"mov",
+    /*B*/  L"mov",        L"mov",        L"mov",        L"mov",        L"mov",        L"mov",    L"mov",    L"mov",
+    /*C*/  L"!shift",     L"!shift",     L"ret",        L"ret",        L"les",        L"lds",    L"mov",    L"mov",
+    /*C*/  L"enter",      L"leave",      L"retf",       L"retf",       L"int",        L"int",    L"into",   L"iretd",
+    /*D*/  L"!shift",     L"!shift",     L"!shift",     L"!shift",     L"aam",        L"aad",    L"salc",   L"xlat",
+    /*D*/  L"!fpu",       L"!fpu",       L"!fpu",       L"!fpu",       L"!fpu",       L"!fpu",   L"!fpu",   L"!fpu",
+    /*E*/  L"loopnz",     L"loopz",      L"loop",       L"jecxz",      L"in",         L"in",     L"out",    L"out",
+    /*E*/  L"call",       L"jmp",        L"jmpf",       L"jmp",        L"in",         L"in",     L"out",    L"out",
+    /*F*/  L"lock",       L"int1",       L"repne",      L"repe",       L"hlt",        L"cmc",    L"!",      L"!",
+    /*F*/  L"clc",        L"stc",        L"cli",        L"sti",        L"cld",        L"std",    L"!inc",   L"!"
 };
 
 // Lookup table for instruction mnemonics(2byte opcodes)
 WCHAR awszOpcodeLUT2[][MAX_OPCODE_NAME_LEN + 1] =
 {
-    //        0                1            2            3            4                5            6            7        
-    //        8                9            A            B            C                D            E            F
-
-    /*0*/    L"!mult",        L"!mult",    L"lar",        L"lsl",        L"",            L"",        L"clts",    L"",
-    /*0*/    L"invd",        L"wbinvd",    L"",        L"ud2",        L"",            L"nop",        L"",        L"",
-
-    /*1*/    L"movups",        L"movups",    L"movlps",    L"movlps",    L"unpcklps",    L"unpckhps",L"movhps",    L"movhps",
-    /*1*/    L"!pfsse",        L"nop",        L"nop",        L"nop",        L"nop",            L"nop",        L"nop",        L"nop",
-
-    /*2*/    L"mov",            L"mov",        L"mov",        L"mov",        L"",            L"",        L"",        L"",
-    /*2*/    L"movaps",        L"movaps",    L"cvtpi2ps",L"movntps",    L"cvttps2pi",    L"cvtps2pi",L"ucomiss", L"comiss",
-
-    /*3*/    L"wrmsr",        L"rdtsc",    L"rdmsr",    L"rdpmc",    L"sysenter",    L"sysexit",    L"",        L"sse",
-    /*3*/    L"3byte",        L"",        L"3byte",    L"",        L"",            L"",        L"",        L"",
-
-    /*4*/    L"cmovo",        L"cmovno",    L"cmovb",    L"cmovae",    L"cmove",        L"cmovne",    L"cmovna",    L"cmova",
-    /*4*/    L"cmovs",        L"cmovns",    L"cmovp",    L"cmovpo",    L"cmovl",        L"cmovge",    L"cmovle",    L"cmovg",
-
-    /*5*/    L"movmskps",    L"sqrtps",    L"rsqrtps",    L"rcpps",    L"andps",        L"andnps",    L"orps",    L"xorps",
-    /*5*/    L"addps",        L"mulps",    L"cvtps2pd",L"cvtdq2ps",L"subps",        L"minps",    L"divps",    L"maxps",
-
-    /*6*/    L"punpcklbw",    L"punpcklwd",    L"punpckldq",    L"packsswb",        L"pcmpgtb",    L"pcmpgtw",    L"pcmpgtd",    L"packuswb",
-    /*6*/    L"punpckhbw",    L"punpckhwd",    L"punpckhdq",    L"packssdw",        L"mmx",        L"mmx",        L"movd",    L"movq",
-
-    /*7*/    L"pshufw",        L"!mult",        L"!mult",        L"!mult",            L"pcmpeqb",    L"pcmpeqw",    L"pcmpeqd",    L"emms",
-    /*7*/    L"mmx",            L"mmx",            L"",            L"",                L"mmx",        L"mmx",        L"movd",    L"movq",
-
-    //        0                1            2            3            4            5            6            7        
-    //        8                9            A            B            C            D            E            F
-
-    /*8*/    L"jo",            L"jno",        L"jb",        L"jnb",        L"je",        L"jne",        L"jbe",        L"ja",
-    /*8*/    L"js",            L"jns",        L"jpe",        L"jpo",        L"jl",        L"jge",        L"jle",        L"jg",
-
-    /*9*/    L"seto",        L"setno",    L"setb",    L"setnb",    L"sete",    L"setne",    L"setbe",    L"seta",
-    /*9*/    L"sets",        L"setns",    L"setpe",    L"setpo",    L"setl",    L"jge",        L"setle",    L"setg",
-
-    /*A*/    L"push",        L"pop",        L"cpuid",    L"bt",        L"shld",    L"shld",    L"",        L"",
-    /*A*/    L"push",        L"pop",        L"rsm",        L"bts",        L"shrd",    L"shrd",    L"!mult",    L"imul",
-
-    /*B*/    L"cmpxchg",        L"cmpxchg",    L"lss",        L"btr",        L"lfs",        L"lgs",        L"movzx",    L"movzx",
-    /*B*/    L"popcnt",        L"ud",        L"!btx",    L"btc",        L"bsf",        L"bsr",        L"movsx",    L"movsx",
-
-    /*C*/    L"xadd",        L"xadd",    L"cmpps",    L"sse",        L"pinsrw",    L"pextrw",    L"shufps",    L"cmpxchg8b",
-    /*C*/    L"bswap",        L"bswap",    L"bswap",    L"bswap",    L"bswap",    L"bswap",    L"bswap",    L"bswap",
-
-    /*D*/    L"sse",            L"psrlw",    L"psrld",    L"psrlq",    L"sse",        L"pmullw",    L"sse",        L"pmovmskb",
-    /*D*/    L"psubusb",        L"psubusw",    L"pminub",    L"pand",    L"paddusb",    L"paddusw",    L"pmaxub",    L"pandn",
-
-    /*E*/    L"pavgb",        L"psraw",    L"psrad",    L"pavgw",    L"pmulhuw",    L"pmulhuw",    L"cvttpd2dq",L"movntq",
-    /*E*/    L"psubsb",        L"psubsw",    L"pminsw",    L"por",        L"paddsb",    L"paddsw",    L"pmaxsw",    L"pxor",
-
-    /*F*/    L"sse",            L"psllw",    L"pslld",    L"psllq",    L"sse",        L"pmaddwd",    L"psadbw",    L"maskmovq",
-    /*F*/    L"psubb",        L"psubw",    L"psubd",    L"mmx",        L"paddb",    L"paddw",    L"paddd",    L"!",
+    //     0              1              2              3              4              5              6              7              
+    //     8              9              A              B              C              D              E              F
+    /*0*/  L"!mult",      L"!mult",      L"lar",        L"lsl",        L"",           L"",           L"clts",       L"",
+    /*0*/  L"invd",       L"wbinvd",     L"",           L"ud2",        L"",           L"nop",        L"",           L"",
+    /*1*/  L"movups",     L"movups",     L"movlps",     L"movlps",     L"unpcklps",   L"unpckhps",   L"movhps",     L"movhps",
+    /*1*/  L"!pfsse",     L"nop",        L"nop",        L"nop",        L"nop",        L"nop",        L"nop",        L"nop",
+    /*2*/  L"mov",        L"mov",        L"mov",        L"mov",        L"",           L"",           L"",           L"",
+    /*2*/  L"movaps",     L"movaps",     L"cvtpi2ps",   L"movntps",    L"cvttps2pi",  L"cvtps2pi",   L"ucomiss",    L"comiss",
+    /*3*/  L"wrmsr",      L"rdtsc",      L"rdmsr",      L"rdpmc",      L"sysenter",   L"sysexit",    L"",           L"sse",
+    /*3*/  L"3byte",      L"",           L"3byte",      L"",           L"",           L"",           L"",           L"",
+    /*4*/  L"cmovo",      L"cmovno",     L"cmovb",      L"cmovae",     L"cmove",      L"cmovne",     L"cmovna",     L"cmova",
+    /*4*/  L"cmovs",      L"cmovns",     L"cmovp",      L"cmovpo",     L"cmovl",      L"cmovge",     L"cmovle",     L"cmovg",
+    /*5*/  L"movmskps",   L"sqrtps",     L"rsqrtps",    L"rcpps",      L"andps",      L"andnps",     L"orps",       L"xorps",
+    /*5*/  L"addps",      L"mulps",      L"cvtps2pd",   L"cvtdq2ps",   L"subps",      L"minps",      L"divps",      L"maxps",
+    /*6*/  L"punpcklbw",  L"punpcklwd",  L"punpckldq",  L"packsswb",   L"pcmpgtb",    L"pcmpgtw",    L"pcmpgtd",    L"packuswb",
+    /*6*/  L"punpckhbw",  L"punpckhwd",  L"punpckhdq",  L"packssdw",   L"mmx",        L"mmx",        L"movd",       L"movq",
+    /*7*/  L"pshufw",     L"!mult",      L"!mult",      L"!mult",      L"pcmpeqb",    L"pcmpeqw",    L"pcmpeqd",    L"emms",
+    /*7*/  L"mmx",        L"mmx",        L"",           L"",           L"mmx",        L"mmx",        L"movd",       L"movq",
+    //     0              1              2              3              4              5              6              7              
+    //     8              9              A              B              C              D              E              F
+    /*8*/  L"jo",         L"jno",        L"jb",         L"jnb",        L"je",         L"jne",        L"jbe",        L"ja",
+    /*8*/  L"js",         L"jns",        L"jpe",        L"jpo",        L"jl",         L"jge",        L"jle",        L"jg",
+    /*9*/  L"seto",       L"setno",      L"setb",       L"setnb",      L"sete",       L"setne",      L"setbe",      L"seta",
+    /*9*/  L"sets",       L"setns",      L"setpe",      L"setpo",      L"setl",       L"jge",        L"setle",      L"setg",
+    /*A*/  L"push",       L"pop",        L"cpuid",      L"bt",         L"shld",       L"shld",       L"",           L"",
+    /*A*/  L"push",       L"pop",        L"rsm",        L"bts",        L"shrd",       L"shrd",       L"!mult",      L"imul",
+    /*B*/  L"cmpxchg",    L"cmpxchg",    L"lss",        L"btr",        L"lfs",        L"lgs",        L"movzx",      L"movzx",
+    /*B*/  L"popcnt",     L"ud",         L"!btx",       L"btc",        L"bsf",        L"bsr",        L"movsx",      L"movsx",
+    /*C*/  L"xadd",       L"xadd",       L"cmpps",      L"sse",        L"pinsrw",     L"pextrw",     L"shufps",     L"cmpxchg8b",
+    /*C*/  L"bswap",      L"bswap",      L"bswap",      L"bswap",      L"bswap",      L"bswap",      L"bswap",      L"bswap",
+    /*D*/  L"sse",        L"psrlw",      L"psrld",      L"psrlq",      L"sse",        L"pmullw",     L"sse",        L"pmovmskb",
+    /*D*/  L"psubusb",    L"psubusw",    L"pminub",     L"pand",       L"paddusb",    L"paddusw",    L"pmaxub",     L"pandn",
+    /*E*/  L"pavgb",      L"psraw",      L"psrad",      L"pavgw",      L"pmulhuw",    L"pmulhuw",    L"cvttpd2dq",  L"movntq",
+    /*E*/  L"psubsb",     L"psubsw",     L"pminsw",     L"por",        L"paddsb",     L"paddsw",     L"pmaxsw",     L"pxor",
+    /*F*/  L"sse",        L"psllw",      L"pslld",      L"psllq",      L"sse",        L"pmaddwd",    L"psadbw",     L"maskmovq",
+    /*F*/  L"psubb",      L"psubw",      L"psubd",      L"mmx",        L"paddb",      L"paddw",      L"paddd",      L"!",
 
 };
 
 // ** FPU Instructions **
 WCHAR awszFPUOpcodeLUTRegEx[][MAX_OPCODE_NAME_LEN + 1] = // Instructions that use only the 'reg' field as opcode extension
 {
-    //            0            1            2            3            4            5            6            7
-    /*D8,0*/    L"fadd",    L"fmul",    L"fcom",    L"fcomp",    L"fsub",    L"fsubr",    L"fdiv",    L"fdivr",
-    /*D9,1*/    L"fld",        L"!",        L"fst",        L"fstp",    L"fldenv",    L"fldcw",    L"fnstenv",    L"fnstcw",
-    /*DA,2*/    L"fiadd",    L"fimul",    L"ficom",    L"ficomp",    L"fisub",    L"fisubr",    L"fidiv",    L"fidivr",
-    /*DB,3*/    L"fild",    L"!",        L"fist",    L"fistp",    L"!",        L"fld",        L"!",        L"fstp",
-    /*DC,4*/    L"fadd",    L"fmul",    L"fcom",    L"fcomp",    L"fsub",    L"fsubr",    L"fdiv",    L"fdivr",
-    /*DD,5*/    L"fld",        L"!",        L"fst",        L"fstp",    L"frstor",    L"!",        L"fnsave",    L"fnstsw",
-    /*DE,6*/    L"fiadd",    L"fimul",    L"ficom",    L"ficomp",    L"fisub",    L"fisubr",    L"fidiv",    L"fidivr",
-    /*DF,7*/    L"fild",    L"!",        L"fist",    L"fistp",    L"fbld",    L"fild",    L"fbstp",    L"fistp"
+    //         0          1          2          3              4              5              6              7
+    /*D8,0*/   L"fadd",   L"fmul",   L"fcom",   L"fcomp",      L"fsub",       L"fsubr",      L"fdiv",       L"fdivr",
+    /*D9,1*/   L"fld",    L"!",      L"fst",    L"fstp",       L"fldenv",     L"fldcw",      L"fnstenv",    L"fnstcw",
+    /*DA,2*/   L"fiadd",  L"fimul",  L"ficom",  L"ficomp",     L"fisub",      L"fisubr",     L"fidiv",      L"fidivr",
+    /*DB,3*/   L"fild",   L"!",      L"fist",   L"fistp",      L"!",          L"fld",        L"!",          L"fstp",
+    /*DC,4*/   L"fadd",   L"fmul",   L"fcom",   L"fcomp",      L"fsub",       L"fsubr",      L"fdiv",       L"fdivr",
+    /*DD,5*/   L"fld",    L"!",      L"fst",    L"fstp",       L"frstor",     L"!",          L"fnsave",     L"fnstsw",
+    /*DE,6*/   L"fiadd",  L"fimul",  L"ficom",  L"ficomp",     L"fisub",      L"fisubr",     L"fidiv",      L"fidivr",
+    /*DF,7*/   L"fild",   L"!",      L"fist",   L"fistp",      L"fbld",       L"fild",       L"fbstp",      L"fistp"
 };
 
 WCHAR awszFPUOpcodeLUTFullEx[][MAX_OPCODE_NAME_LEN + 1] = // Instructions that use full ModRM byte as opcode extension
 {
-    //            0            1            2            3            4            5            6            7
-     //            8            9            A            B            C            D            E            F
-    /*D8,C0*/    L"fadd",    L"fadd",    L"fadd",    L"fadd",    L"fadd",    L"fadd",    L"fadd",    L"fadd",
-    /*D8,C8*/    L"fmul",    L"fmul",    L"fmul",    L"fmul",    L"fmul",    L"fmul",    L"fmul",    L"fmul",
-    /*D8,D0*/    L"fcom",    L"fcom",    L"fcom",    L"fcom",    L"fcom",    L"fcom",    L"fcom",    L"fcom",
-    /*D8,D8*/    L"fcomp",    L"fcomp",    L"fcomp",    L"fcomp",    L"fcomp",    L"fcomp",    L"fcomp",    L"fcomp",
-    /*D8,E0*/    L"fsub",    L"fsub",    L"fsub",    L"fsub",    L"fsub",    L"fsub",    L"fsub",    L"fsub",
-    /*D8,E8*/    L"fsubr",    L"fsubr",    L"fsubr",    L"fsubr",    L"fsubr",    L"fsubr",    L"fsubr",    L"fsubr",
-    /*D8,F0*/    L"fdiv",    L"fdiv",    L"fdiv",    L"fdiv",    L"fdiv",    L"fdiv",    L"fdiv",    L"fdiv",
-    /*D8,F8*/    L"fdivr",    L"fdivr",    L"fdivr",    L"fdivr",    L"fdivr",    L"fdivr",    L"fdivr",    L"fdivr",
-
-    /*D9,C0*/    L"fld",        L"fld",        L"fld",        L"fld",        L"fld",        L"fld",        L"fld",        L"fld",
-    /*D9,C8*/    L"fxch",    L"fxch",    L"fxch",    L"fxch",    L"fxch",    L"fxch",    L"fxch",    L"fxch",
-    /*D9,D0*/    L"fnop",    L"!",        L"!",        L"!",        L"!",        L"!",        L"!",        L"!",
-    /*D9,D8*/    L"!",        L"!",        L"!",        L"!",        L"!",        L"!",        L"!",        L"!",
-    /*D9,E0*/    L"fchs",    L"fabs",    L"!",        L"!",        L"ftst",    L"fxam",    L"!",        L"!",
-    /*D9,E8*/    L"fld1",    L"fldl2t",    L"fldl2e",    L"fldpi",    L"fldlg2",    L"fldln2",    L"fldz",    L"!",
-    /*D9,F0*/    L"f2xm1",    L"fyl2x",    L"fptan",    L"fpatan",    L"fxtract",    L"fprem1",    L"fdecstp",    L"fincstp",
-    /*D9,F8*/    L"fprem",    L"fyl2xp1",    L"fsqrt",    L"fsincos",    L"frndint",    L"fscale",    L"fsin",    L"fcos",
-
-    /*DA,C0*/    L"fcmovb",    L"fcmovb",    L"fcmovb",    L"fcmovb",    L"fcmovb",    L"fcmovb",    L"fcmovb",    L"fcmovb",
-    /*DA,C8*/    L"fcmove",    L"fcmove",    L"fcmove",    L"fcmove",    L"fcmove",    L"fcmove",    L"fcmove",    L"fcmove",
-    /*DA,D0*/    L"fcmovbe",    L"fcmovbe",    L"fcmovbe",    L"fcmovbe",    L"fcmovbe",    L"fcmovbe",    L"fcmovbe",    L"fcmovbe",
-    /*DA,D8*/    L"fcmovu",    L"fcmovu",    L"fcmovu",    L"fcmovu",    L"fcmovu",    L"fcmovu",    L"fcmovu",    L"fcmovu",
-    /*DA,E0*/    L"!",        L"!",        L"!",        L"!",        L"!",        L"!",        L"!",        L"!",
-    /*DA,E8*/    L"!",        L"fucompp",    L"!",        L"!",        L"!",        L"!",        L"!",        L"!",
-    /*DA,F0*/    L"!",        L"!",        L"!",        L"!",        L"!",        L"!",        L"!",        L"!",
-    /*DA,F8*/    L"!",        L"!",        L"!",        L"!",        L"!",        L"!",        L"!",        L"!",
-
-    /*DB,C0*/    L"fcmovnb",    L"fcmovnb",    L"fcmovnb",    L"fcmovnb",    L"fcmovnb",    L"fcmovnb",    L"fcmovnb",    L"fcmovnb",
-    /*DB,C8*/    L"fcmovne",    L"fcmovne",    L"fcmovne",    L"fcmovne",    L"fcmovne",    L"fcmovne",    L"fcmovne",    L"fcmovne",
-    /*DB,D0*/    L"fcmovnbe",L"fcmovnbe",L"fcmovnbe",L"fcmovnbe",L"fcmovnbe",L"fcmovnbe",L"fcmovnbe",L"fcmovnbe",
-    /*DB,D8*/    L"fcmovu",    L"fcmovu",    L"fcmovu",    L"fcmovu",    L"fcmovu",    L"fcmovu",    L"fcmovu",    L"fcmovu",
-    /*DB,E0*/    L"!",        L"!",        L"fnclex",    L"fninit",    L"!",        L"!",        L"!",        L"!",
-    /*DB,E8*/    L"fucomi",    L"fucomi",    L"fucomi",    L"fucomi",    L"fucomi",    L"fucomi",    L"fucomi",    L"fucomi",
-    /*DB,F0*/    L"fcomi",    L"fcomi",    L"fcomi",    L"fcomi",    L"fcomi",    L"fcomi",    L"fcomi",    L"fcomi",
-    /*DB,F8*/    L"!",        L"!",        L"fnclex",    L"fninit",    L"!",        L"!",        L"!",        L"!",
-
-    /*DC,C0*/    L"fadd",    L"fadd",    L"fadd",    L"fadd",    L"fadd",    L"fadd",    L"fadd",    L"fadd",
-    /*DC,C8*/    L"fmul",    L"fmul",    L"fmul",    L"fmul",    L"fmul",    L"fmul",    L"fmul",    L"fmul",
-    /*DC,D0*/    L"!",        L"!",        L"!",        L"!",        L"!",        L"!",        L"!",        L"!",
-    /*DC,D8*/    L"!",        L"!",        L"!",        L"!",        L"!",        L"!",        L"!",        L"!",
-    /*DC,E0*/    L"fsubr",    L"fsubr",    L"fsubr",    L"fsubr",    L"fsubr",    L"fsubr",    L"fsubr",    L"fsubr",
-    /*DC,E8*/    L"fsub",    L"fsub",    L"fsub",    L"fsub",    L"fsub",    L"fsub",    L"fsub",    L"fsub",
-    /*DC,F0*/    L"fdivr",    L"fdivr",    L"fdivr",    L"fdivr",    L"fdivr",    L"fdivr",    L"fdivr",    L"fdivr",
-    /*DC,F8*/    L"fdiv",    L"fdiv",    L"fdiv",    L"fdiv",    L"fdiv",    L"fdiv",    L"fdiv",    L"fdiv",
-
-    /*DD,C0*/    L"ffree",    L"ffree",    L"ffree",    L"ffree",    L"ffree",    L"ffree",    L"ffree",    L"ffree",
-    /*DD,C8*/    L"!",        L"!",        L"!",        L"!",        L"!",        L"!",        L"!",        L"!",
-    /*DD,D0*/    L"fst",        L"fst",        L"fst",        L"fst",        L"fst",        L"fst",        L"fst",        L"fst",
-    /*DD,D8*/    L"fstp",    L"fstp",    L"fstp",    L"fstp",    L"fstp",    L"fstp",    L"fstp",    L"fstp",
-    /*DD,E0*/    L"fucom",    L"fucom",    L"fucom",    L"fucom",    L"fucom",    L"fucom",    L"fucom",    L"fucom",
-    /*DD,E8*/    L"fucomp",    L"fucomp",    L"fucomp",    L"fucomp",    L"fucomp",    L"fucomp",    L"fucomp",    L"fucomp",
-    /*DD,F0*/    L"!",        L"!",        L"!",        L"!",        L"!",        L"!",        L"!",        L"!",
-    /*DD,F8*/    L"!",        L"!",        L"!",        L"!",        L"!",        L"!",        L"!",        L"!",
-
-    /*DE,C0*/    L"faddp",    L"faddp",    L"faddp",    L"faddp",    L"faddp",    L"faddp",    L"faddp",    L"faddp",
-    /*DE,C8*/    L"fmulp",    L"fmulp",    L"fmulp",    L"fmulp",    L"fmulp",    L"fmulp",    L"fmulp",    L"fmulp",
-    /*DE,D0*/    L"!",        L"!",        L"!",        L"!",        L"!",        L"!",        L"!",        L"!",
-    /*DE,D8*/    L"!",        L"fcompp",    L"!",        L"!",        L"!",        L"!",        L"!",        L"!",
-    /*DE,E0*/    L"fsubrp",    L"fsubrp",    L"fsubrp",    L"fsubrp",    L"fsubrp",    L"fsubrp",    L"fsubrp",    L"fsubrp",
-    /*DE,E8*/    L"fsubp",    L"fsubp",    L"fsubp",    L"fsubp",    L"fsubp",    L"fsubp",    L"fsubp",    L"fsubp",
-    /*DE,F0*/    L"fdivrp",    L"fdivrp",    L"fdivrp",    L"fdivrp",    L"fdivrp",    L"fdivrp",    L"fdivrp",    L"fdivrp",
-    /*DE,F8*/    L"fdivp",    L"fdivp",    L"fdivp",    L"fdivp",    L"fdivp",    L"fdivp",    L"fdivp",    L"fdivp",
-
-    /*DF,C0*/    L"!",        L"!",        L"!",        L"!",        L"!",        L"!",        L"!",        L"!",
-    /*DF,C8*/    L"!",        L"!",        L"!",        L"!",        L"!",        L"!",        L"!",        L"!",
-    /*DF,D0*/    L"!",        L"!",        L"!",        L"!",        L"!",        L"!",        L"!",        L"!",
-    /*DF,D8*/    L"!",        L"!",        L"!",        L"!",        L"!",        L"!",        L"!",        L"!",
-    /*DF,E0*/    L"fnstsw",    L"!",        L"!",        L"!",        L"!",        L"!",        L"!",        L"!",
-    /*DF,E8*/    L"fucomip",    L"fucomip",    L"fucomip",    L"fucomip",    L"fucomip",    L"fucomip",    L"fucomip",    L"fucomip",
-    /*DF,F0*/    L"fcomip",    L"fcomip",    L"fcomip",    L"fcomip",    L"fcomip",    L"fcomip",    L"fcomip",    L"fcomip",
-    /*DF,F8*/    L"!",        L"!",        L"!",        L"!",        L"!",        L"!",        L"!",        L"!",
+    //         0              1              2              3              4              5              6              7
+    //         8              9              A              B              C              D              E              F
+    /*D8,C0*/  L"fadd",       L"fadd",       L"fadd",       L"fadd",       L"fadd",       L"fadd",       L"fadd",       L"fadd",
+    /*D8,C8*/  L"fmul",       L"fmul",       L"fmul",       L"fmul",       L"fmul",       L"fmul",       L"fmul",       L"fmul",
+    /*D8,D0*/  L"fcom",       L"fcom",       L"fcom",       L"fcom",       L"fcom",       L"fcom",       L"fcom",       L"fcom",
+    /*D8,D8*/  L"fcomp",      L"fcomp",      L"fcomp",      L"fcomp",      L"fcomp",      L"fcomp",      L"fcomp",      L"fcomp",
+    /*D8,E0*/  L"fsub",       L"fsub",       L"fsub",       L"fsub",       L"fsub",       L"fsub",       L"fsub",       L"fsub",
+    /*D8,E8*/  L"fsubr",      L"fsubr",      L"fsubr",      L"fsubr",      L"fsubr",      L"fsubr",      L"fsubr",      L"fsubr",
+    /*D8,F0*/  L"fdiv",       L"fdiv",       L"fdiv",       L"fdiv",       L"fdiv",       L"fdiv",       L"fdiv",       L"fdiv",
+    /*D8,F8*/  L"fdivr",      L"fdivr",      L"fdivr",      L"fdivr",      L"fdivr",      L"fdivr",      L"fdivr",      L"fdivr",
+    /*D9,C0*/  L"fld",        L"fld",        L"fld",        L"fld",        L"fld",        L"fld",        L"fld",        L"fld",
+    /*D9,C8*/  L"fxch",       L"fxch",       L"fxch",       L"fxch",       L"fxch",       L"fxch",       L"fxch",       L"fxch",
+    /*D9,D0*/  L"fnop",       L"!",          L"!",          L"!",          L"!",          L"!",          L"!",          L"!",
+    /*D9,D8*/  L"!",          L"!",          L"!",          L"!",          L"!",          L"!",          L"!",          L"!",
+    /*D9,E0*/  L"fchs",       L"fabs",       L"!",          L"!",          L"ftst",       L"fxam",       L"!",          L"!",
+    /*D9,E8*/  L"fld1",       L"fldl2t",     L"fldl2e",     L"fldpi",      L"fldlg2",     L"fldln2",     L"fldz",       L"!",
+    /*D9,F0*/  L"f2xm1",      L"fyl2x",      L"fptan",      L"fpatan",     L"fxtract",    L"fprem1",     L"fdecstp",    L"fincstp",
+    /*D9,F8*/  L"fprem",      L"fyl2xp1",    L"fsqrt",      L"fsincos",    L"frndint",    L"fscale",     L"fsin",       L"fcos",
+    /*DA,C0*/  L"fcmovb",     L"fcmovb",     L"fcmovb",     L"fcmovb",     L"fcmovb",     L"fcmovb",     L"fcmovb",     L"fcmovb",
+    /*DA,C8*/  L"fcmove",     L"fcmove",     L"fcmove",     L"fcmove",     L"fcmove",     L"fcmove",     L"fcmove",     L"fcmove",
+    /*DA,D0*/  L"fcmovbe",    L"fcmovbe",    L"fcmovbe",    L"fcmovbe",    L"fcmovbe",    L"fcmovbe",    L"fcmovbe",    L"fcmovbe",
+    /*DA,D8*/  L"fcmovu",     L"fcmovu",     L"fcmovu",     L"fcmovu",     L"fcmovu",     L"fcmovu",     L"fcmovu",     L"fcmovu",
+    /*DA,E0*/  L"!",          L"!",          L"!",          L"!",          L"!",          L"!",          L"!",          L"!",
+    /*DA,E8*/  L"!",          L"fucompp",    L"!",          L"!",          L"!",          L"!",          L"!",          L"!",
+    /*DA,F0*/  L"!",          L"!",          L"!",          L"!",          L"!",          L"!",          L"!",          L"!",
+    /*DA,F8*/  L"!",          L"!",          L"!",          L"!",          L"!",          L"!",          L"!",          L"!",
+    /*DB,C0*/  L"fcmovnb",    L"fcmovnb",    L"fcmovnb",    L"fcmovnb",    L"fcmovnb",    L"fcmovnb",    L"fcmovnb",    L"fcmovnb",
+    /*DB,C8*/  L"fcmovne",    L"fcmovne",    L"fcmovne",    L"fcmovne",    L"fcmovne",    L"fcmovne",    L"fcmovne",    L"fcmovne",
+    /*DB,D0*/  L"fcmovnbe",   L"fcmovnbe",   L"fcmovnbe",   L"fcmovnbe",   L"fcmovnbe",   L"fcmovnbe",   L"fcmovnbe",   L"fcmovnbe",
+    /*DB,D8*/  L"fcmovu",     L"fcmovu",     L"fcmovu",     L"fcmovu",     L"fcmovu",     L"fcmovu",     L"fcmovu",     L"fcmovu",
+    /*DB,E0*/  L"!",          L"!",          L"fnclex",     L"fninit",     L"!",          L"!",          L"!",          L"!",
+    /*DB,E8*/  L"fucomi",     L"fucomi",     L"fucomi",     L"fucomi",     L"fucomi",     L"fucomi",     L"fucomi",     L"fucomi",
+    /*DB,F0*/  L"fcomi",      L"fcomi",      L"fcomi",      L"fcomi",      L"fcomi",      L"fcomi",      L"fcomi",      L"fcomi",
+    /*DB,F8*/  L"!",          L"!",          L"fnclex",     L"fninit",     L"!",          L"!",          L"!",          L"!",
+    /*DC,C0*/  L"fadd",       L"fadd",       L"fadd",       L"fadd",       L"fadd",       L"fadd",       L"fadd",       L"fadd",
+    /*DC,C8*/  L"fmul",       L"fmul",       L"fmul",       L"fmul",       L"fmul",       L"fmul",       L"fmul",       L"fmul",
+    /*DC,D0*/  L"!",          L"!",          L"!",          L"!",          L"!",          L"!",          L"!",          L"!",
+    /*DC,D8*/  L"!",          L"!",          L"!",          L"!",          L"!",          L"!",          L"!",          L"!",
+    /*DC,E0*/  L"fsubr",      L"fsubr",      L"fsubr",      L"fsubr",      L"fsubr",      L"fsubr",      L"fsubr",      L"fsubr",
+    /*DC,E8*/  L"fsub",       L"fsub",       L"fsub",       L"fsub",       L"fsub",       L"fsub",       L"fsub",       L"fsub",
+    /*DC,F0*/  L"fdivr",      L"fdivr",      L"fdivr",      L"fdivr",      L"fdivr",      L"fdivr",      L"fdivr",      L"fdivr",
+    /*DC,F8*/  L"fdiv",       L"fdiv",       L"fdiv",       L"fdiv",       L"fdiv",       L"fdiv",       L"fdiv",       L"fdiv",
+    /*DD,C0*/  L"ffree",      L"ffree",      L"ffree",      L"ffree",      L"ffree",      L"ffree",      L"ffree",      L"ffree",
+    /*DD,C8*/  L"!",          L"!",          L"!",          L"!",          L"!",          L"!",          L"!",          L"!",
+    /*DD,D0*/  L"fst",        L"fst",        L"fst",        L"fst",        L"fst",        L"fst",        L"fst",        L"fst",
+    /*DD,D8*/  L"fstp",       L"fstp",       L"fstp",       L"fstp",       L"fstp",       L"fstp",       L"fstp",       L"fstp",
+    /*DD,E0*/  L"fucom",      L"fucom",      L"fucom",      L"fucom",      L"fucom",      L"fucom",      L"fucom",      L"fucom",
+    /*DD,E8*/  L"fucomp",     L"fucomp",     L"fucomp",     L"fucomp",     L"fucomp",     L"fucomp",     L"fucomp",     L"fucomp",
+    /*DD,F0*/  L"!",          L"!",          L"!",          L"!",          L"!",          L"!",          L"!",          L"!",
+    /*DD,F8*/  L"!",          L"!",          L"!",          L"!",          L"!",          L"!",          L"!",          L"!",
+    /*DE,C0*/  L"faddp",      L"faddp",      L"faddp",      L"faddp",      L"faddp",      L"faddp",      L"faddp",      L"faddp",
+    /*DE,C8*/  L"fmulp",      L"fmulp",      L"fmulp",      L"fmulp",      L"fmulp",      L"fmulp",      L"fmulp",      L"fmulp",
+    /*DE,D0*/  L"!",          L"!",          L"!",          L"!",          L"!",          L"!",          L"!",          L"!",
+    /*DE,D8*/  L"!",          L"fcompp",     L"!",          L"!",          L"!",          L"!",          L"!",          L"!",
+    /*DE,E0*/  L"fsubrp",     L"fsubrp",     L"fsubrp",     L"fsubrp",     L"fsubrp",     L"fsubrp",     L"fsubrp",     L"fsubrp",
+    /*DE,E8*/  L"fsubp",      L"fsubp",      L"fsubp",      L"fsubp",      L"fsubp",      L"fsubp",      L"fsubp",      L"fsubp",
+    /*DE,F0*/  L"fdivrp",     L"fdivrp",     L"fdivrp",     L"fdivrp",     L"fdivrp",     L"fdivrp",     L"fdivrp",     L"fdivrp",
+    /*DE,F8*/  L"fdivp",      L"fdivp",      L"fdivp",      L"fdivp",      L"fdivp",      L"fdivp",      L"fdivp",      L"fdivp",
+    /*DF,C0*/  L"!",          L"!",          L"!",          L"!",          L"!",          L"!",          L"!",          L"!",
+    /*DF,C8*/  L"!",          L"!",          L"!",          L"!",          L"!",          L"!",          L"!",          L"!",
+    /*DF,D0*/  L"!",          L"!",          L"!",          L"!",          L"!",          L"!",          L"!",          L"!",
+    /*DF,D8*/  L"!",          L"!",          L"!",          L"!",          L"!",          L"!",          L"!",          L"!",
+    /*DF,E0*/  L"fnstsw",     L"!",          L"!",          L"!",          L"!",          L"!",          L"!",          L"!",
+    /*DF,E8*/  L"fucomip",    L"fucomip",    L"fucomip",    L"fucomip",    L"fucomip",    L"fucomip",    L"fucomip",    L"fucomip",
+    /*DF,F0*/  L"fcomip",     L"fcomip",     L"fcomip",     L"fcomip",     L"fcomip",     L"fcomip",     L"fcomip",     L"fcomip",
+    /*DF,F8*/  L"!",          L"!",          L"!",          L"!",          L"!",          L"!",          L"!",          L"!",
 };
 
 
@@ -222,93 +183,78 @@ WCHAR awszFPUOpcodeLUTFullEx[][MAX_OPCODE_NAME_LEN + 1] = // Instructions that u
 // and return a BOOL value.
 BOOL(*afpOpcHndlrs[16][16])(BYTE) =
 {
-    //        0                        1                        2                        3                        4
-    //        5                        6                        7                        8                        9
-    //        A                        B                        C                        D                        E
-    //        F
-    /*0*/    OPCHndlrALU_ADD,        OPCHndlrALU_ADD,        OPCHndlrALU_ADD,        OPCHndlrALU_ADD,        OPCHndlrALU_ADD,
-    /*0*/    OPCHndlrALU_ADD,        OPCHndlrStack_PUSH,        OPCHndlrStack_POP,        OPCHndlrALU_OR,            OPCHndlrALU_OR,
-    /*0*/    OPCHndlrALU_OR,            OPCHndlrALU_OR,            OPCHndlrALU_OR,            OPCHndlrALU_OR,            OPCHndlrStack_PUSH,
-    /*0*/    OPCHndlr_2ByteHandler,
-
-    /*1*/    OPCHndlrALU_ADD,        OPCHndlrALU_ADD,        OPCHndlrALU_ADD,        OPCHndlrALU_ADD,        OPCHndlrALU_ADD,
-    /*1*/    OPCHndlrALU_ADD,        OPCHndlrStack_PUSH,        OPCHndlrStack_POP,        OPCHndlrALU_SUB,        OPCHndlrALU_SUB,
-    /*1*/    OPCHndlrALU_SUB,        OPCHndlrALU_SUB,        OPCHndlrALU_SUB,        OPCHndlrALU_SUB,        OPCHndlrStack_PUSH,
-    /*1*/    OPCHndlrStack_POP,
-
-    /*2*/    OPCHndlrALU_AND,        OPCHndlrALU_AND,        OPCHndlrALU_AND,        OPCHndlrALU_AND,        OPCHndlrALU_AND,
-    /*2*/    OPCHndlrALU_AND,        OPCHndlrPrefix_Ovride,    OPCHndlrALU_DAA,        OPCHndlrALU_SUB,        OPCHndlrALU_SUB,
-    /*2*/    OPCHndlrALU_SUB,        OPCHndlrALU_SUB,        OPCHndlrALU_SUB,        OPCHndlrALU_SUB,        OPCHndlrPrefix_Ovride,
-    /*2*/    OPCHndlrALU_DAS,
-
-    /*3*/    OPCHndlrALU_XOR,        OPCHndlrALU_XOR,        OPCHndlrALU_XOR,        OPCHndlrALU_XOR,        OPCHndlrALU_XOR,
-    /*3*/    OPCHndlrALU_XOR,        OPCHndlrPrefix_Ovride,    OPCHndlrALU_AAA,        OPCHndlrCC_CMP,            OPCHndlrCC_CMP,
-    /*3*/    OPCHndlrCC_CMP,            OPCHndlrCC_CMP,            OPCHndlrCC_CMP,            OPCHndlrCC_CMP,            OPCHndlrPrefix_Ovride,
-    /*3*/    OPCHndlrALU_AAS,
-
-    /*4*/    OPCHndlrALU_INC,        OPCHndlrALU_INC,        OPCHndlrALU_INC,        OPCHndlrALU_INC,        OPCHndlrALU_INC,
-    /*4*/    OPCHndlrALU_INC,        OPCHndlrALU_INC,        OPCHndlrALU_INC,        OPCHndlrALU_DEC,        OPCHndlrALU_DEC,
-    /*4*/    OPCHndlrALU_DEC,        OPCHndlrALU_DEC,        OPCHndlrALU_DEC,        OPCHndlrALU_DEC,        OPCHndlrALU_DEC,
-    /*4*/    OPCHndlrALU_DEC,
-
-    /*5*/    OPCHndlrStack_PUSH,        OPCHndlrStack_PUSH,        OPCHndlrStack_PUSH,        OPCHndlrStack_PUSH,        OPCHndlrStack_PUSH,
-    /*5*/    OPCHndlrStack_PUSH,        OPCHndlrStack_PUSH,        OPCHndlrStack_PUSH,        OPCHndlrStack_POP,        OPCHndlrStack_POP,
-    /*5*/    OPCHndlrStack_POP,        OPCHndlrStack_POP,        OPCHndlrStack_POP,        OPCHndlrStack_POP,        OPCHndlrStack_POP,
-    /*5*/    OPCHndlrStack_POP,
-
-    /*6*/    OPCHndlrStack_PUSHxx,    OPCHndlrStack_POPxx,    OPCHndlrCC_BOUND,        OPCHndlrCC_ARPL,        OPCHndlrPrefix_Ovride,
-    /*6*/    OPCHndlrPrefix_Ovride,    OPCHndlrPrefix_Ovride,    OPCHndlrPrefix_Ovride,    OPCHndlrStack_PUSH,        OPCHndlrALU_MUL,
-    /*6*/    OPCHndlrStack_PUSH,        OPCHndlrALU_MUL,        OPCHndlrSysIO_INS,        OPCHndlrSysIO_INS,        OPCHndlrSysIO_OUTS,
-    /*6*/    OPCHndlrSysIO_OUTS,
-
-    /*7*/    OPCHndlrCC_JUMP,        OPCHndlrCC_JUMP,        OPCHndlrCC_JUMP,        OPCHndlrCC_JUMP,        OPCHndlrCC_JUMP,
-    /*7*/    OPCHndlrCC_JUMP,        OPCHndlrCC_JUMP,        OPCHndlrCC_JUMP,        OPCHndlrCC_JUMP,        OPCHndlrCC_JUMP,
-    /*7*/    OPCHndlrCC_JUMP,        OPCHndlrCC_JUMP,        OPCHndlrCC_JUMP,        OPCHndlrCC_JUMP,        OPCHndlrCC_JUMP,
-    /*7*/    OPCHndlrCC_JUMP,
-
-    //        0                        1                        2                        3                        4
-    //        5                        6                        7                        8                        9
-    //        A                        B                        C                        D                        E
-    //        F
-    /*8*/    OPCHndlrMulti_8x,        OPCHndlrMulti_8x,        OPCHndlrMulti_8x,        OPCHndlrMulti_8x,        OPCHndlrCC_TEST,
-    /*8*/    OPCHndlrCC_TEST,        OPCHndlrMem_XCHG,        OPCHndlrMem_XCHG,        OPCHndlrMem_MOV,        OPCHndlrMem_MOV,
-    /*8*/    OPCHndlrMem_MOV,        OPCHndlrMem_MOV,        OPCHndlrMem_MOV,        OPCHndlrMem_LEA,        OPCHndlrMem_MOV,
-    /*8*/    OPCHndlrStack_POP,
-
-    /*9*/    OPCHndlr_NOP,            OPCHndlrMem_XCHG,        OPCHndlrMem_XCHG,        OPCHndlrMem_XCHG,        OPCHndlrMem_XCHG,
-    /*9*/    OPCHndlrMem_XCHG,        OPCHndlrMem_XCHG,        OPCHndlrMem_XCHG,        OPCHndlrMem_CWDE,        OPCHndlrMem_CDQ,
-    /*9*/    OPCHndlrCC_CALL,        OPCHndlrSysIO_WAIT,        OPCHndlrStack_PUSHxx,    OPCHndlrStack_POPxx,    OPCHndlrMem_SAHF,
-    /*9*/    OPCHndlrMem_LAHF,
-
-    /*A*/    OPCHndlrMem_MOV,        OPCHndlrMem_MOV,        OPCHndlrMem_MOV,        OPCHndlrMem_MOV,        OPCHndlrMem_MOVS,
-    /*A*/    OPCHndlrMem_MOVS,        OPCHndlrCC_CMPS,        OPCHndlrCC_CMPS,        OPCHndlrCC_TEST,        OPCHndlrCC_TEST,
-    /*A*/    OPCHndlrMem_STOS,        OPCHndlrMem_STOS,        OPCHndlrMem_LODS,        OPCHndlrMem_LODS,        OPCHndlrCC_SCAS,
-    /*A*/    OPCHndlrCC_SCAS,
-
-    /*B*/    OPCHndlrMem_MOV,        OPCHndlrMem_MOV,        OPCHndlrMem_MOV,        OPCHndlrMem_MOV,        OPCHndlrMem_MOV,
-    /*B*/    OPCHndlrMem_MOV,        OPCHndlrMem_MOV,        OPCHndlrMem_MOV,        OPCHndlrMem_MOV,        OPCHndlrMem_MOV,
-    /*B*/    OPCHndlrMem_MOV,        OPCHndlrMem_MOV,        OPCHndlrMem_MOV,        OPCHndlrMem_MOV,        OPCHndlrMem_MOV,
-    /*B*/    OPCHndlrMem_MOV,
-
-    /*C*/    OPCHndlrALU_Shift,        OPCHndlrALU_Shift,        OPCHndlrCC_RETN,        OPCHndlrCC_RETN,        OPCHndlrMem_LES,
-    /*C*/    OPCHndlrMem_LDS,        OPCHndlrMem_MOV,        OPCHndlrMem_MOV,        OPCHndlrStack_ENTER,    OPCHndlrStack_LEAVE,
-    /*C*/    OPCHndlrCC_RETN,        OPCHndlrCC_RETN,        OPCHndlrSysIO_INT,        OPCHndlrSysIO_INT,        OPCHndlrSysIO_INT,
-    /*C*/    OPCHndlrCC_IRETD,
-
-    /*D*/    OPCHndlrALU_Shift,        OPCHndlrALU_Shift,        OPCHndlrALU_Shift,        OPCHndlrALU_Shift,        OPCHndlrALU_AAM,
-    /*D*/    OPCHndlrALU_AAD,        OPCHndlrALU_SALC,        OPCHndlrMem_XLAT,        OPCHndlrFPU_All,        OPCHndlrFPU_All,
-    /*D*/    OPCHndlrFPU_All,        OPCHndlrFPU_All,        OPCHndlrFPU_All,        OPCHndlrFPU_All,        OPCHndlrFPU_All,
-    /*D*/    OPCHndlrFPU_All,
-
-    /*E*/    OPCHndlrCC_CLOOP,        OPCHndlrCC_CLOOP,        OPCHndlrCC_CLOOP,        OPCHndlrCC_JUMP,        OPCHndlrSysIO_IN,
-    /*E*/    OPCHndlrSysIO_IN,        OPCHndlrSysIO_OUT,        OPCHndlrSysIO_OUT,        OPCHndlrCC_CALL,        OPCHndlrCC_JUMP,
-    /*E*/    OPCHndlrCC_JUMP,        OPCHndlrCC_JUMP,        OPCHndlrSysIO_INDX,        OPCHndlrSysIO_INDX,        OPCHndlrSysIO_OUTDX,
-    /*E*/    OPCHndlrSysIO_OUTDX,
-
-    /*F*/    OPCHndlrPrefix_LOCK,    OPCHndlrSysIO_IceBP,    OPCHndlrPrefix_CREP,    OPCHndlrPrefix_CREP,    OPCHndlrSysIO_HLT,
-    /*F*/    OPCHndlrCC_EFLAGS,        OPCHndlrMulti_fx,        OPCHndlrMulti_fx,        OPCHndlrCC_EFLAGS,        OPCHndlrCC_EFLAGS,
-    /*F*/    OPCHndlrCC_EFLAGS,        OPCHndlrCC_EFLAGS,        OPCHndlrCC_EFLAGS,        OPCHndlrCC_EFLAGS,        OPCHndlrMulti_IncDec,
-    /*F*/    OPCHndlrMulti_FF
+    //     0                          1                          2                          3                      4
+    //     5                          6                          7                          8                      9
+    //     A                          B                          C                          D                      E
+    //     F
+    /*0*/  OPCHndlrALU_ADD,           OPCHndlrALU_ADD,           OPCHndlrALU_ADD,           OPCHndlrALU_ADD,       OPCHndlrALU_ADD,
+    /*0*/  OPCHndlrALU_ADD,           OPCHndlrStack_PUSH,        OPCHndlrStack_POP,         OPCHndlrALU_OR,        OPCHndlrALU_OR,
+    /*0*/  OPCHndlrALU_OR,            OPCHndlrALU_OR,            OPCHndlrALU_OR,            OPCHndlrALU_OR,        OPCHndlrStack_PUSH,
+    /*0*/  OPCHndlr_2ByteHandler,
+    /*1*/  OPCHndlrALU_ADD,           OPCHndlrALU_ADD,           OPCHndlrALU_ADD,           OPCHndlrALU_ADD,       OPCHndlrALU_ADD,
+    /*1*/  OPCHndlrALU_ADD,           OPCHndlrStack_PUSH,        OPCHndlrStack_POP,         OPCHndlrALU_SUB,       OPCHndlrALU_SUB,
+    /*1*/  OPCHndlrALU_SUB,           OPCHndlrALU_SUB,           OPCHndlrALU_SUB,           OPCHndlrALU_SUB,       OPCHndlrStack_PUSH,
+    /*1*/  OPCHndlrStack_POP,
+    /*2*/  OPCHndlrALU_AND,           OPCHndlrALU_AND,           OPCHndlrALU_AND,           OPCHndlrALU_AND,       OPCHndlrALU_AND,
+    /*2*/  OPCHndlrALU_AND,           OPCHndlrPrefix_Ovride,     OPCHndlrALU_DAA,           OPCHndlrALU_SUB,       OPCHndlrALU_SUB,
+    /*2*/  OPCHndlrALU_SUB,           OPCHndlrALU_SUB,           OPCHndlrALU_SUB,           OPCHndlrALU_SUB,       OPCHndlrPrefix_Ovride,
+    /*2*/  OPCHndlrALU_DAS,
+    /*3*/  OPCHndlrALU_XOR,           OPCHndlrALU_XOR,           OPCHndlrALU_XOR,           OPCHndlrALU_XOR,       OPCHndlrALU_XOR,
+    /*3*/  OPCHndlrALU_XOR,           OPCHndlrPrefix_Ovride,     OPCHndlrALU_AAA,           OPCHndlrCC_CMP,        OPCHndlrCC_CMP,
+    /*3*/  OPCHndlrCC_CMP,            OPCHndlrCC_CMP,            OPCHndlrCC_CMP,            OPCHndlrCC_CMP,        OPCHndlrPrefix_Ovride,
+    /*3*/  OPCHndlrALU_AAS,
+    /*4*/  OPCHndlrALU_INC,           OPCHndlrALU_INC,           OPCHndlrALU_INC,           OPCHndlrALU_INC,       OPCHndlrALU_INC,
+    /*4*/  OPCHndlrALU_INC,           OPCHndlrALU_INC,           OPCHndlrALU_INC,           OPCHndlrALU_DEC,       OPCHndlrALU_DEC,
+    /*4*/  OPCHndlrALU_DEC,           OPCHndlrALU_DEC,           OPCHndlrALU_DEC,           OPCHndlrALU_DEC,       OPCHndlrALU_DEC,
+    /*4*/  OPCHndlrALU_DEC,
+    /*5*/  OPCHndlrStack_PUSH,        OPCHndlrStack_PUSH,        OPCHndlrStack_PUSH,        OPCHndlrStack_PUSH,    OPCHndlrStack_PUSH,
+    /*5*/  OPCHndlrStack_PUSH,        OPCHndlrStack_PUSH,        OPCHndlrStack_PUSH,        OPCHndlrStack_POP,     OPCHndlrStack_POP,
+    /*5*/  OPCHndlrStack_POP,         OPCHndlrStack_POP,         OPCHndlrStack_POP,         OPCHndlrStack_POP,     OPCHndlrStack_POP,
+    /*5*/  OPCHndlrStack_POP,
+    /*6*/  OPCHndlrStack_PUSHxx,      OPCHndlrStack_POPxx,       OPCHndlrCC_BOUND,          OPCHndlrCC_ARPL,       OPCHndlrPrefix_Ovride,
+    /*6*/  OPCHndlrPrefix_Ovride,     OPCHndlrPrefix_Ovride,     OPCHndlrPrefix_Ovride,     OPCHndlrStack_PUSH,    OPCHndlrALU_MUL,
+    /*6*/  OPCHndlrStack_PUSH,        OPCHndlrALU_MUL,           OPCHndlrSysIO_INS,         OPCHndlrSysIO_INS,     OPCHndlrSysIO_OUTS,
+    /*6*/  OPCHndlrSysIO_OUTS,
+    /*7*/  OPCHndlrCC_JUMP,           OPCHndlrCC_JUMP,           OPCHndlrCC_JUMP,           OPCHndlrCC_JUMP,       OPCHndlrCC_JUMP,
+    /*7*/  OPCHndlrCC_JUMP,           OPCHndlrCC_JUMP,           OPCHndlrCC_JUMP,           OPCHndlrCC_JUMP,       OPCHndlrCC_JUMP,
+    /*7*/  OPCHndlrCC_JUMP,           OPCHndlrCC_JUMP,           OPCHndlrCC_JUMP,           OPCHndlrCC_JUMP,       OPCHndlrCC_JUMP,
+    /*7*/  OPCHndlrCC_JUMP,
+    //     0                          1                          2                          3                      4
+    //     5                          6                          7                          8                      9
+    //     A                          B                          C                          D                      E
+    //     F
+    /*8*/  OPCHndlrMulti_8x,          OPCHndlrMulti_8x,          OPCHndlrMulti_8x,          OPCHndlrMulti_8x,      OPCHndlrCC_TEST,
+    /*8*/  OPCHndlrCC_TEST,           OPCHndlrMem_XCHG,          OPCHndlrMem_XCHG,          OPCHndlrMem_MOV,       OPCHndlrMem_MOV,
+    /*8*/  OPCHndlrMem_MOV,           OPCHndlrMem_MOV,           OPCHndlrMem_MOV,           OPCHndlrMem_LEA,       OPCHndlrMem_MOV,
+    /*8*/  OPCHndlrStack_POP,
+    /*9*/  OPCHndlr_NOP,              OPCHndlrMem_XCHG,          OPCHndlrMem_XCHG,          OPCHndlrMem_XCHG,      OPCHndlrMem_XCHG,
+    /*9*/  OPCHndlrMem_XCHG,          OPCHndlrMem_XCHG,          OPCHndlrMem_XCHG,          OPCHndlrMem_CWDE,      OPCHndlrMem_CDQ,
+    /*9*/  OPCHndlrCC_CALL,           OPCHndlrSysIO_WAIT,        OPCHndlrStack_PUSHxx,      OPCHndlrStack_POPxx,   OPCHndlrMem_SAHF,
+    /*9*/  OPCHndlrMem_LAHF,
+    /*A*/  OPCHndlrMem_MOV,           OPCHndlrMem_MOV,           OPCHndlrMem_MOV,           OPCHndlrMem_MOV,       OPCHndlrMem_MOVS,
+    /*A*/  OPCHndlrMem_MOVS,          OPCHndlrCC_CMPS,           OPCHndlrCC_CMPS,           OPCHndlrCC_TEST,       OPCHndlrCC_TEST,
+    /*A*/  OPCHndlrMem_STOS,          OPCHndlrMem_STOS,          OPCHndlrMem_LODS,          OPCHndlrMem_LODS,      OPCHndlrCC_SCAS,
+    /*A*/  OPCHndlrCC_SCAS,
+    /*B*/  OPCHndlrMem_MOV,           OPCHndlrMem_MOV,           OPCHndlrMem_MOV,           OPCHndlrMem_MOV,       OPCHndlrMem_MOV,
+    /*B*/  OPCHndlrMem_MOV,           OPCHndlrMem_MOV,           OPCHndlrMem_MOV,           OPCHndlrMem_MOV,       OPCHndlrMem_MOV,
+    /*B*/  OPCHndlrMem_MOV,           OPCHndlrMem_MOV,           OPCHndlrMem_MOV,           OPCHndlrMem_MOV,       OPCHndlrMem_MOV,
+    /*B*/  OPCHndlrMem_MOV,
+    /*C*/  OPCHndlrALU_Shift,         OPCHndlrALU_Shift,         OPCHndlrCC_RETN,           OPCHndlrCC_RETN,       OPCHndlrMem_LES,
+    /*C*/  OPCHndlrMem_LDS,           OPCHndlrMem_MOV,           OPCHndlrMem_MOV,           OPCHndlrStack_ENTER,   OPCHndlrStack_LEAVE,
+    /*C*/  OPCHndlrCC_RETN,           OPCHndlrCC_RETN,           OPCHndlrSysIO_INT,         OPCHndlrSysIO_INT,     OPCHndlrSysIO_INT,
+    /*C*/  OPCHndlrCC_IRETD,
+    /*D*/  OPCHndlrALU_Shift,         OPCHndlrALU_Shift,         OPCHndlrALU_Shift,         OPCHndlrALU_Shift,     OPCHndlrALU_AAM,
+    /*D*/  OPCHndlrALU_AAD,           OPCHndlrALU_SALC,          OPCHndlrMem_XLAT,          OPCHndlrFPU_All,       OPCHndlrFPU_All,
+    /*D*/  OPCHndlrFPU_All,           OPCHndlrFPU_All,           OPCHndlrFPU_All,           OPCHndlrFPU_All,       OPCHndlrFPU_All,
+    /*D*/  OPCHndlrFPU_All,
+    /*E*/  OPCHndlrCC_CLOOP,          OPCHndlrCC_CLOOP,          OPCHndlrCC_CLOOP,          OPCHndlrCC_JUMP,       OPCHndlrSysIO_IN,
+    /*E*/  OPCHndlrSysIO_IN,          OPCHndlrSysIO_OUT,         OPCHndlrSysIO_OUT,         OPCHndlrCC_CALL,       OPCHndlrCC_JUMP,
+    /*E*/  OPCHndlrCC_JUMP,           OPCHndlrCC_JUMP,           OPCHndlrSysIO_INDX,        OPCHndlrSysIO_INDX,    OPCHndlrSysIO_OUTDX,
+    /*E*/  OPCHndlrSysIO_OUTDX,
+    /*F*/  OPCHndlrPrefix_LOCK,       OPCHndlrSysIO_IceBP,       OPCHndlrPrefix_CREP,       OPCHndlrPrefix_CREP,   OPCHndlrSysIO_HLT,
+    /*F*/  OPCHndlrCC_EFLAGS,         OPCHndlrMulti_fx,          OPCHndlrMulti_fx,          OPCHndlrCC_EFLAGS,     OPCHndlrCC_EFLAGS,
+    /*F*/  OPCHndlrCC_EFLAGS,         OPCHndlrCC_EFLAGS,         OPCHndlrCC_EFLAGS,         OPCHndlrCC_EFLAGS,     OPCHndlrMulti_IncDec,
+    /*F*/  OPCHndlrMulti_FF
 
 }; // (*afpOpcHndlrs[][])()
 
@@ -320,93 +266,78 @@ BOOL(*afpOpcHndlrs[16][16])(BYTE) =
 // and return a BOOL value.
 BOOL(*afpOpcHndlrs2[16][16])(BYTE) =
 {
-    //        0                        1                        2                        3                        4
-    //        5                        6                        7                        8                        9
-    //        A                        B                        C                        D                        E
-    //        F
-    /*0*/    OPCHndlrSysIO_LdtTrS,    OPCHndlrSysIO_GdtIdMsw,    OPCHndlrMem_LAR,        OPCHndlrMem_LSL,        OPCHndlr_INVALID,
-    /*0*/    OPCHndlr_INVALID,        OPCHndlrSysIO_CLTS,        OPCHndlr_INVALID,        OPCHndlrSysIO_INVD,        OPCHndlrSysIO_WBINVD,
-    /*0*/    OPCHndlr_INVALID,        OPCHndlrSysIO_UD2,        OPCHndlr_INVALID,        OPCHndlr_NOP,            OPCHndlr_INVALID,
-    /*0*/    OPCHndlr_INVALID,
-
-    /*1*/    OPCHndlrSSE_Mov,        OPCHndlrSSE_Mov,        OPCHndlrSSE_Mov,        OPCHndlrSSE_Mov,        OPCHndlrSSE_Conv,
-    /*1*/    OPCHndlrSSE_Conv,        OPCHndlrSSE_Mov,        OPCHndlrSSE_Mov,        OPCHndlrSSE_Prefetch18,    OPCHndlr_HNOP,
-    /*1*/    OPCHndlr_HNOP,            OPCHndlr_HNOP,            OPCHndlr_HNOP,            OPCHndlr_HNOP,            OPCHndlr_HNOP,
-    /*1*/    OPCHndlr_HNOP,
-
-    /*2*/    OPCHndlrMem_MOVCrDr,    OPCHndlrMem_MOVCrDr,    OPCHndlrMem_MOVCrDr,    OPCHndlrMem_MOVCrDr,    OPCHndlr_INVALID,
-    /*2*/    OPCHndlr_INVALID,        OPCHndlr_INVALID,        OPCHndlr_INVALID,        OPCHndlrSSE_Mov,        OPCHndlrSSE_Mov,
-    /*2*/    OPCHndlrSSE_Conv,        OPCHndlrSSE_Mov,        OPCHndlrSSE_Conv,        OPCHndlrSSE_Conv,        OPCHndlrSSE_Cmp,
-    /*2*/    OPCHndlrSSE_Cmp,
-
-    /*3*/    OPCHndlrSysIO_WRMSR,    OPCHndlrSysIO_RDTSC,    OPCHndlrSysIO_RDMSR,    OPCHndlrSysIO_RDPMC,    OPCHndlrSysIO_SYSENTER,
-    /*3*/    OPCHndlrSysIO_SYSEXIT,    OPCHndlr_INVALID,        OPCHndlrUnKwn_,            OPCHndlr_3ByteHandler,    OPCHndlr_INVALID,
-    /*3*/    OPCHndlr_3ByteHandler,    OPCHndlr_INVALID,        OPCHndlr_INVALID,        OPCHndlr_INVALID,        OPCHndlr_INVALID,
-    /*3*/    OPCHndlr_INVALID,
-
-    /*4*/    OPCHndlrCC_CMOV,        OPCHndlrCC_CMOV,        OPCHndlrCC_CMOV,        OPCHndlrCC_CMOV,        OPCHndlrCC_CMOV,
-    /*4*/    OPCHndlrCC_CMOV,        OPCHndlrCC_CMOV,        OPCHndlrCC_CMOV,        OPCHndlrCC_CMOV,        OPCHndlrCC_CMOV,
-    /*4*/    OPCHndlrCC_CMOV,        OPCHndlrCC_CMOV,        OPCHndlrCC_CMOV,        OPCHndlrCC_CMOV,        OPCHndlrCC_CMOV,
-    /*4*/    OPCHndlrCC_CMOV,
-
-    /*5*/    OPCHndlrSSE_Mov,        OPCHndlrSSE_Arith,        OPCHndlrSSE_Arith,        OPCHndlrSSE_Arith,        OPCHndlrSSE_Logical,
-    /*5*/    OPCHndlrSSE_Logical,    OPCHndlrSSE_Logical,    OPCHndlrSSE_Logical,    OPCHndlrSSE_Arith,        OPCHndlrSSE_Arith,
-    /*5*/    OPCHndlrSSE_Conv,        OPCHndlrSSE_Conv,        OPCHndlrSSE_Arith,        OPCHndlrSSE_Logical,    OPCHndlrSSE_Arith,
-    /*5*/    OPCHndlrSSE_Logical,
-
-    /*6*/    OPCHndlrMMX_PConv,        OPCHndlrMMX_PConv,        OPCHndlrMMX_PConv,        OPCHndlrMMX_PConv,        OPCHndlrMMX_PCmp,
-    /*6*/    OPCHndlrMMX_PCmp,        OPCHndlrMMX_PCmp,        OPCHndlrMMX_PConv,        OPCHndlrMMX_PConv,        OPCHndlrMMX_PConv,
-    /*6*/    OPCHndlrMMX_PConv,        OPCHndlrMMX_PConv,        OPCHndlrUnKwn_MMX,        OPCHndlrUnKwn_MMX,        OPCHndlrMMX_PMov,
-    /*6*/    OPCHndlrMMX_PMov,
-
-    /*7*/    OPCHndlrMMX_PSHUFW,        OPCHndlrMMX_PMulti7x,    OPCHndlrMMX_PMulti7x,    OPCHndlrMMX_PMulti7x,    OPCHndlrMMX_PCmp,
-    /*7*/    OPCHndlrMMX_PCmp,        OPCHndlrMMX_PCmp,        OPCHndlrMMX_EMMS,        OPCHndlrUnKwn_MMX,        OPCHndlrUnKwn_MMX,
-    /*7*/    OPCHndlr_INVALID,        OPCHndlr_INVALID,        OPCHndlrUnKwn_SSE,        OPCHndlrUnKwn_SSE,        OPCHndlrMMX_PMov,
-    /*7*/    OPCHndlrMMX_PMov,
-
-    //        0                        1                        2                        3                        4
-    //        5                        6                        7                        8                        9
-    //        A                        B                        C                        D                        E
-    //        F
-    /*8*/    OPCHndlrCC_JUMP,        OPCHndlrCC_JUMP,        OPCHndlrCC_JUMP,        OPCHndlrCC_JUMP,        OPCHndlrCC_JUMP,
-    /*8*/    OPCHndlrCC_JUMP,        OPCHndlrCC_JUMP,        OPCHndlrCC_JUMP,        OPCHndlrCC_JUMP,        OPCHndlrCC_JUMP,
-    /*8*/    OPCHndlrCC_JUMP,        OPCHndlrCC_JUMP,        OPCHndlrCC_JUMP,        OPCHndlrCC_JUMP,        OPCHndlrCC_JUMP,
-    /*8*/    OPCHndlrCC_JUMP,
-
-    /*9*/    OPCHndlrCC_SETxx,        OPCHndlrCC_SETxx,        OPCHndlrCC_SETxx,        OPCHndlrCC_SETxx,        OPCHndlrCC_SETxx,
-    /*9*/    OPCHndlrCC_SETxx,        OPCHndlrCC_SETxx,        OPCHndlrCC_SETxx,        OPCHndlrCC_SETxx,        OPCHndlrCC_SETxx,
-    /*9*/    OPCHndlrCC_SETxx,        OPCHndlrCC_SETxx,        OPCHndlrCC_SETxx,        OPCHndlrCC_SETxx,        OPCHndlrCC_SETxx,
-    /*9*/    OPCHndlrCC_SETxx,
-
-    /*A*/    OPCHndlrStack_PUSH,        OPCHndlrStack_POP,        OPCHndlrSysIO_CPUID,    OPCHndlrMem_BT,            OPCHndlrALU_Shift,
-    /*A*/    OPCHndlrALU_Shift,        OPCHndlr_INVALID,        OPCHndlr_INVALID,        OPCHndlrStack_PUSH,        OPCHndlrStack_POP,
-    /*A*/    OPCHndlrSysIO_RSM,        OPCHndlrMem_BTS,        OPCHndlrALU_Shift,        OPCHndlrALU_Shift,        OPCHndlrSSE_MultiAE,
-    /*A*/    OPCHndlrALU_MUL,
-
-    /*B*/    OPCHndlrCC_CmpXchg,        OPCHndlrCC_CmpXchg,        OPCHndlrMem_LSS,        OPCHndlrMem_BTR,        OPCHndlrMem_LFS,
-    /*B*/    OPCHndlrMem_LGS,        OPCHndlrMem_MOVZX,        OPCHndlrMem_MOVZX,        OPCHndlrUnKwn_,            OPCHndlrSysIO_UD2,
-    /*B*/    OPCHndlrMulti_BitTestX,    OPCHndlrMem_BTC,        OPCHndlrMem_BSF,        OPCHndlrMem_BSR,        OPCHndlrMem_MOVSX,
-    /*B*/    OPCHndlrMem_MOVSX,
-
-    /*C*/    OPCHndlrALU_XADD,        OPCHndlrALU_XADD,        OPCHndlrSSE_Cmp,        OPCHndlrUnKwn_SSE,        OPCHndlrMMX_PINSRW,
-    /*C*/    OPCHndlrMMX_PEXTRW,        OPCHndlrSSE_SHUFPS,        OPCHndlrCC_CmpXchg,        OPCHndlrMem_ByteSWAP,    OPCHndlrMem_ByteSWAP,
-    /*C*/    OPCHndlrMem_ByteSWAP,    OPCHndlrMem_ByteSWAP,    OPCHndlrMem_ByteSWAP,    OPCHndlrMem_ByteSWAP,    OPCHndlrMem_ByteSWAP,
-    /*C*/    OPCHndlrMem_ByteSWAP,
-
-    /*D*/    OPCHndlrUnKwn_SSE,        OPCHndlrMMX_PShift,        OPCHndlrMMX_PShift,        OPCHndlrMMX_PShift,        OPCHndlrUnKwn_MMX,
-    /*D*/    OPCHndlrMMX_PArith,        OPCHndlrUnKwn_SSE,        OPCHndlrMMX_PMOVMSKB,    OPCHndlrMMX_PArith,        OPCHndlrMMX_PArith,
-    /*D*/    OPCHndlrMMX_PMaxMinAvg,    OPCHndlrMMX_PLogical,    OPCHndlrMMX_PArith,        OPCHndlrMMX_PArith,        OPCHndlrMMX_PMaxMinAvg,
-    /*D*/    OPCHndlrMMX_PLogical,
-
-    /*E*/    OPCHndlrMMX_PMaxMinAvg,    OPCHndlrMMX_PShift,        OPCHndlrMMX_PShift,        OPCHndlrMMX_PMaxMinAvg,    OPCHndlrMMX_PArith,
-    /*E*/    OPCHndlrMMX_PArith,        OPCHndlrSSE_Conv,        OPCHndlrSSE_Mov,        OPCHndlrMMX_PArith,        OPCHndlrMMX_PArith,
-    /*E*/    OPCHndlrMMX_PMaxMinAvg,    OPCHndlrMMX_PLogical,    OPCHndlrMMX_PArith,        OPCHndlrMMX_PArith,        OPCHndlrMMX_PMaxMinAvg,
-    /*E*/    OPCHndlrMMX_PLogical,
-
-    /*F*/    OPCHndlrUnKwn_SSE,        OPCHndlrMMX_PShift,        OPCHndlrMMX_PShift,        OPCHndlrMMX_PShift,        OPCHndlrUnKwn_MMX,
-    /*F*/    OPCHndlrMMX_PArith,        OPCHndlrMMX_PArith,        OPCHndlrSSE_Mov,        OPCHndlrMMX_PArith,        OPCHndlrMMX_PArith,
-    /*F*/    OPCHndlrMMX_PArith,        OPCHndlrUnKwn_SSE,        OPCHndlrMMX_PArith,        OPCHndlrMMX_PArith,        OPCHndlrMMX_PArith,
-    /*F*/    OPCHndlrUnKwn_SSE
+    //     0                          1                          2                      3                          4
+    //     5                          6                          7                      8                          9
+    //     A                          B                          C                      D                          E
+    //     F
+    /*0*/  OPCHndlrSysIO_LdtTrS,      OPCHndlrSysIO_GdtIdMsw,    OPCHndlrMem_LAR,       OPCHndlrMem_LSL,           OPCHndlr_INVALID,
+    /*0*/  OPCHndlr_INVALID,          OPCHndlrSysIO_CLTS,        OPCHndlr_INVALID,      OPCHndlrSysIO_INVD,        OPCHndlrSysIO_WBINVD,
+    /*0*/  OPCHndlr_INVALID,          OPCHndlrSysIO_UD2,         OPCHndlr_INVALID,      OPCHndlr_NOP,              OPCHndlr_INVALID,
+    /*0*/  OPCHndlr_INVALID,
+    /*1*/  OPCHndlrSSE_Mov,           OPCHndlrSSE_Mov,           OPCHndlrSSE_Mov,       OPCHndlrSSE_Mov,           OPCHndlrSSE_Conv,
+    /*1*/  OPCHndlrSSE_Conv,          OPCHndlrSSE_Mov,           OPCHndlrSSE_Mov,       OPCHndlrSSE_Prefetch18,    OPCHndlr_HNOP,
+    /*1*/  OPCHndlr_HNOP,             OPCHndlr_HNOP,             OPCHndlr_HNOP,         OPCHndlr_HNOP,             OPCHndlr_HNOP,
+    /*1*/  OPCHndlr_HNOP,
+    /*2*/  OPCHndlrMem_MOVCrDr,       OPCHndlrMem_MOVCrDr,       OPCHndlrMem_MOVCrDr,   OPCHndlrMem_MOVCrDr,       OPCHndlr_INVALID,
+    /*2*/  OPCHndlr_INVALID,          OPCHndlr_INVALID,          OPCHndlr_INVALID,      OPCHndlrSSE_Mov,           OPCHndlrSSE_Mov,
+    /*2*/  OPCHndlrSSE_Conv,          OPCHndlrSSE_Mov,           OPCHndlrSSE_Conv,      OPCHndlrSSE_Conv,          OPCHndlrSSE_Cmp,
+    /*2*/  OPCHndlrSSE_Cmp,
+    /*3*/  OPCHndlrSysIO_WRMSR,       OPCHndlrSysIO_RDTSC,       OPCHndlrSysIO_RDMSR,   OPCHndlrSysIO_RDPMC,       OPCHndlrSysIO_SYSENTER,
+    /*3*/  OPCHndlrSysIO_SYSEXIT,     OPCHndlr_INVALID,          OPCHndlrUnKwn_,        OPCHndlr_3ByteHandler,     OPCHndlr_INVALID,
+    /*3*/  OPCHndlr_3ByteHandler,     OPCHndlr_INVALID,          OPCHndlr_INVALID,      OPCHndlr_INVALID,          OPCHndlr_INVALID,
+    /*3*/  OPCHndlr_INVALID,
+    /*4*/  OPCHndlrCC_CMOV,           OPCHndlrCC_CMOV,           OPCHndlrCC_CMOV,       OPCHndlrCC_CMOV,           OPCHndlrCC_CMOV,
+    /*4*/  OPCHndlrCC_CMOV,           OPCHndlrCC_CMOV,           OPCHndlrCC_CMOV,       OPCHndlrCC_CMOV,           OPCHndlrCC_CMOV,
+    /*4*/  OPCHndlrCC_CMOV,           OPCHndlrCC_CMOV,           OPCHndlrCC_CMOV,       OPCHndlrCC_CMOV,           OPCHndlrCC_CMOV,
+    /*4*/  OPCHndlrCC_CMOV,
+    /*5*/  OPCHndlrSSE_Mov,           OPCHndlrSSE_Arith,         OPCHndlrSSE_Arith,     OPCHndlrSSE_Arith,         OPCHndlrSSE_Logical,
+    /*5*/  OPCHndlrSSE_Logical,       OPCHndlrSSE_Logical,       OPCHndlrSSE_Logical,   OPCHndlrSSE_Arith,         OPCHndlrSSE_Arith,
+    /*5*/  OPCHndlrSSE_Conv,          OPCHndlrSSE_Conv,          OPCHndlrSSE_Arith,     OPCHndlrSSE_Logical,       OPCHndlrSSE_Arith,
+    /*5*/  OPCHndlrSSE_Logical,
+    /*6*/  OPCHndlrMMX_PConv,         OPCHndlrMMX_PConv,         OPCHndlrMMX_PConv,     OPCHndlrMMX_PConv,         OPCHndlrMMX_PCmp,
+    /*6*/  OPCHndlrMMX_PCmp,          OPCHndlrMMX_PCmp,          OPCHndlrMMX_PConv,     OPCHndlrMMX_PConv,         OPCHndlrMMX_PConv,
+    /*6*/  OPCHndlrMMX_PConv,         OPCHndlrMMX_PConv,         OPCHndlrUnKwn_MMX,     OPCHndlrUnKwn_MMX,         OPCHndlrMMX_PMov,
+    /*6*/  OPCHndlrMMX_PMov,
+    /*7*/  OPCHndlrMMX_PSHUFW,        OPCHndlrMMX_PMulti7x,      OPCHndlrMMX_PMulti7x,  OPCHndlrMMX_PMulti7x,      OPCHndlrMMX_PCmp,
+    /*7*/  OPCHndlrMMX_PCmp,          OPCHndlrMMX_PCmp,          OPCHndlrMMX_EMMS,      OPCHndlrUnKwn_MMX,         OPCHndlrUnKwn_MMX,
+    /*7*/  OPCHndlr_INVALID,          OPCHndlr_INVALID,          OPCHndlrUnKwn_SSE,     OPCHndlrUnKwn_SSE,         OPCHndlrMMX_PMov,
+    /*7*/  OPCHndlrMMX_PMov,
+    //     0                          1                          2                      3                          4
+    //     5                          6                          7                      8                          9
+    //     A                          B                          C                      D                          E
+    //     F
+    /*8*/  OPCHndlrCC_JUMP,           OPCHndlrCC_JUMP,           OPCHndlrCC_JUMP,       OPCHndlrCC_JUMP,           OPCHndlrCC_JUMP,
+    /*8*/  OPCHndlrCC_JUMP,           OPCHndlrCC_JUMP,           OPCHndlrCC_JUMP,       OPCHndlrCC_JUMP,           OPCHndlrCC_JUMP,
+    /*8*/  OPCHndlrCC_JUMP,           OPCHndlrCC_JUMP,           OPCHndlrCC_JUMP,       OPCHndlrCC_JUMP,           OPCHndlrCC_JUMP,
+    /*8*/  OPCHndlrCC_JUMP,
+    /*9*/  OPCHndlrCC_SETxx,          OPCHndlrCC_SETxx,          OPCHndlrCC_SETxx,      OPCHndlrCC_SETxx,          OPCHndlrCC_SETxx,
+    /*9*/  OPCHndlrCC_SETxx,          OPCHndlrCC_SETxx,          OPCHndlrCC_SETxx,      OPCHndlrCC_SETxx,          OPCHndlrCC_SETxx,
+    /*9*/  OPCHndlrCC_SETxx,          OPCHndlrCC_SETxx,          OPCHndlrCC_SETxx,      OPCHndlrCC_SETxx,          OPCHndlrCC_SETxx,
+    /*9*/  OPCHndlrCC_SETxx,
+    /*A*/  OPCHndlrStack_PUSH,        OPCHndlrStack_POP,         OPCHndlrSysIO_CPUID,   OPCHndlrMem_BT,            OPCHndlrALU_Shift,
+    /*A*/  OPCHndlrALU_Shift,         OPCHndlr_INVALID,          OPCHndlr_INVALID,      OPCHndlrStack_PUSH,        OPCHndlrStack_POP,
+    /*A*/  OPCHndlrSysIO_RSM,         OPCHndlrMem_BTS,           OPCHndlrALU_Shift,     OPCHndlrALU_Shift,         OPCHndlrSSE_MultiAE,
+    /*A*/  OPCHndlrALU_MUL,
+    /*B*/  OPCHndlrCC_CmpXchg,        OPCHndlrCC_CmpXchg,        OPCHndlrMem_LSS,       OPCHndlrMem_BTR,           OPCHndlrMem_LFS,
+    /*B*/  OPCHndlrMem_LGS,           OPCHndlrMem_MOVZX,         OPCHndlrMem_MOVZX,     OPCHndlrUnKwn_,            OPCHndlrSysIO_UD2,
+    /*B*/  OPCHndlrMulti_BitTestX,    OPCHndlrMem_BTC,           OPCHndlrMem_BSF,       OPCHndlrMem_BSR,           OPCHndlrMem_MOVSX,
+    /*B*/  OPCHndlrMem_MOVSX,
+    /*C*/  OPCHndlrALU_XADD,          OPCHndlrALU_XADD,          OPCHndlrSSE_Cmp,       OPCHndlrUnKwn_SSE,         OPCHndlrMMX_PINSRW,
+    /*C*/  OPCHndlrMMX_PEXTRW,        OPCHndlrSSE_SHUFPS,        OPCHndlrCC_CmpXchg,    OPCHndlrMem_ByteSWAP,      OPCHndlrMem_ByteSWAP,
+    /*C*/  OPCHndlrMem_ByteSWAP,      OPCHndlrMem_ByteSWAP,      OPCHndlrMem_ByteSWAP,  OPCHndlrMem_ByteSWAP,      OPCHndlrMem_ByteSWAP,
+    /*C*/  OPCHndlrMem_ByteSWAP,
+    /*D*/  OPCHndlrUnKwn_SSE,         OPCHndlrMMX_PShift,        OPCHndlrMMX_PShift,    OPCHndlrMMX_PShift,        OPCHndlrUnKwn_MMX,
+    /*D*/  OPCHndlrMMX_PArith,        OPCHndlrUnKwn_SSE,         OPCHndlrMMX_PMOVMSKB,  OPCHndlrMMX_PArith,        OPCHndlrMMX_PArith,
+    /*D*/  OPCHndlrMMX_PMaxMinAvg,    OPCHndlrMMX_PLogical,      OPCHndlrMMX_PArith,    OPCHndlrMMX_PArith,        OPCHndlrMMX_PMaxMinAvg,
+    /*D*/  OPCHndlrMMX_PLogical,
+    /*E*/  OPCHndlrMMX_PMaxMinAvg,    OPCHndlrMMX_PShift,        OPCHndlrMMX_PShift,    OPCHndlrMMX_PMaxMinAvg,    OPCHndlrMMX_PArith,
+    /*E*/  OPCHndlrMMX_PArith,        OPCHndlrSSE_Conv,          OPCHndlrSSE_Mov,       OPCHndlrMMX_PArith,        OPCHndlrMMX_PArith,
+    /*E*/  OPCHndlrMMX_PMaxMinAvg,    OPCHndlrMMX_PLogical,      OPCHndlrMMX_PArith,    OPCHndlrMMX_PArith,        OPCHndlrMMX_PMaxMinAvg,
+    /*E*/  OPCHndlrMMX_PLogical,
+    /*F*/  OPCHndlrUnKwn_SSE,         OPCHndlrMMX_PShift,        OPCHndlrMMX_PShift,    OPCHndlrMMX_PShift,        OPCHndlrUnKwn_MMX,
+    /*F*/  OPCHndlrMMX_PArith,        OPCHndlrMMX_PArith,        OPCHndlrSSE_Mov,       OPCHndlrMMX_PArith,        OPCHndlrMMX_PArith,
+    /*F*/  OPCHndlrMMX_PArith,        OPCHndlrUnKwn_SSE,         OPCHndlrMMX_PArith,    OPCHndlrMMX_PArith,        OPCHndlrMMX_PArith,
+    /*F*/  OPCHndlrUnKwn_SSE
 
 }; // (*afpOpcHndlrs2[][])()
 
@@ -419,30 +350,22 @@ BOOL(*afpOpcHndlrs2[16][16])(BYTE) =
  // 'reg' field of the ModRM byte as the opcode extension.
 BOOL(*afpFPUModRMRegEx[8][8])(BYTE) =
 {
-/*D8,0*/    OPCHndlrFPU_FADD,    OPCHndlrFPU_FMUL,    OPCHndlrFPU_FCmpReal,    OPCHndlrFPU_FCmpReal,
-            OPCHndlrFPU_FSUB,    OPCHndlrFPU_FSUB,    OPCHndlrFPU_FDIV,        OPCHndlrFPU_FDIV,
-
-/*D9,1*/    OPCHndlrFPU_FLoad,    OPCHndlrFPU_Invalid,OPCHndlrFPU_FStore,        OPCHndlrFPU_FStore,
-            OPCHndlrFPU_CtlOp,    OPCHndlrFPU_CtlOp,    OPCHndlrFPU_CtlOp,        OPCHndlrFPU_CtlOp,
-
-/*DA,2*/    OPCHndlrFPU_FADD,    OPCHndlrFPU_FMUL,    OPCHndlrFPU_FCmpInts,    OPCHndlrFPU_FCmpInts,
-            OPCHndlrFPU_FSUB,    OPCHndlrFPU_FSUB,    OPCHndlrFPU_FDIV,        OPCHndlrFPU_FDIV,
-
-/*DB,3*/    OPCHndlrFPU_FLoad,    OPCHndlrFPU_Invalid,OPCHndlrFPU_FStore,        OPCHndlrFPU_FStore,
-            OPCHndlrFPU_Invalid,OPCHndlrFPU_FLoad,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_FStore,
-
-
-/*DC,4*/    OPCHndlrFPU_FADD,    OPCHndlrFPU_FMUL,    OPCHndlrFPU_FCmpReal,    OPCHndlrFPU_FCmpReal,
-            OPCHndlrFPU_FSUB,    OPCHndlrFPU_FSUB,    OPCHndlrFPU_FDIV,        OPCHndlrFPU_FDIV,
-
-/*DD,5*/    OPCHndlrFPU_FLoad,    OPCHndlrFPU_Invalid,OPCHndlrFPU_FStore,        OPCHndlrFPU_FStore,
-            OPCHndlrFPU_CtlOp,    OPCHndlrFPU_Invalid,OPCHndlrFPU_CtlOp,        OPCHndlrFPU_CtlOp,
-
-/*DE,6*/    OPCHndlrFPU_FADD,    OPCHndlrFPU_FMUL,    OPCHndlrFPU_FCmpInts,    OPCHndlrFPU_FCmpInts,
-            OPCHndlrFPU_FSUB,    OPCHndlrFPU_FSUB,    OPCHndlrFPU_FDIV,        OPCHndlrFPU_FDIV,
-
-/*DF,7*/    OPCHndlrFPU_FLoad,    OPCHndlrFPU_Invalid,OPCHndlrFPU_FStore,        OPCHndlrFPU_FStore,
-            OPCHndlrFPU_FLoad,    OPCHndlrFPU_FLoad,    OPCHndlrFPU_FStore,        OPCHndlrFPU_FStore,
+    /*D8,0*/    OPCHndlrFPU_FADD,      OPCHndlrFPU_FMUL,      OPCHndlrFPU_FCmpReal,  OPCHndlrFPU_FCmpReal,
+                OPCHndlrFPU_FSUB,      OPCHndlrFPU_FSUB,      OPCHndlrFPU_FDIV,      OPCHndlrFPU_FDIV,
+    /*D9,1*/    OPCHndlrFPU_FLoad,     OPCHndlrFPU_Invalid,   OPCHndlrFPU_FStore,    OPCHndlrFPU_FStore,
+                OPCHndlrFPU_CtlOp,     OPCHndlrFPU_CtlOp,     OPCHndlrFPU_CtlOp,     OPCHndlrFPU_CtlOp,
+    /*DA,2*/    OPCHndlrFPU_FADD,      OPCHndlrFPU_FMUL,      OPCHndlrFPU_FCmpInts,  OPCHndlrFPU_FCmpInts,
+                OPCHndlrFPU_FSUB,      OPCHndlrFPU_FSUB,      OPCHndlrFPU_FDIV,      OPCHndlrFPU_FDIV,
+    /*DB,3*/    OPCHndlrFPU_FLoad,     OPCHndlrFPU_Invalid,   OPCHndlrFPU_FStore,    OPCHndlrFPU_FStore,
+                OPCHndlrFPU_Invalid,   OPCHndlrFPU_FLoad,     OPCHndlrFPU_Invalid,   OPCHndlrFPU_FStore,
+    /*DC,4*/    OPCHndlrFPU_FADD,      OPCHndlrFPU_FMUL,      OPCHndlrFPU_FCmpReal,  OPCHndlrFPU_FCmpReal,
+                OPCHndlrFPU_FSUB,      OPCHndlrFPU_FSUB,      OPCHndlrFPU_FDIV,      OPCHndlrFPU_FDIV,
+    /*DD,5*/    OPCHndlrFPU_FLoad,     OPCHndlrFPU_Invalid,   OPCHndlrFPU_FStore,    OPCHndlrFPU_FStore,
+                OPCHndlrFPU_CtlOp,     OPCHndlrFPU_Invalid,   OPCHndlrFPU_CtlOp,     OPCHndlrFPU_CtlOp,
+    /*DE,6*/    OPCHndlrFPU_FADD,      OPCHndlrFPU_FMUL,      OPCHndlrFPU_FCmpInts,  OPCHndlrFPU_FCmpInts,
+                OPCHndlrFPU_FSUB,      OPCHndlrFPU_FSUB,      OPCHndlrFPU_FDIV,      OPCHndlrFPU_FDIV,
+    /*DF,7*/    OPCHndlrFPU_FLoad,     OPCHndlrFPU_Invalid,   OPCHndlrFPU_FStore,    OPCHndlrFPU_FStore,
+                OPCHndlrFPU_FLoad,     OPCHndlrFPU_FLoad,     OPCHndlrFPU_FStore,    OPCHndlrFPU_FStore,
 };
 
 // LookUpTable for instructions whose ModRM's value lies
@@ -451,80 +374,72 @@ BOOL(*afpFPUModRMRegEx[8][8])(BYTE) =
 // #possible ModRM values between C0h and FFh = FFh - C0h + 1h = 40h
 BOOL(*afpFPUModRMFullEx[8][0x40])(BYTE) =
 {
-    //            0                        1                        2                        3                        4                        5                        6                        7
-    //            8                        9                        A                        B                        C                        D                        E                        F
-    /*D8,C0*/    OPCHndlrFPU_FADD,        OPCHndlrFPU_FADD,        OPCHndlrFPU_FADD,        OPCHndlrFPU_FADD,        OPCHndlrFPU_FADD,        OPCHndlrFPU_FADD,        OPCHndlrFPU_FADD,        OPCHndlrFPU_FADD,
-    /*D8,C8*/    OPCHndlrFPU_FMUL,        OPCHndlrFPU_FMUL,        OPCHndlrFPU_FMUL,        OPCHndlrFPU_FMUL,        OPCHndlrFPU_FMUL,        OPCHndlrFPU_FMUL,        OPCHndlrFPU_FMUL,        OPCHndlrFPU_FMUL,
-    /*D8,D0*/    OPCHndlrFPU_FCmpReal,    OPCHndlrFPU_FCmpReal,    OPCHndlrFPU_FCmpReal,    OPCHndlrFPU_FCmpReal,    OPCHndlrFPU_FCmpReal,    OPCHndlrFPU_FCmpReal,    OPCHndlrFPU_FCmpReal,    OPCHndlrFPU_FCmpReal,
-    /*D8,D8*/    OPCHndlrFPU_FCmpReal,    OPCHndlrFPU_FCmpReal,    OPCHndlrFPU_FCmpReal,    OPCHndlrFPU_FCmpReal,    OPCHndlrFPU_FCmpReal,    OPCHndlrFPU_FCmpReal,    OPCHndlrFPU_FCmpReal,    OPCHndlrFPU_FCmpReal,
-    /*D8,E0*/    OPCHndlrFPU_FSUB,        OPCHndlrFPU_FSUB,        OPCHndlrFPU_FSUB,        OPCHndlrFPU_FSUB,        OPCHndlrFPU_FSUB,        OPCHndlrFPU_FSUB,        OPCHndlrFPU_FSUB,        OPCHndlrFPU_FSUB,
-    /*D8,E8*/    OPCHndlrFPU_FSUB,        OPCHndlrFPU_FSUB,        OPCHndlrFPU_FSUB,        OPCHndlrFPU_FSUB,        OPCHndlrFPU_FSUB,        OPCHndlrFPU_FSUB,        OPCHndlrFPU_FSUB,        OPCHndlrFPU_FSUB,
-    /*D8,F0*/    OPCHndlrFPU_FDIV,        OPCHndlrFPU_FDIV,        OPCHndlrFPU_FDIV,        OPCHndlrFPU_FDIV,        OPCHndlrFPU_FDIV,        OPCHndlrFPU_FDIV,        OPCHndlrFPU_FDIV,        OPCHndlrFPU_FDIV,
-    /*D8,F8*/    OPCHndlrFPU_FDIV,        OPCHndlrFPU_FDIV,        OPCHndlrFPU_FDIV,        OPCHndlrFPU_FDIV,        OPCHndlrFPU_FDIV,        OPCHndlrFPU_FDIV,        OPCHndlrFPU_FDIV,        OPCHndlrFPU_FDIV,
-
-    /*D9,C0*/    OPCHndlrFPU_FLoad,        OPCHndlrFPU_FLoad,        OPCHndlrFPU_FLoad,        OPCHndlrFPU_FLoad,        OPCHndlrFPU_FLoad,        OPCHndlrFPU_FLoad,        OPCHndlrFPU_FLoad,        OPCHndlrFPU_FLoad,
-    /*D9,C8*/    OPCHndlrFPU_FXCH,        OPCHndlrFPU_FXCH,        OPCHndlrFPU_FXCH,        OPCHndlrFPU_FXCH,        OPCHndlrFPU_FXCH,        OPCHndlrFPU_FXCH,        OPCHndlrFPU_FXCH,        OPCHndlrFPU_FXCH,
-    /*D9,D0*/    OPCHndlrFPU_FNOP,        OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,
-    /*D9,D8*/    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,
-    /*D9,E0*/    OPCHndlrFPU_FCHS,        OPCHndlrFPU_FABS,        OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_FTST,        OPCHndlrFPU_FXAM,        OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,
-    /*D9,E8*/    OPCHndlrFPU_Const,        OPCHndlrFPU_Const,        OPCHndlrFPU_Const,        OPCHndlrFPU_Const,        OPCHndlrFPU_Const,        OPCHndlrFPU_Const,        OPCHndlrFPU_Const,        OPCHndlrFPU_Invalid,
-    /*D9,F0*/    OPCHndlrFPU_LgExSc,        OPCHndlrFPU_LgExSc,        OPCHndlrFPU_Trig,        OPCHndlrFPU_Trig,        OPCHndlrFPU_FXTRACT,    OPCHndlrFPU_FPREM,        OPCHndlrFPU_Ctl,        OPCHndlrFPU_Ctl,
-    /*D9,F8*/    OPCHndlrFPU_FPREM,        OPCHndlrFPU_LgExSc,        OPCHndlrFPU_FSQRT,        OPCHndlrFPU_Trig,        OPCHndlrFPU_FRNDINT,    OPCHndlrFPU_LgExSc,        OPCHndlrFPU_Trig,        OPCHndlrFPU_Trig,
-
-    /*DA,C0*/    OPCHndlrFPU_FCMOV,        OPCHndlrFPU_FCMOV,        OPCHndlrFPU_FCMOV,        OPCHndlrFPU_FCMOV,        OPCHndlrFPU_FCMOV,        OPCHndlrFPU_FCMOV,        OPCHndlrFPU_FCMOV,        OPCHndlrFPU_FCMOV,
-    /*DA,C8*/    OPCHndlrFPU_FCMOV,        OPCHndlrFPU_FCMOV,        OPCHndlrFPU_FCMOV,        OPCHndlrFPU_FCMOV,        OPCHndlrFPU_FCMOV,        OPCHndlrFPU_FCMOV,        OPCHndlrFPU_FCMOV,        OPCHndlrFPU_FCMOV,
-    /*DA,D0*/    OPCHndlrFPU_FCMOV,        OPCHndlrFPU_FCMOV,        OPCHndlrFPU_FCMOV,        OPCHndlrFPU_FCMOV,        OPCHndlrFPU_FCMOV,        OPCHndlrFPU_FCMOV,        OPCHndlrFPU_FCMOV,        OPCHndlrFPU_FCMOV,
-    /*DA,D8*/    OPCHndlrFPU_FCMOV,        OPCHndlrFPU_FCMOV,        OPCHndlrFPU_FCMOV,        OPCHndlrFPU_FCMOV,        OPCHndlrFPU_FCMOV,        OPCHndlrFPU_FCMOV,        OPCHndlrFPU_FCMOV,        OPCHndlrFPU_FCMOV,
-    /*DA,E0*/    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,
-    /*DA,E8*/    OPCHndlrFPU_Invalid,    OPCHndlrFPU_FCmpReal,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,
-    /*DA,F0*/    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,
-    /*DA,F8*/    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,
-
-    /*DB,C0*/    OPCHndlrFPU_FCMOV,        OPCHndlrFPU_FCMOV,        OPCHndlrFPU_FCMOV,        OPCHndlrFPU_FCMOV,        OPCHndlrFPU_FCMOV,        OPCHndlrFPU_FCMOV,        OPCHndlrFPU_FCMOV,        OPCHndlrFPU_FCMOV,
-    /*DB,C8*/    OPCHndlrFPU_FCMOV,        OPCHndlrFPU_FCMOV,        OPCHndlrFPU_FCMOV,        OPCHndlrFPU_FCMOV,        OPCHndlrFPU_FCMOV,        OPCHndlrFPU_FCMOV,        OPCHndlrFPU_FCMOV,        OPCHndlrFPU_FCMOV,
-    /*DB,D0*/    OPCHndlrFPU_FCMOV,        OPCHndlrFPU_FCMOV,        OPCHndlrFPU_FCMOV,        OPCHndlrFPU_FCMOV,        OPCHndlrFPU_FCMOV,        OPCHndlrFPU_FCMOV,        OPCHndlrFPU_FCMOV,        OPCHndlrFPU_FCMOV,
-    /*DB,D8*/    OPCHndlrFPU_FCMOV,        OPCHndlrFPU_FCMOV,        OPCHndlrFPU_FCMOV,        OPCHndlrFPU_FCMOV,        OPCHndlrFPU_FCMOV,        OPCHndlrFPU_FCMOV,        OPCHndlrFPU_FCMOV,        OPCHndlrFPU_FCMOV,
-    /*DB,E0*/    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Ctl,        OPCHndlrFPU_Ctl,        OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,
-    /*DB,E8*/    OPCHndlrFPU_FCmpReal,    OPCHndlrFPU_FCmpReal,    OPCHndlrFPU_FCmpReal,    OPCHndlrFPU_FCmpReal,    OPCHndlrFPU_FCmpReal,    OPCHndlrFPU_FCmpReal,    OPCHndlrFPU_FCmpReal,    OPCHndlrFPU_FCmpReal,
-    /*DB,F0*/    OPCHndlrFPU_FCmpReal,    OPCHndlrFPU_FCmpReal,    OPCHndlrFPU_FCmpReal,    OPCHndlrFPU_FCmpReal,    OPCHndlrFPU_FCmpReal,    OPCHndlrFPU_FCmpReal,    OPCHndlrFPU_FCmpReal,    OPCHndlrFPU_FCmpReal,
-    /*DB,F8*/    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,
-
-    /*DC,C0*/    OPCHndlrFPU_FADD,        OPCHndlrFPU_FADD,        OPCHndlrFPU_FADD,        OPCHndlrFPU_FADD,        OPCHndlrFPU_FADD,        OPCHndlrFPU_FADD,        OPCHndlrFPU_FADD,        OPCHndlrFPU_FADD,
-    /*DC,C8*/    OPCHndlrFPU_FMUL,        OPCHndlrFPU_FMUL,        OPCHndlrFPU_FMUL,        OPCHndlrFPU_FMUL,        OPCHndlrFPU_FMUL,        OPCHndlrFPU_FMUL,        OPCHndlrFPU_FMUL,        OPCHndlrFPU_FMUL,
-    /*DC,D0*/    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,
-    /*DC,D8*/    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,
-    /*DC,E0*/    OPCHndlrFPU_FSUB,        OPCHndlrFPU_FSUB,        OPCHndlrFPU_FSUB,        OPCHndlrFPU_FSUB,        OPCHndlrFPU_FSUB,        OPCHndlrFPU_FSUB,        OPCHndlrFPU_FSUB,        OPCHndlrFPU_FSUB,
-    /*DC,E8*/    OPCHndlrFPU_FSUB,        OPCHndlrFPU_FSUB,        OPCHndlrFPU_FSUB,        OPCHndlrFPU_FSUB,        OPCHndlrFPU_FSUB,        OPCHndlrFPU_FSUB,        OPCHndlrFPU_FSUB,        OPCHndlrFPU_FSUB,
-    /*DC,F0*/    OPCHndlrFPU_FDIV,        OPCHndlrFPU_FDIV,        OPCHndlrFPU_FDIV,        OPCHndlrFPU_FDIV,        OPCHndlrFPU_FDIV,        OPCHndlrFPU_FDIV,        OPCHndlrFPU_FDIV,        OPCHndlrFPU_FDIV,
-    /*DC,F8*/    OPCHndlrFPU_FDIV,        OPCHndlrFPU_FDIV,        OPCHndlrFPU_FDIV,        OPCHndlrFPU_FDIV,        OPCHndlrFPU_FDIV,        OPCHndlrFPU_FDIV,        OPCHndlrFPU_FDIV,        OPCHndlrFPU_FDIV,
-
-    /*DD,C0*/    OPCHndlrFPU_CtlOp,        OPCHndlrFPU_CtlOp,        OPCHndlrFPU_CtlOp,        OPCHndlrFPU_CtlOp,        OPCHndlrFPU_CtlOp,        OPCHndlrFPU_CtlOp,        OPCHndlrFPU_CtlOp,        OPCHndlrFPU_CtlOp,
-    /*DD,C8*/    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,
-    /*DD,D0*/    OPCHndlrFPU_FStore,        OPCHndlrFPU_FStore,        OPCHndlrFPU_FStore,        OPCHndlrFPU_FStore,        OPCHndlrFPU_FStore,        OPCHndlrFPU_FStore,        OPCHndlrFPU_FStore,        OPCHndlrFPU_FStore,
-    /*DD,D8*/    OPCHndlrFPU_FStore,        OPCHndlrFPU_FStore,        OPCHndlrFPU_FStore,        OPCHndlrFPU_FStore,        OPCHndlrFPU_FStore,        OPCHndlrFPU_FStore,        OPCHndlrFPU_FStore,        OPCHndlrFPU_FStore,
-    /*DD,E0*/    OPCHndlrFPU_FCmpReal,    OPCHndlrFPU_FCmpReal,    OPCHndlrFPU_FCmpReal,    OPCHndlrFPU_FCmpReal,    OPCHndlrFPU_FCmpReal,    OPCHndlrFPU_FCmpReal,    OPCHndlrFPU_FCmpReal,    OPCHndlrFPU_FCmpReal,
-    /*DD,E8*/    OPCHndlrFPU_FCmpReal,    OPCHndlrFPU_FCmpReal,    OPCHndlrFPU_FCmpReal,    OPCHndlrFPU_FCmpReal,    OPCHndlrFPU_FCmpReal,    OPCHndlrFPU_FCmpReal,    OPCHndlrFPU_FCmpReal,    OPCHndlrFPU_FCmpReal,
-    /*DD,F0*/    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,
-    /*DD,F8*/    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,
-
-    /*DE,C0*/    OPCHndlrFPU_FADD,        OPCHndlrFPU_FADD,        OPCHndlrFPU_FADD,        OPCHndlrFPU_FADD,        OPCHndlrFPU_FADD,        OPCHndlrFPU_FADD,        OPCHndlrFPU_FADD,        OPCHndlrFPU_FADD,
-    /*DE,C8*/    OPCHndlrFPU_FMUL,        OPCHndlrFPU_FMUL,        OPCHndlrFPU_FMUL,        OPCHndlrFPU_FMUL,        OPCHndlrFPU_FMUL,        OPCHndlrFPU_FMUL,        OPCHndlrFPU_FMUL,        OPCHndlrFPU_FMUL,
-    /*DE,D0*/    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,
-    /*DE,D8*/    OPCHndlrFPU_Invalid,    OPCHndlrFPU_FCmpReal,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,
-    /*DE,E0*/    OPCHndlrFPU_FSUB,        OPCHndlrFPU_FSUB,        OPCHndlrFPU_FSUB,        OPCHndlrFPU_FSUB,        OPCHndlrFPU_FSUB,        OPCHndlrFPU_FSUB,        OPCHndlrFPU_FSUB,        OPCHndlrFPU_FSUB,
-    /*DE,E8*/    OPCHndlrFPU_FSUB,        OPCHndlrFPU_FSUB,        OPCHndlrFPU_FSUB,        OPCHndlrFPU_FSUB,        OPCHndlrFPU_FSUB,        OPCHndlrFPU_FSUB,        OPCHndlrFPU_FSUB,        OPCHndlrFPU_FSUB,
-    /*DE,F0*/    OPCHndlrFPU_FDIV,        OPCHndlrFPU_FDIV,        OPCHndlrFPU_FDIV,        OPCHndlrFPU_FDIV,        OPCHndlrFPU_FDIV,        OPCHndlrFPU_FDIV,        OPCHndlrFPU_FDIV,        OPCHndlrFPU_FDIV,
-    /*DE,F8*/    OPCHndlrFPU_FDIV,        OPCHndlrFPU_FDIV,        OPCHndlrFPU_FDIV,        OPCHndlrFPU_FDIV,        OPCHndlrFPU_FDIV,        OPCHndlrFPU_FDIV,        OPCHndlrFPU_FDIV,        OPCHndlrFPU_FDIV,
-
-    /*DF,C0*/    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,
-    /*DF,C8*/    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,
-    /*DF,D0*/    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,
-    /*DF,D8*/    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,
-    /*DF,E0*/    OPCHndlrFPU_CtlOp,        OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,
-    /*DF,E8*/    OPCHndlrFPU_FCmpReal,    OPCHndlrFPU_FCmpReal,    OPCHndlrFPU_FCmpReal,    OPCHndlrFPU_FCmpReal,    OPCHndlrFPU_FCmpReal,    OPCHndlrFPU_FCmpReal,    OPCHndlrFPU_FCmpReal,    OPCHndlrFPU_FCmpReal,
-    /*DF,F0*/    OPCHndlrFPU_FCmpReal,    OPCHndlrFPU_FCmpReal,    OPCHndlrFPU_FCmpReal,    OPCHndlrFPU_FCmpReal,    OPCHndlrFPU_FCmpReal,    OPCHndlrFPU_FCmpReal,    OPCHndlrFPU_FCmpReal,    OPCHndlrFPU_FCmpReal,
-    /*DF,F8*/    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,    OPCHndlrFPU_Invalid,
-
+    //         0                      1                      2                      3                      4                      5                      6                      7
+    //         8                      9                      A                      B                      C                      D                      E                      F
+    /*D8,C0*/  OPCHndlrFPU_FADD,      OPCHndlrFPU_FADD,      OPCHndlrFPU_FADD,      OPCHndlrFPU_FADD,      OPCHndlrFPU_FADD,      OPCHndlrFPU_FADD,      OPCHndlrFPU_FADD,      OPCHndlrFPU_FADD,
+    /*D8,C8*/  OPCHndlrFPU_FMUL,      OPCHndlrFPU_FMUL,      OPCHndlrFPU_FMUL,      OPCHndlrFPU_FMUL,      OPCHndlrFPU_FMUL,      OPCHndlrFPU_FMUL,      OPCHndlrFPU_FMUL,      OPCHndlrFPU_FMUL,
+    /*D8,D0*/  OPCHndlrFPU_FCmpReal,  OPCHndlrFPU_FCmpReal,  OPCHndlrFPU_FCmpReal,  OPCHndlrFPU_FCmpReal,  OPCHndlrFPU_FCmpReal,  OPCHndlrFPU_FCmpReal,  OPCHndlrFPU_FCmpReal,  OPCHndlrFPU_FCmpReal,
+    /*D8,D8*/  OPCHndlrFPU_FCmpReal,  OPCHndlrFPU_FCmpReal,  OPCHndlrFPU_FCmpReal,  OPCHndlrFPU_FCmpReal,  OPCHndlrFPU_FCmpReal,  OPCHndlrFPU_FCmpReal,  OPCHndlrFPU_FCmpReal,  OPCHndlrFPU_FCmpReal,
+    /*D8,E0*/  OPCHndlrFPU_FSUB,      OPCHndlrFPU_FSUB,      OPCHndlrFPU_FSUB,      OPCHndlrFPU_FSUB,      OPCHndlrFPU_FSUB,      OPCHndlrFPU_FSUB,      OPCHndlrFPU_FSUB,      OPCHndlrFPU_FSUB,
+    /*D8,E8*/  OPCHndlrFPU_FSUB,      OPCHndlrFPU_FSUB,      OPCHndlrFPU_FSUB,      OPCHndlrFPU_FSUB,      OPCHndlrFPU_FSUB,      OPCHndlrFPU_FSUB,      OPCHndlrFPU_FSUB,      OPCHndlrFPU_FSUB,
+    /*D8,F0*/  OPCHndlrFPU_FDIV,      OPCHndlrFPU_FDIV,      OPCHndlrFPU_FDIV,      OPCHndlrFPU_FDIV,      OPCHndlrFPU_FDIV,      OPCHndlrFPU_FDIV,      OPCHndlrFPU_FDIV,      OPCHndlrFPU_FDIV,
+    /*D8,F8*/  OPCHndlrFPU_FDIV,      OPCHndlrFPU_FDIV,      OPCHndlrFPU_FDIV,      OPCHndlrFPU_FDIV,      OPCHndlrFPU_FDIV,      OPCHndlrFPU_FDIV,      OPCHndlrFPU_FDIV,      OPCHndlrFPU_FDIV,
+    /*D9,C0*/  OPCHndlrFPU_FLoad,     OPCHndlrFPU_FLoad,     OPCHndlrFPU_FLoad,     OPCHndlrFPU_FLoad,     OPCHndlrFPU_FLoad,     OPCHndlrFPU_FLoad,     OPCHndlrFPU_FLoad,     OPCHndlrFPU_FLoad,
+    /*D9,C8*/  OPCHndlrFPU_FXCH,      OPCHndlrFPU_FXCH,      OPCHndlrFPU_FXCH,      OPCHndlrFPU_FXCH,      OPCHndlrFPU_FXCH,      OPCHndlrFPU_FXCH,      OPCHndlrFPU_FXCH,      OPCHndlrFPU_FXCH,
+    /*D9,D0*/  OPCHndlrFPU_FNOP,      OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,
+    /*D9,D8*/  OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,
+    /*D9,E0*/  OPCHndlrFPU_FCHS,      OPCHndlrFPU_FABS,      OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_FTST,      OPCHndlrFPU_FXAM,      OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,
+    /*D9,E8*/  OPCHndlrFPU_Const,     OPCHndlrFPU_Const,     OPCHndlrFPU_Const,     OPCHndlrFPU_Const,     OPCHndlrFPU_Const,     OPCHndlrFPU_Const,     OPCHndlrFPU_Const,     OPCHndlrFPU_Invalid,
+    /*D9,F0*/  OPCHndlrFPU_LgExSc,    OPCHndlrFPU_LgExSc,    OPCHndlrFPU_Trig,      OPCHndlrFPU_Trig,      OPCHndlrFPU_FXTRACT,   OPCHndlrFPU_FPREM,     OPCHndlrFPU_Ctl,       OPCHndlrFPU_Ctl,
+    /*D9,F8*/  OPCHndlrFPU_FPREM,     OPCHndlrFPU_LgExSc,    OPCHndlrFPU_FSQRT,     OPCHndlrFPU_Trig,      OPCHndlrFPU_FRNDINT,   OPCHndlrFPU_LgExSc,    OPCHndlrFPU_Trig,      OPCHndlrFPU_Trig,
+    /*DA,C0*/  OPCHndlrFPU_FCMOV,     OPCHndlrFPU_FCMOV,     OPCHndlrFPU_FCMOV,     OPCHndlrFPU_FCMOV,     OPCHndlrFPU_FCMOV,     OPCHndlrFPU_FCMOV,     OPCHndlrFPU_FCMOV,     OPCHndlrFPU_FCMOV,
+    /*DA,C8*/  OPCHndlrFPU_FCMOV,     OPCHndlrFPU_FCMOV,     OPCHndlrFPU_FCMOV,     OPCHndlrFPU_FCMOV,     OPCHndlrFPU_FCMOV,     OPCHndlrFPU_FCMOV,     OPCHndlrFPU_FCMOV,     OPCHndlrFPU_FCMOV,
+    /*DA,D0*/  OPCHndlrFPU_FCMOV,     OPCHndlrFPU_FCMOV,     OPCHndlrFPU_FCMOV,     OPCHndlrFPU_FCMOV,     OPCHndlrFPU_FCMOV,     OPCHndlrFPU_FCMOV,     OPCHndlrFPU_FCMOV,     OPCHndlrFPU_FCMOV,
+    /*DA,D8*/  OPCHndlrFPU_FCMOV,     OPCHndlrFPU_FCMOV,     OPCHndlrFPU_FCMOV,     OPCHndlrFPU_FCMOV,     OPCHndlrFPU_FCMOV,     OPCHndlrFPU_FCMOV,     OPCHndlrFPU_FCMOV,     OPCHndlrFPU_FCMOV,
+    /*DA,E0*/  OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,
+    /*DA,E8*/  OPCHndlrFPU_Invalid,   OPCHndlrFPU_FCmpReal,  OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,
+    /*DA,F0*/  OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,
+    /*DA,F8*/  OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,
+    /*DB,C0*/  OPCHndlrFPU_FCMOV,     OPCHndlrFPU_FCMOV,     OPCHndlrFPU_FCMOV,     OPCHndlrFPU_FCMOV,     OPCHndlrFPU_FCMOV,     OPCHndlrFPU_FCMOV,     OPCHndlrFPU_FCMOV,     OPCHndlrFPU_FCMOV,
+    /*DB,C8*/  OPCHndlrFPU_FCMOV,     OPCHndlrFPU_FCMOV,     OPCHndlrFPU_FCMOV,     OPCHndlrFPU_FCMOV,     OPCHndlrFPU_FCMOV,     OPCHndlrFPU_FCMOV,     OPCHndlrFPU_FCMOV,     OPCHndlrFPU_FCMOV,
+    /*DB,D0*/  OPCHndlrFPU_FCMOV,     OPCHndlrFPU_FCMOV,     OPCHndlrFPU_FCMOV,     OPCHndlrFPU_FCMOV,     OPCHndlrFPU_FCMOV,     OPCHndlrFPU_FCMOV,     OPCHndlrFPU_FCMOV,     OPCHndlrFPU_FCMOV,
+    /*DB,D8*/  OPCHndlrFPU_FCMOV,     OPCHndlrFPU_FCMOV,     OPCHndlrFPU_FCMOV,     OPCHndlrFPU_FCMOV,     OPCHndlrFPU_FCMOV,     OPCHndlrFPU_FCMOV,     OPCHndlrFPU_FCMOV,     OPCHndlrFPU_FCMOV,
+    /*DB,E0*/  OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Ctl,       OPCHndlrFPU_Ctl,       OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,
+    /*DB,E8*/  OPCHndlrFPU_FCmpReal,  OPCHndlrFPU_FCmpReal,  OPCHndlrFPU_FCmpReal,  OPCHndlrFPU_FCmpReal,  OPCHndlrFPU_FCmpReal,  OPCHndlrFPU_FCmpReal,  OPCHndlrFPU_FCmpReal,  OPCHndlrFPU_FCmpReal,
+    /*DB,F0*/  OPCHndlrFPU_FCmpReal,  OPCHndlrFPU_FCmpReal,  OPCHndlrFPU_FCmpReal,  OPCHndlrFPU_FCmpReal,  OPCHndlrFPU_FCmpReal,  OPCHndlrFPU_FCmpReal,  OPCHndlrFPU_FCmpReal,  OPCHndlrFPU_FCmpReal,
+    /*DB,F8*/  OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,
+    /*DC,C0*/  OPCHndlrFPU_FADD,      OPCHndlrFPU_FADD,      OPCHndlrFPU_FADD,      OPCHndlrFPU_FADD,      OPCHndlrFPU_FADD,      OPCHndlrFPU_FADD,      OPCHndlrFPU_FADD,      OPCHndlrFPU_FADD,
+    /*DC,C8*/  OPCHndlrFPU_FMUL,      OPCHndlrFPU_FMUL,      OPCHndlrFPU_FMUL,      OPCHndlrFPU_FMUL,      OPCHndlrFPU_FMUL,      OPCHndlrFPU_FMUL,      OPCHndlrFPU_FMUL,      OPCHndlrFPU_FMUL,
+    /*DC,D0*/  OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,
+    /*DC,D8*/  OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,
+    /*DC,E0*/  OPCHndlrFPU_FSUB,      OPCHndlrFPU_FSUB,      OPCHndlrFPU_FSUB,      OPCHndlrFPU_FSUB,      OPCHndlrFPU_FSUB,      OPCHndlrFPU_FSUB,      OPCHndlrFPU_FSUB,      OPCHndlrFPU_FSUB,
+    /*DC,E8*/  OPCHndlrFPU_FSUB,      OPCHndlrFPU_FSUB,      OPCHndlrFPU_FSUB,      OPCHndlrFPU_FSUB,      OPCHndlrFPU_FSUB,      OPCHndlrFPU_FSUB,      OPCHndlrFPU_FSUB,      OPCHndlrFPU_FSUB,
+    /*DC,F0*/  OPCHndlrFPU_FDIV,      OPCHndlrFPU_FDIV,      OPCHndlrFPU_FDIV,      OPCHndlrFPU_FDIV,      OPCHndlrFPU_FDIV,      OPCHndlrFPU_FDIV,      OPCHndlrFPU_FDIV,      OPCHndlrFPU_FDIV,
+    /*DC,F8*/  OPCHndlrFPU_FDIV,      OPCHndlrFPU_FDIV,      OPCHndlrFPU_FDIV,      OPCHndlrFPU_FDIV,      OPCHndlrFPU_FDIV,      OPCHndlrFPU_FDIV,      OPCHndlrFPU_FDIV,      OPCHndlrFPU_FDIV,
+    /*DD,C0*/  OPCHndlrFPU_CtlOp,     OPCHndlrFPU_CtlOp,     OPCHndlrFPU_CtlOp,     OPCHndlrFPU_CtlOp,     OPCHndlrFPU_CtlOp,     OPCHndlrFPU_CtlOp,     OPCHndlrFPU_CtlOp,     OPCHndlrFPU_CtlOp,
+    /*DD,C8*/  OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,
+    /*DD,D0*/  OPCHndlrFPU_FStore,    OPCHndlrFPU_FStore,    OPCHndlrFPU_FStore,    OPCHndlrFPU_FStore,    OPCHndlrFPU_FStore,    OPCHndlrFPU_FStore,    OPCHndlrFPU_FStore,    OPCHndlrFPU_FStore,
+    /*DD,D8*/  OPCHndlrFPU_FStore,    OPCHndlrFPU_FStore,    OPCHndlrFPU_FStore,    OPCHndlrFPU_FStore,    OPCHndlrFPU_FStore,    OPCHndlrFPU_FStore,    OPCHndlrFPU_FStore,    OPCHndlrFPU_FStore,
+    /*DD,E0*/  OPCHndlrFPU_FCmpReal,  OPCHndlrFPU_FCmpReal,  OPCHndlrFPU_FCmpReal,  OPCHndlrFPU_FCmpReal,  OPCHndlrFPU_FCmpReal,  OPCHndlrFPU_FCmpReal,  OPCHndlrFPU_FCmpReal,  OPCHndlrFPU_FCmpReal,
+    /*DD,E8*/  OPCHndlrFPU_FCmpReal,  OPCHndlrFPU_FCmpReal,  OPCHndlrFPU_FCmpReal,  OPCHndlrFPU_FCmpReal,  OPCHndlrFPU_FCmpReal,  OPCHndlrFPU_FCmpReal,  OPCHndlrFPU_FCmpReal,  OPCHndlrFPU_FCmpReal,
+    /*DD,F0*/  OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,
+    /*DD,F8*/  OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,
+    /*DE,C0*/  OPCHndlrFPU_FADD,      OPCHndlrFPU_FADD,      OPCHndlrFPU_FADD,      OPCHndlrFPU_FADD,      OPCHndlrFPU_FADD,      OPCHndlrFPU_FADD,      OPCHndlrFPU_FADD,      OPCHndlrFPU_FADD,
+    /*DE,C8*/  OPCHndlrFPU_FMUL,      OPCHndlrFPU_FMUL,      OPCHndlrFPU_FMUL,      OPCHndlrFPU_FMUL,      OPCHndlrFPU_FMUL,      OPCHndlrFPU_FMUL,      OPCHndlrFPU_FMUL,      OPCHndlrFPU_FMUL,
+    /*DE,D0*/  OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,
+    /*DE,D8*/  OPCHndlrFPU_Invalid,   OPCHndlrFPU_FCmpReal,  OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,
+    /*DE,E0*/  OPCHndlrFPU_FSUB,      OPCHndlrFPU_FSUB,      OPCHndlrFPU_FSUB,      OPCHndlrFPU_FSUB,      OPCHndlrFPU_FSUB,      OPCHndlrFPU_FSUB,      OPCHndlrFPU_FSUB,      OPCHndlrFPU_FSUB,
+    /*DE,E8*/  OPCHndlrFPU_FSUB,      OPCHndlrFPU_FSUB,      OPCHndlrFPU_FSUB,      OPCHndlrFPU_FSUB,      OPCHndlrFPU_FSUB,      OPCHndlrFPU_FSUB,      OPCHndlrFPU_FSUB,      OPCHndlrFPU_FSUB,
+    /*DE,F0*/  OPCHndlrFPU_FDIV,      OPCHndlrFPU_FDIV,      OPCHndlrFPU_FDIV,      OPCHndlrFPU_FDIV,      OPCHndlrFPU_FDIV,      OPCHndlrFPU_FDIV,      OPCHndlrFPU_FDIV,      OPCHndlrFPU_FDIV,
+    /*DE,F8*/  OPCHndlrFPU_FDIV,      OPCHndlrFPU_FDIV,      OPCHndlrFPU_FDIV,      OPCHndlrFPU_FDIV,      OPCHndlrFPU_FDIV,      OPCHndlrFPU_FDIV,      OPCHndlrFPU_FDIV,      OPCHndlrFPU_FDIV,
+    /*DF,C0*/  OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,
+    /*DF,C8*/  OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,
+    /*DF,D0*/  OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,
+    /*DF,D8*/  OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,
+    /*DF,E0*/  OPCHndlrFPU_CtlOp,     OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,
+    /*DF,E8*/  OPCHndlrFPU_FCmpReal,  OPCHndlrFPU_FCmpReal,  OPCHndlrFPU_FCmpReal,  OPCHndlrFPU_FCmpReal,  OPCHndlrFPU_FCmpReal,  OPCHndlrFPU_FCmpReal,  OPCHndlrFPU_FCmpReal,  OPCHndlrFPU_FCmpReal,
+    /*DF,F0*/  OPCHndlrFPU_FCmpReal,  OPCHndlrFPU_FCmpReal,  OPCHndlrFPU_FCmpReal,  OPCHndlrFPU_FCmpReal,  OPCHndlrFPU_FCmpReal,  OPCHndlrFPU_FCmpReal,  OPCHndlrFPU_FCmpReal,  OPCHndlrFPU_FCmpReal,
+    /*DF,F8*/  OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,   OPCHndlrFPU_Invalid,
 };
 
 // IASD Vol2 - Table 3-1
@@ -548,9 +463,10 @@ WCHAR awszMMXRegCodes[8][4] = { L"mm0", L"mm1", L"mm2", L"mm3", L"mm4", L"mm5", 
 WCHAR awszXMMRegCodes[8][5] = { L"xmm0", L"xmm1", L"xmm2", L"xmm3", L"xmm4", L"xmm5", L"xmm6", L"xmm7" };
 
 // operand pointer strings
-static WCHAR awszPtrStr[][MAX_PTR_STR] = {  L"", L"byte ptr ", L"word ptr ", L"dword ptr ",
-                                            L"fword ptr ", L"qword ptr ", L"tbyte ptr ",
-                                            L"mmword ptr ", L"xmmword ptr " };
+static WCHAR awszPtrStr[][MAX_PTR_STR] = {
+    L"", L"byte ptr ", L"word ptr ", L"dword ptr ",
+    L"fword ptr ", L"qword ptr ", L"tbyte ptr ",
+    L"mmword ptr ", L"xmmword ptr " };
 
 /*
  * ***********************************************************************
@@ -4444,9 +4360,9 @@ BOOL OPCHndlrALU_NOT(BYTE bOpcode)
 }
 
 /*    ** NEG **
- * F6 /3    NEG r/m8    Two’s complement negate r/m8
- * F7 /3    NEG r/m16    Two’s complement negate r/m16
- * F7 /3    NEG r/m32    Two’s complement negate r/m32
+ * F6 /3    NEG r/m8     Two's complement negate r/m8
+ * F7 /3    NEG r/m16    Two's complement negate r/m16
+ * F7 /3    NEG r/m32    Two's complement negate r/m32
  */
 BOOL OPCHndlrALU_NEG(BYTE bOpcode)
 {
@@ -5935,9 +5851,9 @@ BOOL OPCHndlrSysIO_WAIT(BYTE bOpcode)
 }
 
 /*    ** intx **
- * CC        INT 3        Interrupt 3—trap to debugger
- * CD ib    INT imm8    Interrupt vector number specified by immediate byte
- * CE        intO        Interrupt 4—if overflow flag is 1
+ * CC        INT 3       Interrupt 3-trap to debugger
+ * CD ib     INT imm8    Interrupt vector number specified by immediate byte
+ * CE        intO        Interrupt 4-if overflow flag is 1
  */
 
 BOOL OPCHndlrSysIO_INT(BYTE bOpcode)    //    int3/intn/intO
@@ -7529,7 +7445,7 @@ BOOL OPCHndlrFPU_Trig(BYTE bOpcode)    // FSIN/FCOS/FSINCOS/FPTAN/FPATAN
 
 // FPU Log, Exp, Scale
 /*
- * D9 F0    F2XM1    Replace ST(0) with (2^ST(0) – 1)
+ * D9 F0    F2XM1    Replace ST(0) with (2^ST(0) - 1)
  * D9 F1    FYL2X
  * D9 F9    FYL2XP1
  * D9 FD    FSCALE    Scale ST(0) by ST(1).

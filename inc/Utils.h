@@ -22,21 +22,20 @@
  */
 
  // Instruction utils
-void Util_vSplitModRMByte(BYTE bModRMValue, __out PBYTE pbMod,
+void Util_SplitModRMByte(BYTE bModRMValue, __out PBYTE pbMod,
     __out PBYTE pbReg, __out PBYTE pbRM);
-void Util_vGetDWBits(BYTE bOpcode, __out PBYTE pbDBit, __out PBYTE pbWBit);
-BOOL Util_fIsPrefix(BYTE bValue);
+void Util_GetDWBits(BYTE bOpcode, __out PBYTE pbDBit, __out PBYTE pbWBit);
+BOOL Util_IsPrefix(BYTE bValue);
 
 // PE header related utils
-BOOL fGetPtrNTHeaders(HANDLE hFileView, __out IMAGE_NT_HEADERS **ppNTHeaders);
-BOOL fGetPtrToCode(DWORD dwFileBase, IMAGE_NT_HEADERS *pNTHeaders, __out DWORD *pdwCodePtr,
+BOOL GetPtrToNTHeaders(HANDLE hFileView, __out IMAGE_NT_HEADERS **ppNTHeaders);
+BOOL GetPtrToCode(DWORD dwFileBase, IMAGE_NT_HEADERS *pNTHeaders, __out DWORD *pdwCodePtr,
     __out DWORD *pdwSizeOfData, __out DWORD *pdwCodeSecVirtAddr);
 PIMAGE_SECTION_HEADER GetEnclosingSectionHeader(DWORD rva, PIMAGE_NT_HEADERS pNTHeader);
-BOOL Util_fDumpIMAGE_IMPORT_DESCRIPTORS(DWORD rva, DWORD dwSize, PIMAGE_NT_HEADERS pNTHeaders, DWORD dwFileBase);
+BOOL Util_DumpIMAGE_IMPORT_DESCRIPTORS(DWORD rva, DWORD dwSize, PIMAGE_NT_HEADERS pNTHeaders, DWORD dwFileBase);
 
 // Other
-void Util_vTwosComplementByte(BYTE chSignedVal, __out PBYTE pchOut);
-void Util_vTwosComplementInt(INT iSignedVal, __out PINT piOut);
-
+void Util_TwosComplementByte(BYTE chSignedVal, __out PBYTE pchOut);
+void Util_TwosComplementInt(INT iSignedVal, __out PINT piOut);
 
 #endif // _UTILS_H

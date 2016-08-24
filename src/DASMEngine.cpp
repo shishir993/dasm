@@ -511,8 +511,8 @@ static DASM_STATE dsNextState;
  */
 
 
- /* fDisassembler()
-  * Entry point for the DasmEngine. Calls fDoDisassembly() for all the
+ /* ExecDisassembler()
+  * Entry point for the DasmEngine. Calls DoDisassembly() for all the
   * code sections specified in the argument pCodeLocs.
   *
   * Args:
@@ -527,7 +527,7 @@ static DASM_STATE dsNextState;
   *
   * Notes: Under construction
   */
-BOOL fDisassembler(NCODE_LOCS *pCodeLocs, DWORD dwVirtCodeBase)
+BOOL ExecDisassembler(NCODE_LOCS *pCodeLocs, DWORD dwVirtCodeBase)
 {
     ASSERT(pCodeLocs != NULL);
 
@@ -538,20 +538,20 @@ BOOL fDisassembler(NCODE_LOCS *pCodeLocs, DWORD dwVirtCodeBase)
     {
         if (pCodeLocs->aNonCodeLocs[i].iPartType == CODE_PART_CODE)
         {
-            fDoDisassembly((DWORD*)pCodeLocs->aNonCodeLocs[i].dwFilePointer,
+            DoDisassembly((DWORD*)pCodeLocs->aNonCodeLocs[i].dwFilePointer,
                 pCodeLocs->aNonCodeLocs[i].dwPartSize, dwVirtCodeBase, FALSE);
         }
     }
 
     return FALSE;
 
-}// fDisassembler()
+}// ExecDisassembler()
 
-/* fDoDisassembly()
- * The DASM module calls this fDoDisassembly() with a pointer to
+/* DoDisassembly()
+ * The DASM module calls this DoDisassembly() with a pointer to
  * the code section(.text) of the executable file. This is where
  * the entry point must be.
- * fDoDisassembly() is modeled as a state machine.
+ * DoDisassembly() is modeled as a state machine.
  *
  * Args:
  *        pdwCodeSection: DWORD* pointer to the code section in the
@@ -564,8 +564,7 @@ BOOL fDisassembler(NCODE_LOCS *pCodeLocs, DWORD dwVirtCodeBase)
  * RetVal:
  *        TRUE/FALSE depending on whether there was an error or not.
  */
-BOOL fDoDisassembly(DWORD *pdwCodeSection, DWORD dwSizeOfCodeSection,
-    DWORD dwVirtCodeBase, BOOL f64bit)
+BOOL DoDisassembly(DWORD *pdwCodeSection, DWORD dwSizeOfCodeSection, DWORD dwVirtCodeBase, BOOL f64bit)
 {
     ASSERT(pdwCodeSection != NULL);
 
@@ -613,10 +612,10 @@ BOOL fDoDisassembly(DWORD *pdwCodeSection, DWORD dwSizeOfCodeSection,
 
         case DASM_STATE_PREFIX:
         {
-            if (!fStatePrefix())
+            if (!StatePrefix())
                 dsNextState = DASM_STATE_ERROR;
 
-            // If fStatePrefix did not return FALSE, then the next state
+            // If StatePrefix did not return FALSE, then the next state
             // was already determined in that function.
 
             break;
@@ -624,15 +623,15 @@ BOOL fDoDisassembly(DWORD *pdwCodeSection, DWORD dwSizeOfCodeSection,
 
         case DASM_STATE_OPCODE:
         {
-            if (!fStateOpcode())
+            if (!StateOpcode())
             {
                 //dsNextState = DASM_STATE_ERROR;
 
-                logdbg(L"fDoDisassembly(): OPCODE error. Continuing...");
+                logdbg(L"DoDisassembly(): OPCODE error. Continuing...");
 
 
                 // simply print the offending opcode byte and move on
-                fStateDumpOnOpcodeError();
+                StateDumpOnOpcodeError();
 
                 // Let pByteInCode point to the byte after the current 
                 // opcode/prefix byte processed
@@ -644,28 +643,28 @@ BOOL fDoDisassembly(DWORD *pdwCodeSection, DWORD dwSizeOfCodeSection,
 
         case DASM_STATE_MOD_RM:
         {
-            if (!fStateModRM())
+            if (!StateModRM())
                 dsNextState = DASM_STATE_ERROR;
             break;
         }
 
         case DASM_STATE_SIB:
         {
-            if (!fStateSIB())
+            if (!StateSIB())
                 dsNextState = DASM_STATE_ERROR;
             break;
         }
 
         case DASM_STATE_DISP:
         {
-            if (!fStateDisp())
+            if (!StateDisp())
                 dsNextState = DASM_STATE_ERROR;
             break;
         }
 
         case DASM_STATE_IMM:
         {
-            if (!fStateImm())
+            if (!StateImm())
                 dsNextState = DASM_STATE_ERROR;
             break;
         }
@@ -675,21 +674,21 @@ BOOL fDoDisassembly(DWORD *pdwCodeSection, DWORD dwSizeOfCodeSection,
             if (insCurIns.fpvCallback)
                 insCurIns.fpvCallback();
 
-            if (!fStateDump())
+            if (!StateDump())
                 dsNextState = DASM_STATE_ERROR;
             break;
         }
 
         case DASM_STATE_ERROR:
         {
-            wprintf_s(L"fDoDisassembly(): ERROR state. Aborting...\n");
+            wprintf_s(L"DoDisassembly(): ERROR state. Aborting...\n");
             goto AFT_WHILE;
         }
 
         default:
         {
             // We will never reach here, typically.
-            wprintf_s(L"fDoDisassembly(): Invalid state: %d\n", dsNextState);
+            wprintf_s(L"DoDisassembly(): Invalid state: %d\n", dsNextState);
             goto AFT_WHILE;
         }
 
@@ -705,10 +704,9 @@ AFT_WHILE:
     wprintf_s(L"Bytes decoded     : %Xh\n", (DWORD)pByteInCode - (DWORD)pdwCodeSection);
 
     return TRUE;
-}// fDoDisassembly
+}// DoDisassembly
 
-
-/* fStateReset()
+/* StateReset()
  * This is the state that the state machine begins to operate in.
  * This is the state that is reached after disassembling an instruction
  * and before starting the disassembly of the next instruction, unless
@@ -719,13 +717,12 @@ AFT_WHILE:
  * RetVal:
  *        TRUE/FALSE depending on whether there was an error or not.
  */
-BOOL fStateReset()
+BOOL StateReset()
 {
     return TRUE;
-}// fStateReset()
+}
 
-
-/* fStatePrefix()
+/* StatePrefix()
  * This state processes the prefix(es) in the instruction.
  *
  * Args:
@@ -733,14 +730,14 @@ BOOL fStateReset()
  * RetVal:
  *        TRUE/FALSE depending on whether there was an error or not.
  */
-BOOL fStatePrefix()
+BOOL StatePrefix()
 {
     BYTE nPrefixes = 0;
 
     // There may be upto 4 prefixes of 1byte each.
     // We must scan forward until we find a byte that
     // is not a prefix.
-    while (Util_fIsPrefix(*pByteInCode))
+    while (Util_IsPrefix(*pByteInCode))
     {
         ++nPrefixes;
 
@@ -774,7 +771,7 @@ BOOL fStatePrefix()
             break;
 
         default:
-            wprintf_s(L"fStatePrefix(): Unrecognized prefix type %u\n", *pByteInCode);
+            wprintf_s(L"StatePrefix(): Unrecognized prefix type %u\n", *pByteInCode);
             break;
         }// switch(*pByteInCode)
 
@@ -795,10 +792,10 @@ BOOL fStatePrefix()
 
     return TRUE;
 
-}// fStatePrefix()
+}// StatePrefix()
 
 
-/* fStateOpcode()
+/* StateOpcode()
  * This state processes the opcode(s) in the instruction.
  *
  * Args:
@@ -806,7 +803,7 @@ BOOL fStatePrefix()
  * RetVal:
  *        TRUE/FALSE depending on whether there was an error or not.
  */
-BOOL fStateOpcode()
+BOOL StateOpcode()
 {
     // Lookup instruction string using opcode
     WORD wIndex;
@@ -829,7 +826,7 @@ BOOL fStateOpcode()
     ++nBytesCurIns;
 
     // store the d and w bits in INS_SPLIT
-    Util_vGetDWBits(bFullOpcode, &insCurIns.bDBit, &insCurIns.bWBit);
+    Util_GetDWBits(bFullOpcode, &insCurIns.bDBit, &insCurIns.bWBit);
 
     // Construct the output string starting with the instruction mnemonic
     wIndex = (bOpcodeHigh * 16) + bOpcodeLow;
@@ -838,7 +835,7 @@ BOOL fStateOpcode()
     // function call
     return afpOpcHndlrs[bOpcodeHigh][bOpcodeLow](bFullOpcode);
 
-}// fStateOpcode()
+}// StateOpcode()
 
 
 /* OPCHndlr_2ByteHandler()
@@ -880,7 +877,7 @@ BOOL OPCHndlr_2ByteHandler(BYTE bOpcode)
     bOpcodeHigh = (bFullOpcode & 0xf0) >> 4;
 
     // store the d and w bits in INS_SPLIT
-    Util_vGetDWBits(bFullOpcode, &insCurIns.bDBit, &insCurIns.bWBit);
+    Util_GetDWBits(bFullOpcode, &insCurIns.bDBit, &insCurIns.bWBit);
 
     // Construct the output string starting with the instruction mnemonic
     wIndex = (bOpcodeHigh * 16) + bOpcodeLow;
@@ -1065,7 +1062,7 @@ void DEngine_MMXUnitTest()
     for (INT i = 0; i < nOpcodes; ++i)
     {
         pByteInCode = abMMXOpcodes + i * 2;
-        fStateOpcode();
+        StateOpcode();
     }
 
     return;
@@ -1120,7 +1117,7 @@ void DEngine_SSEUnitTest()
     for (INT i = 0; i < nOpcodes; ++i)
     {
         pByteInCode = abSSEOpcodes + i * 2;
-        fStateOpcode();
+        StateOpcode();
     }
 
     return;
@@ -1167,7 +1164,7 @@ BOOL OPCHndlrFPU_ModRMRegEx(BYTE bOpcode)
     INT iRowIndex;
     INT iInsStrIndex;
 
-    Util_vSplitModRMByte(bFPUModRM, NULL, &bFPUReg, NULL);
+    Util_SplitModRMByte(bFPUModRM, NULL, &bFPUReg, NULL);
     ASSERT(bFPUReg >= 0 && bFPUReg <= 7);
 
     /*
@@ -1220,7 +1217,7 @@ BOOL OPCHndlrFPU_ModRMFullEx(BYTE bOpcode)
  * *************************
  */
 
- /* fStateModRM()
+ /* StateModRM()
   * This state processes the ModRM byte in the instruction.
   *
   * Args:
@@ -1228,7 +1225,7 @@ BOOL OPCHndlrFPU_ModRMFullEx(BYTE bOpcode)
   * RetVal:
   *        TRUE/FALSE depending on whether there was an error or not.
   */
-BOOL fStateModRM()
+BOOL StateModRM()
 {
     BYTE bModRM;
     BYTE bMod;
@@ -1239,14 +1236,14 @@ BOOL fStateModRM()
     bModRM = *pByteInCode;
     ++pByteInCode;
     ++nBytesCurIns;
-    logdbg(L"fStateModRM(): %xh", bModRM);
+    logdbg(L"StateModRM(): %xh", bModRM);
 
     // pByteInCode now points to either a disp/SIB/IMM
 
     insCurIns.bModRM = bModRM;
 
     // split the ModRM byte into individual fields
-    Util_vSplitModRMByte(bModRM, &bMod, &bReg, &bRM);
+    Util_SplitModRMByte(bModRM, &bMod, &bReg, &bRM);
 
     // Check the ModRM type
     if (insCurIns.bModRMType == MODRM_TYPE_DIGIT)
@@ -1264,7 +1261,7 @@ BOOL fStateModRM()
     else
     {
 #ifdef _DEBUG
-        wprintf_s(L"fStateModRM(): Invalid bModRMType %d\n", insCurIns.bModRMType);
+        wprintf_s(L"StateModRM(): Invalid bModRMType %d\n", insCurIns.bModRMType);
         fRetVal = FALSE;
 #endif
     }
@@ -1273,7 +1270,7 @@ BOOL fStateModRM()
 
     return fRetVal;
 
-}// fStateModRM
+}// StateModRM
 
 
 /*
@@ -1973,7 +1970,7 @@ BYTE MODRM_bGetOperandSize()
  * *************************
  */
 
- /* fStateSIB()
+ /* StateSIB()
   * This state processes the SIB byte in the instruction.
   *
   * Args:
@@ -1981,7 +1978,7 @@ BYTE MODRM_bGetOperandSize()
   * RetVal:
   *        TRUE/FALSE depending on whether there was an error or not.
   */
-BOOL fStateSIB()
+BOOL StateSIB()
 {
     BYTE bSIB, bScale, bIndex, bBase;
 
@@ -1989,11 +1986,11 @@ BOOL fStateSIB()
     ++pByteInCode;
     ++nBytesCurIns;
     insCurIns.bSIB = bSIB;
-    logdbg(L"fStateSIB(): %X", bSIB);
+    logdbg(L"StateSIB(): %X", bSIB);
 
     // SplitModRM can be used because the structure of both
     // ModRM and SIB byte is the same.
-    Util_vSplitModRMByte(bSIB, &bScale, &bIndex, &bBase);
+    Util_SplitModRMByte(bSIB, &bScale, &bIndex, &bBase);
 
     // _DEBUG only
     ASSERT(bScale >= 0 && bScale <= 3);
@@ -2054,7 +2051,7 @@ BOOL fStateSIB()
         break;
 
     default:    // We generally wouldn't reach here.
-        wprintf_s(L"fStateSIB(): Invalid bIndex %d\n", bIndex);
+        wprintf_s(L"StateSIB(): Invalid bIndex %d\n", bIndex);
         return FALSE;
 
     }// switch(bScale)
@@ -2075,7 +2072,7 @@ BOOL fStateSIB()
 
          // Get Mod field of ModRM byte: pByteInCode-2 because we have moved past
          // the SIB byte by now.
-        Util_vSplitModRMByte(*(pByteInCode - 2), &bMod, NULL, NULL);
+        Util_SplitModRMByte(*(pByteInCode - 2), &bMod, NULL, NULL);
         ASSERT(bMod >= 0 && bMod <= 2);    // ASSERT always??
         if (bMod == 0)
         {
@@ -2110,7 +2107,7 @@ BOOL fStateSIB()
 
     return TRUE;
 
-}// fStateSIB()
+}// StateSIB()
 
 
 /*
@@ -2119,7 +2116,7 @@ BOOL fStateSIB()
  * *************************
  */
 
- /* fStateDisp()
+ /* StateDisp()
   * This state processes the Displacement byte in the instruction.
   *
   * Args:
@@ -2127,7 +2124,7 @@ BOOL fStateSIB()
   * RetVal:
   *        TRUE/FALSE depending on whether there was an error or not.
   */
-BOOL fStateDisp()
+BOOL StateDisp()
 {
     // pByteInCode must now be pointing to the disp byte
     // insCurIns.bDispType tells us the size of disp to read
@@ -2154,7 +2151,7 @@ BOOL fStateDisp()
 #ifdef _DEBUG
         if (insCurIns.bImmType == IMM_UNDEF)
         {
-            wprintf_s(L"fStateDisp(): bImmType UNDEF\n");
+            wprintf_s(L"StateDisp(): bImmType UNDEF\n");
             return FALSE;
         }
 #endif
@@ -2165,7 +2162,7 @@ BOOL fStateDisp()
     dsNextState = DASM_STATE_DUMP;
     return TRUE;
 
-}// fStateDisp()
+}// StateDisp()
 
 
 /*
@@ -2174,7 +2171,7 @@ BOOL fStateDisp()
  * *************************
  */
 
- /* fStateImm()
+ /* StateImm()
   * This state processes the Immediate value byte in the instruction.
   *
   * Args:
@@ -2182,7 +2179,7 @@ BOOL fStateDisp()
   * RetVal:
   *        TRUE/FALSE depending on whether there was an error or not.
   */
-BOOL fStateImm()
+BOOL StateImm()
 {
 
     // Read the bImmType size of data from pByteInCode
@@ -2221,7 +2218,7 @@ BOOL fStateImm()
         }
         else
         {
-            wprintf_s(L"fStateImm(): Invalid code offset size %u\n", insCurIns.bImmType);
+            wprintf_s(L"StateImm(): Invalid code offset size %u\n", insCurIns.bImmType);
             return FALSE;
         }
 
@@ -2249,7 +2246,7 @@ BOOL fStateImm()
         }
         else
         {
-            wprintf_s(L"fStateImm(): Invalid data offset size %u\n", insCurIns.bImmType);
+            wprintf_s(L"StateImm(): Invalid data offset size %u\n", insCurIns.bImmType);
             return FALSE;
         }
 
@@ -2282,14 +2279,14 @@ BOOL fStateImm()
     }
     else
     {
-        wprintf_s(L"fStateImm(): Invalid bImmType %d\n", insCurIns.bImmType);
+        wprintf_s(L"StateImm(): Invalid bImmType %d\n", insCurIns.bImmType);
         return FALSE;
     }
 
     dsNextState = DASM_STATE_DUMP;
 
     return TRUE;
-}// fStateImm()
+}// StateImm()
 
 
 /*
@@ -2298,7 +2295,7 @@ BOOL fStateImm()
  * *************************
  */
 
-BOOL fStateDumpOnOpcodeError()
+BOOL StateDumpOnOpcodeError()
 {
     // 1: address
     wprintf_s(L"  %08X: ", (UINT)(pByteInCode - nBytesCurIns) + lDelta);
@@ -2306,7 +2303,7 @@ BOOL fStateDumpOnOpcodeError()
     return TRUE;
 }
 
-BOOL fStateDump()
+BOOL StateDump()
 {
     static WCHAR awszPrefixStr[][8] = { L"lock", L"repne", L"repe" };
     static INT aiPrefixStrNChars[] = { 4, 5, 4 };
@@ -2374,7 +2371,7 @@ BOOL fStateDump()
             break;
 
         default:
-            logdbg(L"fStateDump(): Invalid prefix %d\n", insCurIns.abPrefixes[PREFIX_INDEX_LOCKREP]);
+            logdbg(L"StateDump(): Invalid prefix %d\n", insCurIns.abPrefixes[PREFIX_INDEX_LOCKREP]);
             break;
         }// switch()
 
@@ -2409,14 +2406,14 @@ BOOL fStateDump()
 
         case OPRTYPE_MEM:    // dword ptr [eax], word ptr [ebx], ...
         {
-            DUMP_vGetSegPrefix(insCurIns.abPrefixes[PREFIX_INDEX_SEG], &pwszSegStr);
+            Dump_GetSegmentPrefix(insCurIns.abPrefixes[PREFIX_INDEX_SEG], &pwszSegStr);
             wprintf_s(L"%s%s[%s]", insCurIns.pwszPtrStr, pwszSegStr, insCurIns.wszCurInsStrDes);
             break;
         }
 
         case OPRTYPE_MEM8:    // dword ptr [eax-4h], word ptr [ebx+10h], ...
         {
-            DUMP_vGetSegPrefix(insCurIns.abPrefixes[PREFIX_INDEX_SEG], &pwszSegStr);
+            Dump_GetSegmentPrefix(insCurIns.abPrefixes[PREFIX_INDEX_SEG], &pwszSegStr);
             if (insCurIns.iDisp >= 0)    // must include a '+'
                 wprintf_s(L"%s%s[%s+%02Xh]", insCurIns.pwszPtrStr, pwszSegStr,
                     insCurIns.wszCurInsStrDes, insCurIns.iDisp);
@@ -2427,7 +2424,7 @@ BOOL fStateDump()
                 // positive and negative displacements (especially from ebp: diff b/w
                 // locals and arguments).
                 BYTE chDisp = (BYTE)insCurIns.iDisp;
-                Util_vTwosComplementByte(chDisp, &chDisp);        // same variable as two parameters I know!
+                Util_TwosComplementByte(chDisp, &chDisp);        // same variable as two parameters I know!
                 wprintf_s(L"%s%s[%s-%02Xh]", insCurIns.pwszPtrStr, pwszSegStr, insCurIns.wszCurInsStrDes, chDisp);
             }
             break;
@@ -2435,7 +2432,7 @@ BOOL fStateDump()
 
         case OPRTYPE_MEM32:
         {
-            DUMP_vGetSegPrefix(insCurIns.abPrefixes[PREFIX_INDEX_SEG], &pwszSegStr);
+            Dump_GetSegmentPrefix(insCurIns.abPrefixes[PREFIX_INDEX_SEG], &pwszSegStr);
 
             // dumpbin appears to be doing it(2's compl thing) only for disp8, not disp32
             wprintf_s(L"%s%s[%s+%Xh]", insCurIns.pwszPtrStr, pwszSegStr,
@@ -2468,7 +2465,7 @@ BOOL fStateDump()
                         else
                         {
                             chDisp = (BYTE)insCurIns.iDisp;
-                            Util_vTwosComplementByte(chDisp, &chDisp);        // same variable as two parameters I know!
+                            Util_TwosComplementByte(chDisp, &chDisp);        // same variable as two parameters I know!
                             wprintf_s(L"%s[%s-%02Xh]", insCurIns.pwszPtrStr, insCurIns.wszScaleIndex, chDisp);
                         }
                     }
@@ -2484,7 +2481,7 @@ BOOL fStateDump()
                         else
                         {
                             chDisp = (BYTE)insCurIns.iDisp;
-                            Util_vTwosComplementByte(chDisp, &chDisp);        // same variable as two parameters I know!
+                            Util_TwosComplementByte(chDisp, &chDisp);        // same variable as two parameters I know!
                             wprintf_s(L"%s[%s-%02Xh]", insCurIns.pwszPtrStr, insCurIns.wszBase, chDisp);
                         }
                     }
@@ -2498,7 +2495,7 @@ BOOL fStateDump()
                         else
                         {
                             chDisp = (BYTE)insCurIns.iDisp;
-                            Util_vTwosComplementByte(chDisp, &chDisp);        // same variable as two parameters I know!
+                            Util_TwosComplementByte(chDisp, &chDisp);        // same variable as two parameters I know!
                             wprintf_s(L"%s[%s+%s-%02Xh]", insCurIns.pwszPtrStr,
                                 insCurIns.wszBase, insCurIns.wszScaleIndex, chDisp);
                         }
@@ -2511,7 +2508,7 @@ BOOL fStateDump()
                 {
                     if (insCurIns.wszScaleIndex[0] == 0)    // todo: no scale, no index, no base!! error??
                     {
-                        wprintf_s(L"fStateDump(): SIB no base, no SI, no disp!!\n");
+                        wprintf_s(L"StateDump(): SIB no base, no SI, no disp!!\n");
                         return FALSE;
                     }
                     else    // scaled-index
@@ -2570,7 +2567,7 @@ BOOL fStateDump()
                 {
                     if (insCurIns.wszScaleIndex[0] == 0)    // todo: no scale, no index, no base!! error??
                     {
-                        wprintf_s(L"fStateDump(): SIB no base, no SI, no disp!!\n");
+                        wprintf_s(L"StateDump(): SIB no base, no SI, no disp!!\n");
                         return FALSE;
                     }
                     else    // scaled-index
@@ -2599,7 +2596,7 @@ BOOL fStateDump()
             if (insCurIns.wPrefixTypes & PREFIX_SEG)
             {
                 // We have a segment override prefix. Get it.
-                DUMP_vGetSegPrefix(insCurIns.abPrefixes[PREFIX_INDEX_SEG], &pwszSegStr);
+                Dump_GetSegmentPrefix(insCurIns.abPrefixes[PREFIX_INDEX_SEG], &pwszSegStr);
 
                 wprintf_s(L"%s%s:[%08Xh]", insCurIns.pwszPtrStr, pwszSegStr, insCurIns.iDisp);
             }
@@ -2666,14 +2663,14 @@ BOOL fStateDump()
 
         case OPRTYPE_MEM:    // dword ptr [eax], word ptr [ebx], ...
         {
-            DUMP_vGetSegPrefix(insCurIns.abPrefixes[PREFIX_INDEX_SEG], &pwszSegStr);
+            Dump_GetSegmentPrefix(insCurIns.abPrefixes[PREFIX_INDEX_SEG], &pwszSegStr);
             wprintf_s(L"%s%s[%s]", insCurIns.pwszPtrStr, pwszSegStr, insCurIns.wszCurInsStrSrc);
             break;
         }
 
         case OPRTYPE_MEM8:    // dword ptr [eax-4h], word ptr [ebx+10h], ...
         {
-            DUMP_vGetSegPrefix(insCurIns.abPrefixes[PREFIX_INDEX_SEG], &pwszSegStr);
+            Dump_GetSegmentPrefix(insCurIns.abPrefixes[PREFIX_INDEX_SEG], &pwszSegStr);
             if (insCurIns.iDisp >= 0)    // must include a '+'
             {
                 wprintf_s(L"%s%s[%s+%Xh]", insCurIns.pwszPtrStr, pwszSegStr, insCurIns.wszCurInsStrSrc, insCurIns.iDisp);
@@ -2685,7 +2682,7 @@ BOOL fStateDump()
                 // positive and negative displacements (especially from ebp: diff b/w
                 // locals and arguments).
                 BYTE chDisp = (BYTE)insCurIns.iDisp;
-                Util_vTwosComplementByte(chDisp, &chDisp);        // same variable as two parameters I know!
+                Util_TwosComplementByte(chDisp, &chDisp);        // same variable as two parameters I know!
                 wprintf_s(L"%s%s[%s-%Xh]", insCurIns.pwszPtrStr, pwszSegStr, insCurIns.wszCurInsStrSrc, chDisp);
             }
             break;
@@ -2693,7 +2690,7 @@ BOOL fStateDump()
 
         case OPRTYPE_MEM32:
         {
-            DUMP_vGetSegPrefix(insCurIns.abPrefixes[PREFIX_INDEX_SEG], &pwszSegStr);
+            Dump_GetSegmentPrefix(insCurIns.abPrefixes[PREFIX_INDEX_SEG], &pwszSegStr);
 
             // dumpbin appears to be doing it(2's compl thing) only for disp8, not disp32
             wprintf_s(L"%s%s[%s+%Xh]", insCurIns.pwszPtrStr, pwszSegStr, insCurIns.wszCurInsStrSrc, insCurIns.iDisp);
@@ -2728,7 +2725,7 @@ BOOL fStateDump()
                 {
                     if (insCurIns.wszScaleIndex[0] == 0)    // todo: no scale, no index, no base!! error??
                     {
-                        wprintf_s(L"fStateDump(): SIB no base, no SI, no disp!!\n");
+                        wprintf_s(L"StateDump(): SIB no base, no SI, no disp!!\n");
                         return FALSE;
                     }
                     else    // scaled-index
@@ -2751,7 +2748,7 @@ BOOL fStateDump()
             if (insCurIns.wPrefixTypes & PREFIX_SEG)
             {
                 // We have a segment override prefix. Get it.
-                DUMP_vGetSegPrefix(insCurIns.abPrefixes[PREFIX_INDEX_SEG], &pwszSegStr);
+                Dump_GetSegmentPrefix(insCurIns.abPrefixes[PREFIX_INDEX_SEG], &pwszSegStr);
 
                 wprintf_s(L"%s%s:[%08Xh]", insCurIns.pwszPtrStr, pwszSegStr, insCurIns.iDisp);
             }
@@ -2817,7 +2814,7 @@ BOOL fStateDump()
             // des not determined earlier but src has been determined
             // and there is a data offset. So the data offset must be
             // the des operand
-            DUMP_vDumpDataOffset();
+            Dump_DataOffset();
             insCurIns.fDesStrSet = TRUE;    // we have a des operand: print ',' later
         }
 
@@ -2833,7 +2830,7 @@ BOOL fStateDump()
             // data offset must be the src operand
             if (insCurIns.fDesStrSet)
                 wprintf_s(L",");
-            DUMP_vDumpDataOffset();
+            Dump_DataOffset();
             insCurIns.fSrcStrSet = TRUE;    // we have a src operand: print ',' later
         }
 
@@ -2955,7 +2952,7 @@ BOOL fStateDump()
     //                break;
 
     //            default:    // Not a critical error
-    //                wprintf_s(L"fStateDump(): Invalid segovr prefix %xh\n", insCurIns.abPrefixes[PREFIX_INDEX_SEG]);
+    //                wprintf_s(L"StateDump(): Invalid segovr prefix %xh\n", insCurIns.abPrefixes[PREFIX_INDEX_SEG]);
     //                if(insCurIns.bImmType == IMM_16BIT)
     //                    wprintf_s(L"%s <>:[%04Xh]", insCurIns.pwszPtrStr, 
     //                                awszSRegCodes[SREGCODE_ES], insCurIns.iImm);
@@ -2999,7 +2996,7 @@ BOOL fStateDump()
 
 }
 
-void DUMP_vDumpDataOffset()
+void Dump_DataOffset()
 {
     //if(insCurIns.fDesStrSet)
     //    wprintf_s(L",");
@@ -3026,7 +3023,7 @@ void DUMP_vDumpDataOffset()
 
         WCHAR *pwszSegStr = NULL;
 
-        DUMP_vGetSegPrefix(insCurIns.abPrefixes[PREFIX_INDEX_SEG], &pwszSegStr);
+        Dump_GetSegmentPrefix(insCurIns.abPrefixes[PREFIX_INDEX_SEG], &pwszSegStr);
         if (insCurIns.bImmType == IMM_16BIT)
             wprintf_s(L"%s%s:[%04Xh]", insCurIns.pwszPtrStr, pwszSegStr, insCurIns.iImm);
         else
@@ -3089,7 +3086,7 @@ void DUMP_vDumpDataOffset()
         //        break;
 
         //    default:    // Not a critical error
-        //        wprintf_s(L"fStateDump(): Invalid segovr prefix %xh\n", insCurIns.abPrefixes[PREFIX_INDEX_SEG]);
+        //        wprintf_s(L"StateDump(): Invalid segovr prefix %xh\n", insCurIns.abPrefixes[PREFIX_INDEX_SEG]);
         //        if(insCurIns.bImmType == IMM_16BIT)
         //            wprintf_s(L"%s <>:[%04Xh]", insCurIns.pwszPtrStr, 
         //                        awszSRegCodes[SREGCODE_ES], insCurIns.iImm);
@@ -3103,11 +3100,11 @@ void DUMP_vDumpDataOffset()
     return;
 }
 
-// DUMP_vGetSegPrefix()
+// Dump_GetSegmentPrefix()
 // Returns the segment register string given the segment override 
 // prefix value as parameter. If there is no segment override 
 // prefix/invalid is sent as the parameter, an empty string is returned.
-void DUMP_vGetSegPrefix(BYTE bSegPrefixVal, __out WCHAR **ppwszPrefixStr)
+void Dump_GetSegmentPrefix(BYTE bSegPrefixVal, __out WCHAR **ppwszPrefixStr)
 {
     static WCHAR awszSegRegs[][4] = { L"", L"es:", L"cs:", L"ss:", L"ds:", L"fs:", L"gs:" };
 
@@ -3247,21 +3244,19 @@ BOOL OPCHndlrStack_PUSH(BYTE bOpcode)
 
         }// switch(bOpcode)
     }
-    else
-    {
+    else {
         // Opcode is between 50h to 57h: PUSH reg
         // Get the register name
         WORD wReg = bOpcode - 0x50;
 
-        if (insCurIns.wPrefixTypes & PREFIX_OPSIZE)
+        if (insCurIns.wPrefixTypes & PREFIX_OPSIZE) {
             // 16bit reg
-            StringCchCopy(insCurIns.wszCurInsStrSrc, _countof(insCurIns.wszCurInsStrSrc),
-                awszRegCodes16[wReg]);
-        else
+            StringCchCopy(insCurIns.wszCurInsStrSrc, _countof(insCurIns.wszCurInsStrSrc), awszRegCodes16[wReg]);
+        }
+        else {
             // 32bit reg
-            StringCchCopy(insCurIns.wszCurInsStrSrc, _countof(insCurIns.wszCurInsStrSrc),
-                awszRegCodes32[wReg]);
-
+            StringCchCopy(insCurIns.wszCurInsStrSrc, _countof(insCurIns.wszCurInsStrSrc), awszRegCodes32[wReg]);
+        }
         insCurIns.fSrcStrSet = TRUE;
 
         // Next state is DUMP because there are no more 
@@ -3351,17 +3346,18 @@ BOOL OPCHndlrStack_POP(BYTE bOpcode)
 
         }// switch(bOpcode)
     }
-    else
-    {
+    else {
         // Opcode is between 58h to 5fh: POP reg
 
         // Get the register name index
         WORD wReg = bOpcode - 0x58;
 
-        if (insCurIns.wPrefixTypes & PREFIX_OPSIZE)
+        if (insCurIns.wPrefixTypes & PREFIX_OPSIZE) {
             StringCchCopy(insCurIns.wszCurInsStrSrc, _countof(insCurIns.wszCurInsStrSrc), awszRegCodes16[wReg]);
-        else
+        }
+        else {
             StringCchCopy(insCurIns.wszCurInsStrSrc, _countof(insCurIns.wszCurInsStrSrc), awszRegCodes32[wReg]);
+        }
 
         insCurIns.fSrcStrSet = TRUE;
 
@@ -3385,19 +3381,18 @@ BOOL OPCHndlrStack_PUSHxx(BYTE bOpcode)
     // If operand size prefix is present,
     // then 16bit mnemonic is used.
     // Remember that 32bit mnemonic is already written
-    // in fStateOpcode()
-    if (bOpcode == 0x60)
-    {
-        if (insCurIns.wPrefixTypes & PREFIX_OPSIZE)
+    // in StateOpcode()
+    if (bOpcode == 0x60) {
+        if (insCurIns.wPrefixTypes & PREFIX_OPSIZE) {
             StringCchPrintf(wszCurInsStr, _countof(wszCurInsStr), L"pusha");
+        }
     }
-    else if (bOpcode == 0x9c)
-    {
-        if (insCurIns.wPrefixTypes & PREFIX_OPSIZE)
+    else if (bOpcode == 0x9c) {
+        if (insCurIns.wPrefixTypes & PREFIX_OPSIZE) {
             StringCchPrintf(wszCurInsStr, _countof(wszCurInsStr), L"pushf");
+        }
     }
-    else
-    {
+    else {
         wprintf_s(L"OPCHndlrStack_PUSHxx(): Invalid opcode %xh\n", bOpcode);
         return FALSE;
     }
@@ -3416,16 +3411,18 @@ BOOL OPCHndlrStack_POPxx(BYTE bOpcode)
     // If operand size prefix is present,
     // then 16bit mnemonic is used.
     // Remember that 32bit mnemonic is already written
-    // in fStateOpcode()
+    // in StateOpcode()
     if (bOpcode == 0x61)
     {
-        if (insCurIns.wPrefixTypes & PREFIX_OPSIZE)
+        if (insCurIns.wPrefixTypes & PREFIX_OPSIZE) {
             StringCchPrintf(wszCurInsStr, _countof(wszCurInsStr), L"popa");
+        }
     }
     else if (bOpcode == 0x9d)
     {
-        if (insCurIns.wPrefixTypes & PREFIX_OPSIZE)
+        if (insCurIns.wPrefixTypes & PREFIX_OPSIZE) {
             StringCchPrintf(wszCurInsStr, _countof(wszCurInsStr), L"popf");
+        }
     }
     else
     {
@@ -3497,11 +3494,11 @@ BOOL OPCHndlrStack_LEAVE(BYTE bOpcode)
  * 04 ib        ADD AL,imm8
  * 05 iw        ADD AX,imm16
  * 05 id        ADD EAX,imm32
- * 80 /0 ib        ADD r/m8,imm8
- * 81 /0 iw        ADD r/m16,imm16
- * 81 /0 id        ADD r/m32,imm32
- * 83 /0 ib        ADD r/m16,imm8        with sign-extension
- * 83 /0 ib        ADD r/m32,imm8        with sign-extension
+ * 80 /0 ib     ADD r/m8,imm8
+ * 81 /0 iw     ADD r/m16,imm16
+ * 81 /0 id     ADD r/m32,imm32
+ * 83 /0 ib     ADD r/m16,imm8        with sign-extension
+ * 83 /0 ib     ADD r/m32,imm8        with sign-extension
  * 00 /r        ADD r/m8,r8
  * 01 /r        ADD r/m16,r16
  * 01 /r        ADD r/m32,r32
@@ -3512,11 +3509,11 @@ BOOL OPCHndlrStack_LEAVE(BYTE bOpcode)
  * 14 ib        ADC AL,imm8
  * 15 iw        ADC AX,imm16
  * 15 id        ADC EAX,imm32
- * 80 /2 ib        ADC r/m8,imm8
- * 81 /2 iw        ADC r/m16,imm16
- * 81 /2 id        ADC r/m32,imm32
- * 83 /2 ib        ADC r/m16,imm8 Add with CF sign-extended imm8 to r/m16
- * 83 /2 ib        ADC r/m32,imm8 Add with CF sign-extended imm8 into r/m32
+ * 80 /2 ib     ADC r/m8,imm8
+ * 81 /2 iw     ADC r/m16,imm16
+ * 81 /2 id     ADC r/m32,imm32
+ * 83 /2 ib     ADC r/m16,imm8 Add with CF sign-extended imm8 to r/m16
+ * 83 /2 ib     ADC r/m32,imm8 Add with CF sign-extended imm8 into r/m32
  * 10 /r        ADC r/m8,r8
  * 11 /r        ADC r/m16,r16
  * 11 /r        ADC r/m32,r32
@@ -3613,11 +3610,11 @@ BOOL OPCHndlrALU_ADD(BYTE bOpcode)
  * 1D iw    SBB AX,imm16
  * 1D id    SBB EAX,imm32
  *
- * 80 /3 ib        SBB r/m8,imm8
- * 81 /3 iw        SBB r/m16,imm16
- * 81 /3 id        SBB r/m32,imm32
- * 83 /3 ib        SBB r/m16,imm8        Subtract with borrow sign-extended imm8 from r/m16
- * 83 /3 ib        SBB r/m32,imm8        Subtract with borrow sign-extended imm8 from r/m32
+ * 80 /3 ib     SBB r/m8,imm8
+ * 81 /3 iw     SBB r/m16,imm16
+ * 81 /3 id     SBB r/m32,imm32
+ * 83 /3 ib     SBB r/m16,imm8        Subtract with borrow sign-extended imm8 from r/m16
+ * 83 /3 ib     SBB r/m32,imm8        Subtract with borrow sign-extended imm8 from r/m32
  *
  * 18 /r    SBB r/m8,r8
  * 19 /r    SBB r/m16,r16
@@ -3630,11 +3627,11 @@ BOOL OPCHndlrALU_ADD(BYTE bOpcode)
  * 2D iw SUB    AX,imm16
  * 2D id SUB    EAX,imm32
  *
- * 80 /5 ib        SUB r/m8,imm8
- * 81 /5 iw        SUB r/m16,imm16
- * 81 /5 id        SUB r/m32,imm32
- * 83 /5 ib        SUB r/m16,imm8        Subtract sign-extended imm8 from r/m16
- * 83 /5 ib        SUB r/m32,imm8        Subtract sign-extended imm8 from r/m32
+ * 80 /5 ib     SUB r/m8,imm8
+ * 81 /5 iw     SUB r/m16,imm16
+ * 81 /5 id     SUB r/m32,imm32
+ * 83 /5 ib     SUB r/m16,imm8        Subtract sign-extended imm8 from r/m16
+ * 83 /5 ib     SUB r/m32,imm8        Subtract sign-extended imm8 from r/m32
  *
  * 28 /r    SUB r/m8,r8
  * 29 /r    SUB r/m16,r16
@@ -3722,16 +3719,16 @@ BOOL OPCHndlrALU_SUB(BYTE bOpcode)
  * F6 /5        IMUL r/m8
  * F7 /5        IMUL r/m16
  * F7 /5        IMUL r/m32
- * 0F AF /r        IMUL r16,r/m16
- * 0F AF /r        IMUL r32,r/m32
- * 6B /r ib        IMUL r16,r/m16,imm8        word register = r/m16 * sign-extended immediate byte
- * 6B /r ib        IMUL r32,r/m32,imm8        doubleword register = r/m32 * sign-extended immediate byte
- * 6B /r ib        IMUL r16,imm8            word register =  word register * sign-extended immediate byte
- * 6B /r ib        IMUL r32,imm8            doubleword register =  doubleword register * signextended immediate byte
- * 69 /r iw        IMUL r16,r/m16,imm16    word register = r/m16 * immediate word
- * 69 /r id        IMUL r32,r/m32,imm32    doubleword register = r/m32 * immediate doubleword
- * 69 /r iw        IMUL r16,imm16            word register = r/m16 * immediate word
- * 69 /r id        IMUL r32,imm32            doubleword register = r/m32 * immediate doubleword
+ * 0F AF /r     IMUL r16,r/m16
+ * 0F AF /r     IMUL r32,r/m32
+ * 6B /r ib     IMUL r16,r/m16,imm8        word register = r/m16 * sign-extended immediate byte
+ * 6B /r ib     IMUL r32,r/m32,imm8        doubleword register = r/m32 * sign-extended immediate byte
+ * 6B /r ib     IMUL r16,imm8            word register =  word register * sign-extended immediate byte
+ * 6B /r ib     IMUL r32,imm8            doubleword register =  doubleword register * signextended immediate byte
+ * 69 /r iw     IMUL r16,r/m16,imm16    word register = r/m16 * immediate word
+ * 69 /r id     IMUL r32,r/m32,imm32    doubleword register = r/m32 * immediate doubleword
+ * 69 /r iw     IMUL r16,imm16            word register = r/m16 * immediate word
+ * 69 /r id     IMUL r32,imm32            doubleword register = r/m32 * immediate doubleword
  *
  * F6 /4    MUL r/m8    Unsigned multiply (AX = AL * r/m8)
  * F7 /4    MUL r/m16    Unsigned multiply (DX:AX = AX * r/m16)
@@ -3899,18 +3896,18 @@ BOOL OPCHndlrALU_DEC(BYTE bOpcode)
 /*    ** Rotate / Shift **
  *    * This is gonna be a big one! *
  *
- * C0 /0 ib        ROL r/m8,imm8
- * C0 /2 ib        RCL r/m8,imm8
- * C0 /3 ib        RCR r/m8,imm8
- * C1 /2 ib        RCL r/m16,imm8
- * C1 /2 ib        RCL r/m32,imm8
- * C1 /0 ib        ROL r/m16,imm8
- * C1 /0 ib        ROL r/m32,imm8
- * C0 /1 ib        ROR r/m8,imm8
- * C1 /1 ib        ROR r/m16,imm8
- * C1 /1 ib        ROR r/m32,imm8
- * C1 /3 ib        RCR r/m16,imm8
- * C1 /3 ib        RCR r/m32,imm8
+ * C0 /0 ib     ROL r/m8,imm8
+ * C0 /2 ib     RCL r/m8,imm8
+ * C0 /3 ib     RCR r/m8,imm8
+ * C1 /2 ib     RCL r/m16,imm8
+ * C1 /2 ib     RCL r/m32,imm8
+ * C1 /0 ib     ROL r/m16,imm8
+ * C1 /0 ib     ROL r/m32,imm8
+ * C0 /1 ib     ROR r/m8,imm8
+ * C1 /1 ib     ROR r/m16,imm8
+ * C1 /1 ib     ROR r/m32,imm8
+ * C1 /3 ib     RCR r/m16,imm8
+ * C1 /3 ib     RCR r/m32,imm8
  *
  * D0 /2    RCL r/m8,1
  * D2 /2    RCL r/m8,CL
@@ -3941,14 +3938,14 @@ BOOL OPCHndlrALU_DEC(BYTE bOpcode)
  * D3 /1    ROR r/m32,CL
  *
  * 0F A4 SHLD r/m16,r16,imm8    Shift r/m16 to left imm8 places while shifting bits from r16 in from the right
- * 0F A5 SHLD r/m16,r16,CL        Shift r/m16 to left CL places while shifting bits from r16 in from the right
+ * 0F A5 SHLD r/m16,r16,CL      Shift r/m16 to left CL places while shifting bits from r16 in from the right
  * 0F A4 SHLD r/m32,r32,imm8    Shift r/m32 to left imm8 places while shifting bits from r32 in from the right
- * 0F A5 SHLD r/m32,r32,CL        Shift r/m32 to left CL places while shifting bits from r32 in from the right
+ * 0F A5 SHLD r/m32,r32,CL      Shift r/m32 to left CL places while shifting bits from r32 in from the right
  *
  * 0F AC SHRD r/m16,r16,imm8    Shift r/m16 to right imm8 places while shifting bits from r16 in from the left
- * 0F AD SHRD r/m16,r16,CL        Shift r/m16 to right CL places while shifting bits from r16 in from the left
+ * 0F AD SHRD r/m16,r16,CL      Shift r/m16 to right CL places while shifting bits from r16 in from the left
  * 0F AC SHRD r/m32,r32,imm8    Shift r/m32 to right imm8 places while shifting bits from r32 in from the left
- * 0F AD SHRD r/m32,r32,CL        Shift r/m32 to right CL places while shifting bits from r32 in from the left
+ * 0F AD SHRD r/m32,r32,CL      Shift r/m32 to right CL places while shifting bits from r32 in from the left
  *
  */
 BOOL OPCHndlrALU_Shift(BYTE bOpcode)
@@ -4054,7 +4051,7 @@ BOOL OPCHndlrALU_Shift_SetInsStr(BYTE bOpcode)
     static WCHAR awszMnemonics[][MAX_OPCODE_NAME_LEN + 1] = {
                     L"rol",    L"ror",    L"rcl",    L"rcr", L"shl", L"shr", L"sal", L"sar" };
 
-    Util_vSplitModRMByte(*pByteInCode, NULL, &bOpcodeEx, NULL);
+    Util_SplitModRMByte(*pByteInCode, NULL, &bOpcodeEx, NULL);
     if (bOpcodeEx < 0 || bOpcodeEx > 7)
     {
         return FALSE;
@@ -4082,11 +4079,11 @@ BOOL OPCHndlrALU_SALC(BYTE bOpcode)
  * 0D iw    OR AX,imm16
  * 0D id    OR EAX,imm32
  *
- * 80 /1 ib        OR r/m8,imm8
- * 81 /1 iw        OR r/m16,imm16
- * 81 /1 id        OR r/m32,imm32
- * 83 /1 ib        OR r/m16,imm8        r/m16 OR imm8 (sign-extended)
- * 83 /1 ib        OR r/m32,imm8        r/m32 OR imm8 (sign-extended)
+ * 80 /1 ib     OR r/m8,imm8
+ * 81 /1 iw     OR r/m16,imm16
+ * 81 /1 id     OR r/m32,imm32
+ * 83 /1 ib     OR r/m16,imm8        r/m16 OR imm8 (sign-extended)
+ * 83 /1 ib     OR r/m32,imm8        r/m32 OR imm8 (sign-extended)
  *
  * 08 /r    OR r/m8,r8
  * 09 /r    OR r/m16,r16
@@ -4255,11 +4252,11 @@ BOOL OPCHndlrALU_AND(BYTE bOpcode)
  * 35 iw    XOR AX,imm16
  * 35 id    XOR EAX,imm32
  *
- * 80 /6 ib        XOR r/m8,imm8
- * 81 /6 iw        XOR r/m16,imm16
- * 81 /6 id        XOR r/m32,imm32
- * 83 /6 ib        XOR r/m16,imm8        r/m16 XOR imm8 (sign-extended)
- * 83 /6 ib        XOR r/m32,imm8        r/m32 XOR imm8 (sign-extended)
+ * 80 /6 ib     XOR r/m8,imm8
+ * 81 /6 iw     XOR r/m16,imm16
+ * 81 /6 id     XOR r/m32,imm32
+ * 83 /6 ib     XOR r/m16,imm8        r/m16 XOR imm8 (sign-extended)
+ * 83 /6 ib     XOR r/m32,imm8        r/m32 XOR imm8 (sign-extended)
  *
  * 30 /r    XOR r/m8,r8
  * 31 /r    XOR r/m16,r16
@@ -4520,21 +4517,21 @@ BOOL OPCHndlrMem_XCHG(BYTE bOpcode)
 }
 
 /*    ** MOV **
- * 88 /r    MOV r/m8,r8            Move r8 to r/m8
- * 89 /r    MOV r/m16,r16        Move r16 to r/m16
- * 89 /r    MOV r/m32,r32        Move r32 to r/m32
- * 8A /r    MOV r8,r/m8            Move r/m8 to r8
- * 8B /r    MOV r16,r/m16        Move r/m16 to r16
- * 8B /r    MOV r32,r/m32        Move r/m32 to r32
+ * 88 /r    MOV r/m8,r8         Move r8 to r/m8
+ * 89 /r    MOV r/m16,r16       Move r16 to r/m16
+ * 89 /r    MOV r/m32,r32       Move r32 to r/m32
+ * 8A /r    MOV r8,r/m8         Move r/m8 to r8
+ * 8B /r    MOV r16,r/m16       Move r/m16 to r16
+ * 8B /r    MOV r32,r/m32       Move r/m32 to r32
  * 8C /r    MOV r/m16,Sreg**    Move segment register to r/m16
  * 8E /r    MOV Sreg,r/m16**    Move r/m16 to segment register
  *
- * A0    MOV AL,moffs8*        Move byte at (seg:offset) to AL
+ * A0    MOV AL,moffs8*         Move byte at (seg:offset) to AL
  * A1    MOV AX,moffs16*        Move word at (seg:offset) to AX
- * A1    MOV EAX,moffs32*    Move doubleword at (seg:offset) to EAX
- * A2    MOV moffs8*,AL        Move AL to (seg:offset)
+ * A1    MOV EAX,moffs32*       Move doubleword at (seg:offset) to EAX
+ * A2    MOV moffs8*,AL         Move AL to (seg:offset)
  * A3    MOV moffs16*,AX        Move AX to (seg:offset)
- * A3    MOV moffs32*,EAX    Move EAX to (seg:offset)
+ * A3    MOV moffs32*,EAX       Move EAX to (seg:offset)
  *
  * B0+ rb    MOV r8,imm8
  * B8+ rw    MOV r16,imm16
@@ -4915,12 +4912,12 @@ BOOL OPCHndlrMem_MOVS(BYTE bOpcode)
 }
 
 /*    ** LODS **
- * AC    LODS m8        Load byte at address DS:(E)SI into AL
- * AD    LODS m16    Load word at address DS:(E)SI into AX
- * AD    LODS m32    Load doubleword at address DS:(E)SI into EAX
- * AC    LODSB        Load byte at address DS:(E)SI into AL
- * AD    LODSW        Load word at address DS:(E)SI into AX
- * AD    LODSD        Load doubleword at address DS:(E)SI into EAX
+ * AC    LODS m8    Load byte at address DS:(E)SI into AL
+ * AD    LODS m16   Load word at address DS:(E)SI into AX
+ * AD    LODS m32   Load doubleword at address DS:(E)SI into EAX
+ * AC    LODSB      Load byte at address DS:(E)SI into AL
+ * AD    LODSW      Load word at address DS:(E)SI into AX
+ * AD    LODSD      Load doubleword at address DS:(E)SI into EAX
  */
 BOOL OPCHndlrMem_LODS(BYTE bOpcode)
 {
@@ -4946,8 +4943,7 @@ BOOL OPCHndlrMem_LODS(BYTE bOpcode)
     }
 
     // to print: lods        dword ptr [esi]
-    StringCchPrintf(insCurIns.wszCurInsStrSrc, _countof(insCurIns.wszCurInsStrSrc),
-        L"%s[%s]", pwszPtrStr, pwszxSI);
+    StringCchPrintf(insCurIns.wszCurInsStrSrc, _countof(insCurIns.wszCurInsStrSrc), L"%s[%s]", pwszPtrStr, pwszxSI);
     insCurIns.fSrcStrSet = TRUE;
     dsNextState = DASM_STATE_DUMP;
     return TRUE;
@@ -4985,8 +4981,7 @@ BOOL OPCHndlrMem_STOS(BYTE bOpcode)
     }
 
     // to print: stos        word ptr es:[edi]
-    StringCchPrintf(insCurIns.wszCurInsStrSrc, _countof(insCurIns.wszCurInsStrSrc),
-        L"%ses:[%s]", pwszPtrStr, pwszxDI);
+    StringCchPrintf(insCurIns.wszCurInsStrSrc, _countof(insCurIns.wszCurInsStrSrc), L"%ses:[%s]", pwszPtrStr, pwszxDI);
     insCurIns.fSrcStrSet = TRUE;
     dsNextState = DASM_STATE_DUMP;
     return TRUE;
@@ -5184,7 +5179,6 @@ BOOL OPCHndlrCC_BOUND(BYTE bOpcode)
         insCurIns.bOperandSizeDes = OPERANDSIZE_32BIT;
     }
     dsNextState = DASM_STATE_MOD_RM;
-
     return TRUE;
 }
 
@@ -5210,51 +5204,51 @@ BOOL OPCHndlrCC_ARPL(BYTE bOpcode)
 }
 
 /*    ** Jcc **
- * 77 cb JA        rel8 Jump short if above (CF=0 and ZF=0)
+ * 77 cb JA     rel8 Jump short if above (CF=0 and ZF=0)
  * 73 cb JAE    rel8 Jump short if above or equal (CF=0)
- * 72 cb JB        rel8 Jump short if below (CF=1)
+ * 72 cb JB     rel8 Jump short if below (CF=1)
  * 76 cb JBE    rel8 Jump short if below or equal (CF=1 or ZF=1)
- * E3 cb JCXZ    rel8 Jump short if CX register is 0
- * E3 cb JECXZ    rel8 Jump short if ECX register is 0
- * 74 cb JE        rel8 Jump short if equal (ZF=1)
- * 7F cb JG        rel8 Jump short if greater (ZF=0 and SF=OF)
+ * E3 cb JCXZ   rel8 Jump short if CX register is 0
+ * E3 cb JECXZ  rel8 Jump short if ECX register is 0
+ * 74 cb JE     rel8 Jump short if equal (ZF=1)
+ * 7F cb JG     rel8 Jump short if greater (ZF=0 and SF=OF)
  * 7D cb JGE    rel8 Jump short if greater or equal (SF=OF)
- * 7C cb JL        rel8 Jump short if less (SF<>OF)
+ * 7C cb JL     rel8 Jump short if less (SF<>OF)
  * 7E cb JLE    rel8 Jump short if less or equal (ZF=1 or SF<>OF)
  * 75 cb JNE    rel8 Jump short if not equal (ZF=0)
  * 71 cb JNO    rel8 Jump short if not overflow (OF=0)
  * 7B cb JNP    rel8 Jump short if not parity (PF=0)
  * 79 cb JNS    rel8 Jump short if not sign (SF=0)
- * 70 cb JO        rel8 Jump short if overflow (OF=1)
- * 7A cb JP        rel8 Jump short if parity (PF=1)
- * 78 cb JS        rel8 Jump short if sign (SF=1)
+ * 70 cb JO     rel8 Jump short if overflow (OF=1)
+ * 7A cb JP     rel8 Jump short if parity (PF=1)
+ * 78 cb JS     rel8 Jump short if sign (SF=1)
  *
- * 0F 87 cw/cd JA rel16/32    Jump near if above (CF=0 and ZF=0)
- * 0F 83 cw/cd JAE rel16/32 Jump near if above or equal (CF=0)
- * 0F 82 cw/cd JB rel16/32    Jump near if below (CF=1)
- * 0F 86 cw/cd JBE rel16/32 Jump near if below or equal (CF=1 or ZF=1)
- * 0F 84 cw/cd JE rel16/32    Jump near if equal (ZF=1)
- * 0F 8F cw/cd JG rel16/32    Jump near if greater (ZF=0 and SF=OF)
- * 0F 8D cw/cd JGE rel16/32 Jump near if greater or equal (SF=OF)
- * 0F 8C cw/cd JL rel16/32    Jump near if less (SF<>OF)
- * 0F 8E cw/cd JLE rel16/32 Jump near if less or equal (ZF=1 or SF<>OF)
- * 0F 85 cw/cd JNE rel16/32 Jump near if not equal (ZF=0)
- * 0F 81 cw/cd JNO rel16/32 Jump near if not overflow (OF=0)
- * 0F 8B cw/cd JNP rel16/32 Jump near if not parity (PF=0)
- * 0F 89 cw/cd JNS rel16/32 Jump near if not sign (SF=0)
- * 0F 80 cw/cd JO rel16/32    Jump near if overflow (OF=1)
- * 0F 8A cw/cd JP rel16/32    Jump near if parity (PF=1)
- * 0F 88 cw/cd JS rel16/32    Jump near if sign (SF=1)
+ * 0F 87 cw/cd JA   rel16/32    Jump near if above (CF=0 and ZF=0)
+ * 0F 83 cw/cd JAE  rel16/32    Jump near if above or equal (CF=0)
+ * 0F 82 cw/cd JB   rel16/32    Jump near if below (CF=1)
+ * 0F 86 cw/cd JBE  rel16/32    Jump near if below or equal (CF=1 or ZF=1)
+ * 0F 84 cw/cd JE   rel16/32    Jump near if equal (ZF=1)
+ * 0F 8F cw/cd JG   rel16/32    Jump near if greater (ZF=0 and SF=OF)
+ * 0F 8D cw/cd JGE  rel16/32    Jump near if greater or equal (SF=OF)
+ * 0F 8C cw/cd JL   rel16/32    Jump near if less (SF<>OF)
+ * 0F 8E cw/cd JLE  rel16/32    Jump near if less or equal (ZF=1 or SF<>OF)
+ * 0F 85 cw/cd JNE  rel16/32    Jump near if not equal (ZF=0)
+ * 0F 81 cw/cd JNO  rel16/32    Jump near if not overflow (OF=0)
+ * 0F 8B cw/cd JNP  rel16/32    Jump near if not parity (PF=0)
+ * 0F 89 cw/cd JNS  rel16/32    Jump near if not sign (SF=0)
+ * 0F 80 cw/cd JO   rel16/32    Jump near if overflow (OF=1)
+ * 0F 8A cw/cd JP   rel16/32    Jump near if parity (PF=1)
+ * 0F 88 cw/cd JS   rel16/32    Jump near if sign (SF=1)
  *
- * EB cb JMP rel8        Jump short, relative, displacement relative to next instruction
- * E9 cw JMP rel16        Jump near, relative, displacement relative to next instruction
- * E9 cd JMP rel32        Jump near, relative, displacement relative to next instruction
- * FF /4 JMP r/m16        Jump near, absolute indirect, address given in r/m16
- * FF /4 JMP r/m32        Jump near, absolute indirect, address given in r/m32
- * EA cd JMP ptr16:16    Jump far, absolute, address given in operand
- * EA cp JMP ptr16:32    Jump far, absolute, address given in operand
- * FF /5 JMP m16:16        Jump far, absolute indirect, address given in m16:16
- * FF /5 JMP m16:32        Jump far, absolute indirect, address given in m16:32
+ * EB cb JMP rel8       Jump short, relative, displacement relative to next instruction
+ * E9 cw JMP rel16      Jump near, relative, displacement relative to next instruction
+ * E9 cd JMP rel32      Jump near, relative, displacement relative to next instruction
+ * FF /4 JMP r/m16      Jump near, absolute indirect, address given in r/m16
+ * FF /4 JMP r/m32      Jump near, absolute indirect, address given in r/m32
+ * EA cd JMP ptr16:16   Jump far, absolute, address given in operand
+ * EA cp JMP ptr16:32   Jump far, absolute, address given in operand
+ * FF /5 JMP m16:16     Jump far, absolute indirect, address given in m16:16
+ * FF /5 JMP m16:32     Jump far, absolute indirect, address given in m16:32
  */
 BOOL OPCHndlrCC_JUMP(BYTE bOpcode)
 {
@@ -5318,7 +5312,7 @@ BOOL OPCHndlrCC_JUMP(BYTE bOpcode)
         case 0xff:
         {
             BYTE bOpcodeEx;
-            Util_vSplitModRMByte(*pByteInCode, NULL, &bOpcodeEx, NULL);
+            Util_SplitModRMByte(*pByteInCode, NULL, &bOpcodeEx, NULL);
             insCurIns.fModRM = TRUE;
             insCurIns.fSpecialInstruction = TRUE;
             if (bOpcodeEx == 4)
@@ -5358,16 +5352,16 @@ BOOL OPCHndlrCC_JUMP(BYTE bOpcode)
 
 /*    ** TEST **
  * A8 ib    TEST AL,imm8    AND imm8 with AL; set SF, ZF, PF according to result
- * A9 iw    TEST AX,imm16    AND imm16 with AX; set SF, ZF, PF according to result
- * A9 id    TEST EAX,imm32    AND imm32 with EAX; set SF, ZF, PF according to result
+ * A9 iw    TEST AX,imm16   AND imm16 with AX; set SF, ZF, PF according to result
+ * A9 id    TEST EAX,imm32  AND imm32 with EAX; set SF, ZF, PF according to result
  *
- * F6 /0 ib        TEST r/m8,imm8        AND imm8 with r/m8; set SF, ZF, PF according to result
- * F7 /0 iw        TEST r/m16,imm16    AND imm16 with r/m16; set SF, ZF, PF according to result
- * F7 /0 id        TEST r/m32,imm32    AND imm32 with r/m32; set SF, ZF, PF according to result
+ * F6 /0 ib     TEST r/m8,imm8      AND imm8 with r/m8; set SF, ZF, PF according to result
+ * F7 /0 iw     TEST r/m16,imm16    AND imm16 with r/m16; set SF, ZF, PF according to result
+ * F7 /0 id     TEST r/m32,imm32    AND imm32 with r/m32; set SF, ZF, PF according to result
  *
  * 84 /r    TEST r/m8,r8    AND r8 with r/m8; set SF, ZF, PF according to result
- * 85 /r    TEST r/m16,r16    AND r16 with r/m16; set SF, ZF, PF according to result
- * 85 /r    TEST r/m32,r32    AND r32 with r/m32; set SF, ZF, PF according to result
+ * 85 /r    TEST r/m16,r16  AND r16 with r/m16; set SF, ZF, PF according to result
+ * 85 /r    TEST r/m32,r32  AND r32 with r/m32; set SF, ZF, PF according to result
  */
 BOOL OPCHndlrCC_TEST(BYTE bOpcode)
 {
@@ -5430,17 +5424,17 @@ BOOL OPCHndlrCC_TEST(BYTE bOpcode)
 }
 
 /*    ** CMPSx **
- * A6 CMPS m8, m8        Compares byte at address DS:(E)SI with byte at address
+ * A6 CMPS m8, m8       Compares byte at address DS:(E)SI with byte at address
  *                            ES:(E)DI and sets the status flags accordingly
- * A7 CMPS m16, m16        Compares word at address DS:(E)SI with word at address
+ * A7 CMPS m16, m16     Compares word at address DS:(E)SI with word at address
  *                            ES:(E)DI and sets the status flags accordingly
- * A7 CMPS m32, m32        Compares doubleword at address DS:(E)SI with doubleword
+ * A7 CMPS m32, m32     Compares doubleword at address DS:(E)SI with doubleword
  *                            at address ES:(E)DI and sets the status flags accordingly
- * A6 CMPSB                Compares byte at address DS:(E)SI with byte at address
+ * A6 CMPSB             Compares byte at address DS:(E)SI with byte at address
  *                            ES:(E)DI and sets the status flags accordingly
- * A7 CMPSW                Compares word at address DS:(E)SI with word at address
+ * A7 CMPSW             Compares word at address DS:(E)SI with word at address
  *                            ES:(E)DI and sets the status flags accordingly
- * A7 CMPSD                Compares doubleword at address DS:(E)SI with doubleword
+ * A7 CMPSD             Compares doubleword at address DS:(E)SI with doubleword
  *                            at address ES:(E)DI and sets the status flags accordingly
  */
 BOOL OPCHndlrCC_CMPS(BYTE bOpcode)
@@ -5488,12 +5482,12 @@ BOOL OPCHndlrCC_CMPS(BYTE bOpcode)
 }
 
 /*    ** SCASx **
- * AE    SCAS m8        Compare AL with byte at ES:(E)DI and set status flags
+ * AE    SCAS m8     Compare AL with byte at ES:(E)DI and set status flags
  * AF    SCAS m16    Compare AX with word at ES:(E)DI and set status flags
  * AF    SCAS m32    Compare EAX with doubleword at ES(E)DI and set status flags
- * AE    SCASB        Compare AL with byte at ES:(E)DI and set status flags
- * AF    SCASW        Compare AX with word at ES:(E)DI and set status flags
- * AF    SCASD        Compare EAX with doubleword at ES:(E)DI and set status flags
+ * AE    SCASB       Compare AL with byte at ES:(E)DI and set status flags
+ * AF    SCASW       Compare AX with word at ES:(E)DI and set status flags
+ * AF    SCASD       Compare EAX with doubleword at ES:(E)DI and set status flags
  */
 BOOL OPCHndlrCC_SCAS(BYTE bOpcode)
 {
@@ -5527,10 +5521,10 @@ BOOL OPCHndlrCC_SCAS(BYTE bOpcode)
 }
 
 /*    ** RET **
- * C3        RET            Near return to calling procedure
- * CB        RET            Far return to calling procedure
- * C2 iw    RET imm16    Near return to calling procedure and pop imm16 bytes from stack
- * CA iw    RET imm16    Far return to calling procedure and pop imm16 bytes from stack
+ * C3       RET         Near return to calling procedure
+ * CB       RET         Far return to calling procedure
+ * C2 iw    RET imm16   Near return to calling procedure and pop imm16 bytes from stack
+ * CA iw    RET imm16   Far return to calling procedure and pop imm16 bytes from stack
  */
 BOOL OPCHndlrCC_RETN(BYTE bOpcode)
 {
@@ -5571,11 +5565,11 @@ BOOL OPCHndlrCC_IRETD(BYTE bOpcode)
 }
 
 /*    ** LOOP/LOOPxx **
- * E2 cb    LOOP rel8        Decrement count; jump short if count != 0
- * E1 cb    LOOPE rel8        Decrement count; jump short if count != 0 and ZF=1
- * E1 cb    LOOPZ rel8        Decrement count; jump short if count != 0 and ZF=1
- * E0 cb    LOOPNE rel8        Decrement count; jump short if count != 0 and ZF=0
- * E0 cb    LOOPNZ rel8        Decrement count; jump short if count != 0 and ZF=0
+ * E2 cb    LOOP rel8       Decrement count; jump short if count != 0
+ * E1 cb    LOOPE rel8      Decrement count; jump short if count != 0 and ZF=1
+ * E1 cb    LOOPZ rel8      Decrement count; jump short if count != 0 and ZF=1
+ * E0 cb    LOOPNE rel8     Decrement count; jump short if count != 0 and ZF=0
+ * E0 cb    LOOPNZ rel8     Decrement count; jump short if count != 0 and ZF=0
  */
 BOOL OPCHndlrCC_CLOOP(BYTE bOpcode)
 {
@@ -5592,14 +5586,14 @@ BOOL OPCHndlrCC_CLOOP(BYTE bOpcode)
 }
 
 /*    ** CALL **
- * E8 cw    CALL rel16        Call near, relative, displacement relative to next instruction
- * E8 cd    CALL rel32        Call near, relative, displacement relative to next instruction
- * FF /2    CALL r/m16        Call near, absolute indirect, address given in r/m16
- * FF /2    CALL r/m32        Call near, absolute indirect, address given in r/m32
- * 9A cd    CALL ptr16:16    Call far, absolute, address given in operand
- * 9A cp    CALL ptr16:32    Call far, absolute, address given in operand
- * FF /3    CALL m16:16        Call far, absolute indirect, address given in m16:16
- * FF /3    CALL m16:32        Call far, absolute indirect, address given in m16:32
+ * E8 cw    CALL rel16      Call near, relative, displacement relative to next instruction
+ * E8 cd    CALL rel32      Call near, relative, displacement relative to next instruction
+ * FF /2    CALL r/m16      Call near, absolute indirect, address given in r/m16
+ * FF /2    CALL r/m32      Call near, absolute indirect, address given in r/m32
+ * 9A cd    CALL ptr16:16   Call far, absolute, address given in operand
+ * 9A cp    CALL ptr16:32   Call far, absolute, address given in operand
+ * FF /3    CALL m16:16     Call far, absolute indirect, address given in m16:16
+ * FF /3    CALL m16:32     Call far, absolute indirect, address given in m16:32
  */
 BOOL OPCHndlrCC_CALL(BYTE bOpcode)
 {
@@ -5675,7 +5669,7 @@ BOOL OPCHndlrCC_CALL(BYTE bOpcode)
         BYTE bReg;
 
         // Determine whether it is FF /2 or FF /3 call
-        Util_vSplitModRMByte(*pByteInCode, NULL, &bReg, NULL);
+        Util_SplitModRMByte(*pByteInCode, NULL, &bReg, NULL);
         if (bReg == 2)
         {
             // CALL r/m16 or CALL r/m32
@@ -5719,8 +5713,7 @@ BOOL OPCHndlrCC_CALL(BYTE bOpcode)
  * F5    CMC        Complement CF flag
  * F9    STC        Set CF flag
  * FD    STD        Set DF flag
- * FB    STI        Set interrupt flag; external, maskable interrupts enabled
- *                at the end of the next instruction
+ * FB    STI        Set interrupt flag; external, maskable interrupts enabled at the end of the next instruction
  */
 BOOL OPCHndlrCC_EFLAGS(BYTE bOpcode)    // EFLAGS manipulators: CMC, CLC, STC, ...
 {
@@ -5789,7 +5782,7 @@ BOOL OPCHndlrSysIO_INS(BYTE bOpcode)
 }
 
 /*    ** OUTS **
- * 6E    OUTS DX, m8        Output byte from memory location specified in DS:(E)SI to I/O port specified in DX
+ * 6E    OUTS DX, m8     Output byte from memory location specified in DS:(E)SI to I/O port specified in DX
  * 6F    OUTS DX, m16    Output word from memory location specified in DS:(E)SI to I/O port specified in DX
  * 6F    OUTS DX, m32    Output doubleword from memory location specified in DS:(E)SI to I/O port specified in DX
  */
@@ -5899,9 +5892,9 @@ BOOL OPCHndlrSysIO_IceBP(BYTE bOpcode)    // undocumented INT1
 }
 
 /*    ** IN imm **
- * E4 ib    IN AL,imm8        Input byte from imm8 I/O port address into AL
- * E5 ib    IN AX,imm8        Input byte from imm8 I/O port address into AX
- * E5 ib    IN EAX,imm8        Input byte from imm8 I/O port address into EAX
+ * E4 ib    IN AL,imm8      Input byte from imm8 I/O port address into AL
+ * E5 ib    IN AX,imm8      Input byte from imm8 I/O port address into AX
+ * E5 ib    IN EAX,imm8     Input byte from imm8 I/O port address into EAX
  */
 BOOL OPCHndlrSysIO_IN(BYTE bOpcode)    // IN imm
 {
@@ -5937,7 +5930,7 @@ BOOL OPCHndlrSysIO_IN(BYTE bOpcode)    // IN imm
 /*    ** OUT **
  * E6 ib    OUT imm8, AL    Output byte in AL to I/O port address imm8
  * E7 ib    OUT imm8, AX    Output word in AX to I/O port address imm8
- * E7 ib    OUT imm8, EAX    Output doubleword in EAX to I/O port address imm8
+ * E7 ib    OUT imm8, EAX   Output doubleword in EAX to I/O port address imm8
  */
 BOOL OPCHndlrSysIO_OUT(BYTE bOpcode)    // OUT imm
 {
@@ -5983,7 +5976,7 @@ BOOL OPCHndlrSysIO_OUT(BYTE bOpcode)    // OUT imm
 /*    ** IN xx,DX **
  * EC    IN AL,DX    Input byte from I/O port in DX into AL
  * ED    IN AX,DX    Input word from I/O port in DX into AX
- * ED    IN EAX,DX    Input doubleword from I/O port in DX into EAX
+ * ED    IN EAX,DX   Input doubleword from I/O port in DX into EAX
  */
 BOOL OPCHndlrSysIO_INDX(BYTE bOpcode)
 {
@@ -6022,7 +6015,7 @@ BOOL OPCHndlrSysIO_INDX(BYTE bOpcode)
 /*    ** OUT xx,DX **
  * EE    OUT DX, AL    Output byte in AL to I/O port address in DX
  * EF    OUT DX, AX    Output word in AX to I/O port address in DX
- * EF    OUT DX, EAX    Output doubleword in EAX to I/O port address in DX
+ * EF    OUT DX, EAX   Output doubleword in EAX to I/O port address in DX
  */
 BOOL OPCHndlrSysIO_OUTDX(BYTE bOpcode)
 {
@@ -6107,7 +6100,7 @@ BOOL OPCHndlrPrefix_CREP(BYTE bOpcode)    // conditional repetition: REPE/REPNE
 
 /*
  * ADD    /0
- * OR    /1
+ * OR     /1
  * ADC    /2
  * SBB    /3
  * AND    /4
@@ -6126,7 +6119,7 @@ BOOL OPCHndlrMulti_8x(BYTE bOpcode)        // 0x80 - 0x83
     static WCHAR awszMnemonics[][MAX_OPCODE_NAME_LEN + 1] = {
                     L"add",    L"or",    L"adc",    L"sbb", L"and", L"sub", L"xor", L"cmp" };
 
-    Util_vSplitModRMByte(*pByteInCode, NULL, &bOpcodeEx, NULL);
+    Util_SplitModRMByte(*pByteInCode, NULL, &bOpcodeEx, NULL);
 
     switch (bOpcodeEx)
     {
@@ -6196,9 +6189,9 @@ BOOL OPCHndlrMulti_8x(BYTE bOpcode)        // 0x80 - 0x83
  * F7 /2    NOT r/m16
  * F7 /2    NOT r/m32
  *    ** TEST **
- * F6 /0 ib        TEST r/m8,imm8
- * F7 /0 iw        TEST r/m16,imm16
- * F7 /0 id        TEST r/m32,imm32
+ * F6 /0 ib     TEST r/m8,imm8
+ * F7 /0 iw     TEST r/m16,imm16
+ * F7 /0 id     TEST r/m32,imm32
  */
 BOOL OPCHndlrMulti_fx(BYTE bOpcode)        // 0xf6 and 0xf7
 {
@@ -6211,7 +6204,7 @@ BOOL OPCHndlrMulti_fx(BYTE bOpcode)        // 0xf6 and 0xf7
     static WCHAR awszMnemonics[][MAX_OPCODE_NAME_LEN + 1] = {
                     L"test", L"", L"not", L"neg", L"mul", L"imul", L"div", L"idiv" };
 
-    Util_vSplitModRMByte(*pByteInCode, NULL, &bOpcodeEx, NULL);
+    Util_SplitModRMByte(*pByteInCode, NULL, &bOpcodeEx, NULL);
 
     switch (bOpcodeEx)
     {
@@ -6265,7 +6258,7 @@ BOOL OPCHndlrMulti_IncDec(BYTE bOpcode)    // 0xfe: INC/DEC
     // This is the extension to the primary opcode.
     BYTE bOpcodeEx;
 
-    Util_vSplitModRMByte(*pByteInCode, NULL, &bOpcodeEx, NULL);
+    Util_SplitModRMByte(*pByteInCode, NULL, &bOpcodeEx, NULL);
 
     if (bOpcodeEx == 0)
     {
@@ -6317,7 +6310,7 @@ BOOL OPCHndlrMulti_FF(BYTE bOpcode)        // 0xff
     static WCHAR awszMnemonics[][MAX_OPCODE_NAME_LEN + 1] = {
                     L"inc", L"dec", L"call", L"call", L"jmp", L"jmp", L"push" };
 
-    Util_vSplitModRMByte(*pByteInCode, NULL, &bOpcodeEx, NULL);
+    Util_SplitModRMByte(*pByteInCode, NULL, &bOpcodeEx, NULL);
 
     switch (bOpcodeEx)
     {
@@ -6412,13 +6405,13 @@ BOOL OPCHndlrUnKwn_ICE(BYTE bOpcode)    // ?? SysIO
  // FPU Basic Arithmetic
 
  /*    ** FADD **
-  * D8 /0    FADD m32 real        Add m32real to ST(0) and store result in ST(0)
-  * DC /0    FADD m64real        Add m64real to ST(0) and store result in ST(0)
-  * D8 C0+i    FADD ST(0), ST(i)    Add ST(0) to ST(i) and store result in ST(0)
-  * DC C0+i    FADD ST(i), ST(0)    Add ST(i) to ST(0) and store result in ST(i)
-  * DE C0+i    FADDP ST(i), ST(0)    Add ST(0) to ST(i), store result in ST(i), and pop the register stack
-  * DA /0    FIADD m32int        Add m32int to ST(0) and store result in ST(0)
-  * DE /0    FIADD m16int        Add m16int to ST(0) and store result in ST(0)
+  * D8 /0       FADD m32 real       Add m32real to ST(0) and store result in ST(0)
+  * DC /0       FADD m64real        Add m64real to ST(0) and store result in ST(0)
+  * D8 C0+i     FADD ST(0), ST(i)   Add ST(0) to ST(i) and store result in ST(0)
+  * DC C0+i     FADD ST(i), ST(0)   Add ST(i) to ST(0) and store result in ST(i)
+  * DE C0+i     FADDP ST(i), ST(0)  Add ST(0) to ST(i), store result in ST(i), and pop the register stack
+  * DA /0       FIADD m32int        Add m32int to ST(0) and store result in ST(0)
+  * DE /0       FIADD m16int        Add m16int to ST(0) and store result in ST(0)
   */
 BOOL OPCHndlrFPU_FADD(BYTE bOpcode)    // FADDP/FIADD also
 {
@@ -6524,9 +6517,9 @@ BOOL OPCHndlrFPU_FADD(BYTE bOpcode)    // FADDP/FIADD also
 /*    ** FSUB **
  * D8 /4    FSUB m32real        Subtract m32real from ST(0) and store result in ST(0)
  * DC /4    FSUB m64real        Subtract m64real from ST(0) and store result in ST(0)
- * D8 E0+i    FSUB ST(0), ST(i)    Subtract ST(i) from ST(0) and store result in ST(0)
- * DC E8+i    FSUB ST(i), ST(0)    Subtract ST(0) from ST(i) and store result in ST(i)
- * DE E8+i    FSUBP ST(i), ST(0)    Subtract ST(0) from ST(i), store result in ST(i), and pop register stack
+ * D8 E0+i  FSUB ST(0), ST(i)   Subtract ST(i) from ST(0) and store result in ST(0)
+ * DC E8+i  FSUB ST(i), ST(0)   Subtract ST(0) from ST(i) and store result in ST(i)
+ * DE E8+i  FSUBP ST(i), ST(0)  Subtract ST(0) from ST(i), store result in ST(i), and pop register stack
  * DA /4    FISUB m32int        Subtract m32int from ST(0) and store result in ST(0)
  * DE /4    FISUB m16int        Subtract m16int from ST(0) and store result in ST(0)
  */
@@ -6634,9 +6627,9 @@ BOOL OPCHndlrFPU_FSUB(BYTE bOpcode)    // + FSUBP/FISUB/FSUBR/FSUBRP/FISUBR
 /*
  * D8 /1    FMUL m32real        Multiply ST(0) by m32real and store result in ST(0)
  * DC /1    FMUL m64real        Multiply ST(0) by m64real and store result in ST(0)
- * D8 C8+i    FMUL ST(0), ST(i)    Multiply ST(0) by ST(i) and store result in ST(0)
- * DC C8+i    FMUL ST(i), ST(0)    Multiply ST(i) by ST(0) and store result in ST(i)
- * DE C8+i    FMULP ST(i), ST(0)    Multiply ST(i) by ST(0), store result in ST(i), and pop the register stack.
+ * D8 C8+i  FMUL ST(0), ST(i)   Multiply ST(0) by ST(i) and store result in ST(0)
+ * DC C8+i  FMUL ST(i), ST(0)   Multiply ST(i) by ST(0) and store result in ST(i)
+ * DE C8+i  FMULP ST(i), ST(0)  Multiply ST(i) by ST(0), store result in ST(i), and pop the register stack.
  * DA /1    FIMUL m32int        Multiply ST(0) by m32int and store result in ST(0)
  * DE /1    FIMUL m16int        Multiply ST(0) by m16int and store result in ST(0)
  */
@@ -6744,21 +6737,21 @@ BOOL OPCHndlrFPU_FMUL(BYTE bOpcode)    // + FMULP/FIMUL
 /*
  * D8 /6    FDIV m32real        Divide ST(0) by m32real and store result in ST(0)
  * DC /6    FDIV m64real        Divide ST(0) by m64real and store result in ST(0)
- * D8 F0+i    FDIV ST(0), ST(i)    Divide ST(0) by ST(i) and store result in ST(0)
- * DC F8+i    FDIV ST(i), ST(0)    Divide ST(i) by ST(0) and store result in ST(i)
+ * D8 F0+i  FDIV ST(0), ST(i)   Divide ST(0) by ST(i) and store result in ST(0)
+ * DC F8+i  FDIV ST(i), ST(0)   Divide ST(i) by ST(0) and store result in ST(i)
  *
- * DE F8+i    FDIVP ST(i), ST(0)    Divide ST(i) by ST(0), store result in ST(i), and pop the register stack
+ * DE F8+i  FDIVP ST(i), ST(0)  Divide ST(i) by ST(0), store result in ST(i), and pop the register stack
  *
  * DA /6    FIDIV m32int        Divide ST(0) by m32int and store result in ST(0)
  * DE /6    FIDIV m16int        Divide ST(0) by m16int and store result in ST(0)
  *
- * D8 /7    FDIVR m32real        Divide m32real by ST(0) and store result in ST(0)
- * DC /7    FDIVR m64real        Divide m64real by ST(0) and store result in ST(0)
- * D8 F8+i    FDIVR ST(0), ST(i)    Divide ST(i) by ST(0) and store result in ST(0)
- * DC F0+i    FDIVR ST(i), ST(0)    Divide ST(0) by ST(i) and store result in ST(i)
- * DE F0+i    FDIVRP ST(i), ST(0) Divide ST(0) by ST(i), store result in ST(i), and pop the register stack
- * DA /7    FIDIVR m32int        Divide m32int by ST(0) and store result in ST(0)
- * DE /7    FIDIVR m16int        Divide m16int by ST(0) and store result in ST(0)
+ * D8 /7    FDIVR m32real       Divide m32real by ST(0) and store result in ST(0)
+ * DC /7    FDIVR m64real       Divide m64real by ST(0) and store result in ST(0)
+ * D8 F8+i  FDIVR ST(0), ST(i)  Divide ST(i) by ST(0) and store result in ST(0)
+ * DC F0+i  FDIVR ST(i), ST(0)  Divide ST(0) by ST(i) and store result in ST(i)
+ * DE F0+i  FDIVRP ST(i), ST(0) Divide ST(0) by ST(i), store result in ST(i), and pop the register stack
+ * DA /7    FIDIVR m32int       Divide m32int by ST(0) and store result in ST(0)
+ * DE /7    FIDIVR m16int       Divide m16int by ST(0) and store result in ST(0)
  */
 BOOL OPCHndlrFPU_FDIV(BYTE bOpcode)    // + FDIVR/FIDIV/FDIVP/FDIVRP/FIDIVR
 {
@@ -6976,8 +6969,8 @@ BOOL OPCHndlrFPU_FXTRACT(BYTE bOpcode)
  * D9 E9    FLDL2T
  * D9 EA    FLDL2E
  * D9 EB    FLDPI
- * D9 EC    FLDLG2    Push log10(2) onto the FPU register stack.
- * D9 ED    FLDLN2    Push loge(2) onto the FPU register stack.
+ * D9 EC    FLDLG2  Push log10(2) onto the FPU register stack.
+ * D9 ED    FLDLN2  Push loge(2) onto the FPU register stack.
  * D9 EE    FLDZ    Push +0.0 onto the FPU register stack.
  *
  */
@@ -6998,14 +6991,14 @@ BOOL OPCHndlrFPU_Const(BYTE bOpcode)    // all constants
 // FPU Data Transfer
 
 /*
- * D9 /0    FLD m32real        Push m32real onto the FPU register stack.
- * DD /0    FLD m64real        Push m64real onto the FPU register stack.
- * DB /5    FLD m80real        Push m80real onto the FPU register stack.
- * D9 C0+i    FLD ST(i)        Push ST(i) onto the FPU register stack.
+ * D9 /0    FLD m32real     Push m32real onto the FPU register stack.
+ * DD /0    FLD m64real     Push m64real onto the FPU register stack.
+ * DB /5    FLD m80real     Push m80real onto the FPU register stack.
+ * D9 C0+i  FLD ST(i)       Push ST(i) onto the FPU register stack.
  *
- * DF /0    FILD m16int        Push m16int onto the FPU register stack.
- * DB /0    FILD m32int        Push m32int onto the FPU register stack.
- * DF /5    FILD m64int        Push m64int onto the FPU register stack.
+ * DF /0    FILD m16int     Push m16int onto the FPU register stack.
+ * DB /0    FILD m32int     Push m32int onto the FPU register stack.
+ * DF /5    FILD m64int     Push m64int onto the FPU register stack.
  *
  * DF /4    FBLD m80dec
  */
@@ -8145,7 +8138,7 @@ BOOL OPCHndlrSysIO_LdtTrS(BYTE bOpcode)    // 0f 00 LLDT/SLDT/LTR/...
     static WCHAR awszMnemonics[][MAX_OPCODE_NAME_LEN + 1] =
     { L"sldt", L"str", L"lldt", L"ltr", L"verr", L"verw" };
 
-    Util_vSplitModRMByte(*pByteInCode, NULL, &bReg, NULL);
+    Util_SplitModRMByte(*pByteInCode, NULL, &bReg, NULL);
     ASSERT(bReg >= 0 && bReg <= 5);    // todo: ASSERT_ALWAYS?
     StringCchPrintf(wszCurInsStr, _countof(wszCurInsStr), L"%s", awszMnemonics[bReg]);
 
@@ -8181,7 +8174,7 @@ BOOL OPCHndlrSysIO_GdtIdMsw(BYTE bOpcode)    // 0f 01 LGDT/SGDT/LIDT/...
     static WCHAR awszMnemonics[][MAX_OPCODE_NAME_LEN + 1] =
     { L"sgdt", L"sidt", L"lgdt", L"lidt", L"smsw", L"!", L"lmsw", L"invlpg" };
 
-    Util_vSplitModRMByte(*pByteInCode, NULL, &bReg, NULL);
+    Util_SplitModRMByte(*pByteInCode, NULL, &bReg, NULL);
     ASSERT(bReg != 5 && bReg >= 0 && bReg <= 7);
     StringCchPrintf(wszCurInsStr, _countof(wszCurInsStr), L"%s", awszMnemonics[bReg]);
     switch (bReg)
@@ -8404,7 +8397,7 @@ BOOL OPCHndlrMulti_BitTestX(BYTE bOpcode)        // 0f ba
     // This is the extension to the primary opcode.
     BYTE bOpcodeEx;
 
-    Util_vSplitModRMByte(*pByteInCode, NULL, &bOpcodeEx, NULL);
+    Util_SplitModRMByte(*pByteInCode, NULL, &bOpcodeEx, NULL);
 
     switch (bOpcodeEx)
     {
@@ -8599,7 +8592,7 @@ BOOL OPCHndlrMMX_PMulti7x(BYTE bOpcode)    //
     INT iIndex;
 
     // get the 'reg' field from the ModRM byte
-    Util_vSplitModRMByte(*pByteInCode, NULL, &bOpcodeEx, NULL);
+    Util_SplitModRMByte(*pByteInCode, NULL, &bOpcodeEx, NULL);
 
     // TODO: For 0x0F 0x71 opcode, this assert fails because bOpcodeEx is 1
     ASSERT(bOpcodeEx == 2 || bOpcodeEx == 4 || bOpcodeEx == 6);    // assert always?
@@ -9465,7 +9458,7 @@ BOOL OPCHndlrSSE_MultiAE(BYTE bOpcode)    // FXSAVE/FXRSTOR/LDMXCSR/STMXCSR/SFEN
     BYTE bOpcodeEx = 0xff;
 
     // Get the opcode extension
-    Util_vSplitModRMByte(*pByteInCode, NULL, &bOpcodeEx, NULL);
+    Util_SplitModRMByte(*pByteInCode, NULL, &bOpcodeEx, NULL);
 
     insCurIns.bDBit = 1;
     insCurIns.fSSEIns = TRUE;
@@ -9529,7 +9522,7 @@ BOOL OPCHndlrSSE_Prefetch18(BYTE bOpcode)    // 0F 18 PREFETCH{T0,T1,T2,NTA}
 
     // insCurIns.bOperandSizeSrc = OPERANDSIZE_UNDEF;    // dumpbin says so
 
-    Util_vSplitModRMByte(*pByteInCode, NULL, &bOpcodeEx, NULL);
+    Util_SplitModRMByte(*pByteInCode, NULL, &bOpcodeEx, NULL);
 
     // No need to check < 0 because bOpcodeEx is unsigned char
     if (bOpcodeEx > 3)

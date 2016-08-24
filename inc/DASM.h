@@ -16,9 +16,9 @@
 #define EXEFILEMAP_NAME L"InputFileMapName"
 
 int wmain(int argc, WCHAR **argv);
-BOOL fCmdArgsHandler(int argc, WCHAR **argv, WCHAR *pwszInFile, DWORD dwInFileBufSize);
-void vRunTests();
-BOOL fOpenAndMapFile(WCHAR *pwszFilePath, HANDLE *hFile, HANDLE *hFileMapObj, HANDLE *hFileView);
-BOOL fCloseFile(HANDLE hFile, HANDLE hFileMapObj, HANDLE hFileView);
+BOOL CmdArgsHandler(int argc, WCHAR **argv, WCHAR *pwszInFile, DWORD dwInFileBufSize);
+void RunTests();
+BOOL OpenAndMapFile(WCHAR *pwszFilePath, HANDLE *hFile, HANDLE *hFileMapObj, HANDLE *hFileView);
+BOOL CloseFile(HANDLE hFile, HANDLE hFileMapObj, HANDLE hFileView);
 
 #endif // _DASM_H

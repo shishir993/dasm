@@ -55,7 +55,7 @@ typedef struct _NCodeLocs {
 } NCODE_LOCS;
 
 // Function comment skeleton
-/* fGetPtrNTHeaders()
+/* GetPtrToNTHeaders()
  *
  *
  * Args:

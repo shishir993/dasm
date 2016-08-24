@@ -26,8 +26,7 @@
  * RetVal:
  *        none
  */
-void Util_vSplitModRMByte(BYTE bModRMValue, __out PBYTE pbMod,
-    __out PBYTE pbReg, __out PBYTE pbRM)
+void Util_SplitModRMByte(BYTE bModRMValue, __out PBYTE pbMod, __out PBYTE pbReg, __out PBYTE pbRM)
 {
     //    Bits:    7 6   5 4 3   2 1 0
     //    Field:    Mod    Reg     R/M
@@ -45,7 +44,7 @@ void Util_vSplitModRMByte(BYTE bModRMValue, __out PBYTE pbMod,
 }// Util_fSplitModRMByte
 
 
-/* Util_vGetDWBits()
+/* Util_GetDWBits()
  * Given the opcode byte, returns the value of the d and w bits
  * of the opcode. If any of the __out pointers are NULL, then
  * those fields are not computed.
@@ -58,7 +57,7 @@ void Util_vSplitModRMByte(BYTE bModRMValue, __out PBYTE pbMod,
  * RetVal:
  *        none
  */
-void Util_vGetDWBits(BYTE bOpcode, __out PBYTE pbDBit, __out PBYTE pbWBit)
+void Util_GetDWBits(BYTE bOpcode, __out PBYTE pbDBit, __out PBYTE pbWBit)
 {
     if (pbDBit)
         *pbDBit = (bOpcode & DBIT_MASK) >> 1;
@@ -68,10 +67,10 @@ void Util_vGetDWBits(BYTE bOpcode, __out PBYTE pbDBit, __out PBYTE pbWBit)
 
     return;
 
-}// Util_vGetDWBits()
+}// Util_GetDWBits()
 
 
-/* Util_fIsPrefix()
+/* Util_IsPrefix()
  * Given a byte as argument, tells whether it is a valid prefix or not.
  *
  * Args:
@@ -80,7 +79,7 @@ void Util_vGetDWBits(BYTE bOpcode, __out PBYTE pbDBit, __out PBYTE pbWBit)
  * RetVal:
  *        TRUE/FALSE depending on whether bValue is a prefix or not.
  */
-BOOL Util_fIsPrefix(BYTE bValue)
+BOOL Util_IsPrefix(BYTE bValue)
 {
     switch (bValue)
     {
@@ -103,10 +102,10 @@ BOOL Util_fIsPrefix(BYTE bValue)
 
     return FALSE;
 
-}// Util_fIsPrefix()
+}// Util_IsPrefix()
 
 
-/* fGetPtrNTHeaders()
+/* GetPtrToNTHeaders()
  *
  *
  * Args:
@@ -115,7 +114,7 @@ BOOL Util_fIsPrefix(BYTE bValue)
  * RetVal:
  *
  */
-BOOL fGetPtrNTHeaders(HANDLE hFileView, __out IMAGE_NT_HEADERS **ppNTHeaders)
+BOOL GetPtrToNTHeaders(HANDLE hFileView, __out IMAGE_NT_HEADERS **ppNTHeaders)
 {
     ASSERT(hFileView != NULL && ppNTHeaders != NULL);
 
@@ -124,10 +123,10 @@ BOOL fGetPtrNTHeaders(HANDLE hFileView, __out IMAGE_NT_HEADERS **ppNTHeaders)
     *ppNTHeaders = (PIMAGE_NT_HEADERS)((BYTE*)pDOSHeader + pDOSHeader->e_lfanew);
     return TRUE;
 
-}// fGetPtrNTHeaders()
+}// GetPtrToNTHeaders()
 
 
-/* fGetPtrToCode()
+/* GetPtrToCode()
  *
  *
  * Args:
@@ -136,7 +135,7 @@ BOOL fGetPtrNTHeaders(HANDLE hFileView, __out IMAGE_NT_HEADERS **ppNTHeaders)
  * RetVal:
  *
  */
-BOOL fGetPtrToCode(DWORD dwFileBase, IMAGE_NT_HEADERS *pNTHeaders,
+BOOL GetPtrToCode(DWORD dwFileBase, IMAGE_NT_HEADERS *pNTHeaders,
     __out DWORD *pdwCodePtr, __out DWORD *pdwSizeOfData, __out DWORD *pdwCodeSecVirtAddr)
 {
     ASSERT(pNTHeaders != NULL && pdwCodePtr != NULL);
@@ -149,7 +148,7 @@ BOOL fGetPtrToCode(DWORD dwFileBase, IMAGE_NT_HEADERS *pNTHeaders,
     if ((pImgSecHeader = GetEnclosingSectionHeader(pNTHeaders->OptionalHeader.AddressOfEntryPoint,
         pNTHeaders)) == NULL)
     {
-        wprintf_s(L"fGetPtrToCode(): pImgSecHeader NULL\n");
+        wprintf_s(L"GetPtrToCode(): pImgSecHeader NULL\n");
         return FALSE;
     }
     dwSecChars = pImgSecHeader->Characteristics;
@@ -181,7 +180,7 @@ BOOL fGetPtrToCode(DWORD dwFileBase, IMAGE_NT_HEADERS *pNTHeaders,
     *pdwCodeSecVirtAddr = pNTHeaders->OptionalHeader.ImageBase + pImgSecHeader->VirtualAddress;
 
     return TRUE;
-}// fGetPtrToCode()
+}// GetPtrToCode()
 
 
 /* GetEnclosingSectionHeader()
@@ -214,7 +213,7 @@ PIMAGE_SECTION_HEADER GetEnclosingSectionHeader(DWORD rva, PIMAGE_NT_HEADERS pNT
 }
 
 // Notes: Under construction
-BOOL Util_fDumpIMAGE_IMPORT_DESCRIPTORS(DWORD rva, DWORD dwSize, PIMAGE_NT_HEADERS pNTHeaders, DWORD dwFileBase)
+BOOL Util_DumpIMAGE_IMPORT_DESCRIPTORS(DWORD rva, DWORD dwSize, PIMAGE_NT_HEADERS pNTHeaders, DWORD dwFileBase)
 {
     PIMAGE_SECTION_HEADER pImgSecHeader = NULL;
     PIMAGE_IMPORT_DESCRIPTOR pImports = NULL;
@@ -293,8 +292,7 @@ BOOL Util_fDumpIMAGE_IMPORT_DESCRIPTORS(DWORD rva, DWORD dwSize, PIMAGE_NT_HEADE
     return TRUE;
 }
 
-
-void Util_vTwosComplementByte(BYTE chSignedVal, __out PBYTE pchOut)
+void Util_TwosComplementByte(BYTE chSignedVal, __out PBYTE pchOut)
 {
     __asm {
         push eax
@@ -312,8 +310,7 @@ void Util_vTwosComplementByte(BYTE chSignedVal, __out PBYTE pchOut)
     return;
 }
 
-
-void Util_vTwosComplementInt(INT iSignedVal, __out PINT piOut)
+void Util_TwosComplementInt(INT iSignedVal, __out PINT piOut)
 {
     __asm {
         push eax

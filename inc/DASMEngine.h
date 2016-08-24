@@ -485,21 +485,21 @@ typedef struct _InsSplit {
 /*
  * function prototypes
  */
-BOOL fDisassembler(NCODE_LOCS *pCodeLocs, DWORD dwVirtCodeBase);
-BOOL fDoDisassembly(DWORD *pdwCodeSection, DWORD dwSizeOfCodeSection, DWORD dwVirtCodeBase, BOOL f64bit);
+BOOL ExecDisassembler(NCODE_LOCS *pCodeLocs, DWORD dwVirtCodeBase);
+BOOL DoDisassembly(DWORD *pdwCodeSection, DWORD dwSizeOfCodeSection, DWORD dwVirtCodeBase, BOOL f64bit);
 
 /* Disasm states */
-BOOL fStateReset();
-BOOL fStatePrefix();
+BOOL StateReset();
+BOOL StatePrefix();
 
-BOOL fStateOpcode();
+BOOL StateOpcode();
 BOOL OPCHndlr_2ByteHandler(BYTE bOpcode);
 BOOL OPCHndlr_3ByteHandler(BYTE bOpcode);
 BOOL OPCHndlrFPU_All(BYTE bOpcode);
 BOOL OPCHndlrFPU_ModRMRegEx(BYTE bOpcode);
 BOOL OPCHndlrFPU_ModRMFullEx(BYTE bOpcode);
 
-BOOL fStateModRM();
+BOOL StateModRM();
 BOOL MODRM_fTypeDigit(BYTE bModRM, BYTE bMod, BYTE bRM);
 BOOL MODRM_fTypeR(BYTE bModRM, BYTE bMod, BYTE bReg, BYTE bRM);
 OPRTYPE_RETVAL MODRM_GetOperandFromModRM(BYTE bMod, BYTE bRM, BYTE bOprSize, BYTE bRegType,
@@ -509,14 +509,14 @@ OPRTYPE_RETVAL MODRM_GetOperandFromReg(BYTE bReg, BYTE bOprSize, BYTE bRegType,
 BOOL MODRM_fSetPtrStr(BYTE bOperandSize, __out WCHAR *pwszPtrStr, DWORD dwPtrStrCount);
 BYTE MODRM_bGetOperandSize();
 
-BOOL fStateSIB();
-BOOL fStateDisp();
-BOOL fStateImm();
+BOOL StateSIB();
+BOOL StateDisp();
+BOOL StateImm();
 
-BOOL fStateDump();
-BOOL fStateDumpOnOpcodeError();
-void DUMP_vDumpDataOffset();
-void DUMP_vGetSegPrefix(BYTE bSegPrefixVal, __out WCHAR **ppwszPrefixStr);
+BOOL StateDump();
+BOOL StateDumpOnOpcodeError();
+void Dump_DataOffset();
+void Dump_GetSegmentPrefix(BYTE bSegPrefixVal, __out WCHAR **ppwszPrefixStr);
 
 // Opcodecode handlers grouped by:
 // ALU, Memory, Prefix, Stack, Ctrl_Cond, System_IO
@@ -525,7 +525,7 @@ void DUMP_vGetSegPrefix(BYTE bSegPrefixVal, __out WCHAR **ppwszPrefixStr);
 BOOL OPCHndlrStack_PUSH(BYTE bOpcode);
 BOOL OPCHndlrStack_POP(BYTE bOpcode);
 BOOL OPCHndlrStack_PUSHxx(BYTE bOpcode);    // PUSHAD/PUSHFD
-BOOL OPCHndlrStack_POPxx(BYTE bOpcode);        // POPAD/POPFD
+BOOL OPCHndlrStack_POPxx(BYTE bOpcode);     // POPAD/POPFD
 BOOL OPCHndlrStack_ENTER(BYTE bOpcode);
 BOOL OPCHndlrStack_LEAVE(BYTE bOpcode);
 

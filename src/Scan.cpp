@@ -36,7 +36,7 @@ static WCHAR *awszDataDirNames[IMAGE_NUMBEROF_DIRECTORY_ENTRIES] =
     { L"Reserved"} };
 
 
-BOOL fBeginFileScan(HANDLE hFileView, BOOL *pf64bit)
+BOOL BeginFileScan(HANDLE hFileView, BOOL *pf64bit)
 {
     PIMAGE_DOS_HEADER pDOSHeader = (PIMAGE_DOS_HEADER)hFileView;
     PIMAGE_NT_HEADERS pNTHeaders = NULL;
@@ -70,7 +70,7 @@ BOOL fBeginFileScan(HANDLE hFileView, BOOL *pf64bit)
 
         wprintf_s(L"Valid PE signature found at FilePtr:0x%08x\n", (DWORD)pNTHeaders - (DWORD)hFileView);
 
-        if (!fDumpFileHeader(pNTHeaders, pf64bit))
+        if (!DumpFileHeader(pNTHeaders, pf64bit))
             return FALSE;
 
         // optional header: IMAGE_OPTIONAL_HEADER
@@ -116,22 +116,22 @@ BOOL fBeginFileScan(HANDLE hFileView, BOOL *pf64bit)
             }// switch(subsystem)
         }
 
-        fDumpDataDirectory(pNTHeaders);
+        DumpDataDirectory(pNTHeaders);
     }// if(g_fHeaders)
 
     if (g_fExports)
-        fDumpExports((DWORD)pDOSHeader, pNTHeaders,
+        DumpExports((DWORD)pDOSHeader, pNTHeaders,
             &(pNTHeaders->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT]));
 
     if (g_fImports)
-        Util_fDumpIMAGE_IMPORT_DESCRIPTORS(pNTHeaders->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT].VirtualAddress,
+        Util_DumpIMAGE_IMPORT_DESCRIPTORS(pNTHeaders->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT].VirtualAddress,
             pNTHeaders->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT].Size, pNTHeaders, (DWORD)hFileView);
 
     return TRUE;
 
-}// fBeginFileScan()
+}// BeginFileScan()
 
-BOOL fDumpFileHeader(IMAGE_NT_HEADERS *pNTHeader, BOOL *pf64bit)
+BOOL DumpFileHeader(IMAGE_NT_HEADERS *pNTHeader, BOOL *pf64bit)
 {
     ASSERT(pNTHeader != NULL);
 
@@ -139,14 +139,14 @@ BOOL fDumpFileHeader(IMAGE_NT_HEADERS *pNTHeader, BOOL *pf64bit)
     WORD wFileCharacs;
 
     static WCHAR awszCharacteristics[][32] = {
-                    L"RELOCS_STRIPPED",        L"EXECUTABLE_IMAGE",
-                    L"LINE_NUMS_STRIPPED",    L"LOCAL_SYMS_STRIPPED",
-                    L"AGGRESIVE_WS_TRIM",    L"LARGE_ADDRESS_AWARE",
-                    L"BYTES_REVERSED_LO",    L"32BIT_MACHINE",
-                    L"DEBUG_STRIPPED",        L"REMOVABLE_RUN_FROM_SWAP",
-                    L"NET_RUN_FROM_SWAP",    L"SYSTEM",
-                    L"DLL",                    L"UP_SYSTEM_ONLY",
-                    L"BYTES_REVERSED_HI" };
+        L"RELOCS_STRIPPED",        L"EXECUTABLE_IMAGE",
+        L"LINE_NUMS_STRIPPED",     L"LOCAL_SYMS_STRIPPED",
+        L"AGGRESIVE_WS_TRIM",      L"LARGE_ADDRESS_AWARE",
+        L"BYTES_REVERSED_LO",      L"32BIT_MACHINE",
+        L"DEBUG_STRIPPED",         L"REMOVABLE_RUN_FROM_SWAP",
+        L"NET_RUN_FROM_SWAP",      L"SYSTEM",
+        L"DLL",                    L"UP_SYSTEM_ONLY",
+        L"BYTES_REVERSED_HI"       };
 
     *pf64bit = FALSE;
 
@@ -214,8 +214,7 @@ BOOL fDumpFileHeader(IMAGE_NT_HEADERS *pNTHeader, BOOL *pf64bit)
     return TRUE;
 }
 
-
-BOOL fDumpDataDirectory(IMAGE_NT_HEADERS *pNTHeader)
+BOOL DumpDataDirectory(IMAGE_NT_HEADERS *pNTHeader)
 {
     ASSERT(pNTHeader != NULL);
 
@@ -235,8 +234,7 @@ BOOL fDumpDataDirectory(IMAGE_NT_HEADERS *pNTHeader)
     return TRUE;
 }
 
-
-BOOL fDumpSectionHeaders(IMAGE_NT_HEADERS *pNTHeaders)
+BOOL DumpSectionHeaders(IMAGE_NT_HEADERS *pNTHeaders)
 {
     ASSERT(pNTHeaders != NULL);
 
@@ -267,13 +265,13 @@ BOOL fDumpSectionHeaders(IMAGE_NT_HEADERS *pNTHeaders)
     }// for i
 
     return TRUE;
-}// fDumpSectionHeaders()
+}// DumpSectionHeaders()
 
 
-// fFindIAT_InText()
+// FindIAT_InText()
 // Find the starting address - virtual address and file pointer - and the 
 // size of the IAT within the .text section if present.
-BOOL fFindIAT_InText(HANDLE hFileBase, IMAGE_NT_HEADERS *pNTHeader, __out NONCODE_LOC *pNonCodeBlocks)
+BOOL FindIAT_InText(HANDLE hFileBase, IMAGE_NT_HEADERS *pNTHeader, __out NONCODE_LOC *pNonCodeBlocks)
 {
     ASSERT(hFileBase != NULL);
     ASSERT(pNTHeader != NULL && pNonCodeBlocks != NULL);
@@ -287,13 +285,12 @@ BOOL fFindIAT_InText(HANDLE hFileBase, IMAGE_NT_HEADERS *pNTHeader, __out NONCOD
     //IMAGE_THUNK_DATA
 
     return TRUE;
-}// fFindIAT_InText()
+}// FindIAT_InText()
 
 //
 // ** Mostly from Matt Pietrek's PEDUMP.exe **
 //
-BOOL fDumpExports(DWORD dwFileBase, IMAGE_NT_HEADERS *pNTHeader,
-    IMAGE_DATA_DIRECTORY *pDataDir_Exp)
+BOOL DumpExports(DWORD dwFileBase, IMAGE_NT_HEADERS *pNTHeader, IMAGE_DATA_DIRECTORY *pDataDir_Exp)
 {
     ASSERT(pNTHeader != NULL && pDataDir_Exp != NULL);
 
@@ -313,7 +310,7 @@ BOOL fDumpExports(DWORD dwFileBase, IMAGE_NT_HEADERS *pNTHeader,
 
     if (pDataDir_Exp->VirtualAddress == 0 || pDataDir_Exp->Size == 0)
     {
-        wprintf_s(L"fDumpExports(): No Exports Found\n");
+        wprintf_s(L"DumpExports(): No Exports Found\n");
         return FALSE;
     }
 
@@ -385,4 +382,5 @@ BOOL fDumpExports(DWORD dwFileBase, IMAGE_NT_HEADERS *pNTHeader,
 
     return TRUE;
 
-}// fDumpExports()
+}// DumpExports()
+ 

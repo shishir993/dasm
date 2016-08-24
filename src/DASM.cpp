@@ -26,7 +26,7 @@ int wmain(int argc, WCHAR **argv)
 #ifdef UNIT_TESTS_ONLY
     DBG_UNREFERENCED_PARAMETER(argc);
     DBG_UNREFERENCED_PARAMETER(argv);
-    vRunTests();
+    RunTests();
     DEngine_FPUUnitTest();
     //DEngine_MMXUnitTest();
     DEngine_SSEUnitTest();
@@ -51,14 +51,14 @@ int wmain(int argc, WCHAR **argv)
             L"Copyright: MIT License (MIT) (Don't forget to include my name as a reference in your code/webpage :))\n\n", DASM_VERSION_STR);
 #endif
 
-    if (!fCmdArgsHandler(argc, argv, wszFilepath, _countof(wszFilepath)))
+    if (!CmdArgsHandler(argc, argv, wszFilepath, _countof(wszFilepath)))
     {
         wprintf_s(L"main(): Unable to parse command line arguments\n");
         wprintf_s(L"usage: %s\n\t[inputFile]\n\t[-exports|-e]\n\t[-imports|-i]\n\t[-headers|-h]\n\t[-disasm|-d]\n", argv[0]);
         return 1;
     }
 
-    if (!fOpenAndMapFile(wszFilepath, &hFile, &hFileObj, &hFileView))
+    if (!OpenAndMapFile(wszFilepath, &hFile, &hFileObj, &hFileView))
     {
         wprintf_s(L"Error opening input file\n");
         return 1;
@@ -69,7 +69,7 @@ int wmain(int argc, WCHAR **argv)
     __try
     {
         // dump information from headers
-        if (!fBeginFileScan(hFileView, &f64bit))
+        if (!BeginFileScan(hFileView, &f64bit))
         {
             wprintf_s(L"main(): fBeginFileScan() error\n");
             return 1;
@@ -78,14 +78,14 @@ int wmain(int argc, WCHAR **argv)
         if (g_fDisasm)
         {
             // get pointer to code section
-            if (!fGetPtrToCode((DWORD)hFileView, g_binFileInfo.pNTHeaders,
+            if (!GetPtrToCode((DWORD)hFileView, g_binFileInfo.pNTHeaders,
                 &dwCodeSecOffset, &dwSizeOfCodeSection, &g_binFileInfo.dwVirtBaseOfCode))
             {
                 wprintf_s(L"Cannot retrieve pointer to code section. Aborting...\n");
                 return 1;
             }
 
-            fDoDisassembly((DWORD*)dwCodeSecOffset, dwSizeOfCodeSection, g_binFileInfo.dwVirtBaseOfCode, f64bit);
+            DoDisassembly((DWORD*)dwCodeSecOffset, dwSizeOfCodeSection, g_binFileInfo.dwVirtBaseOfCode, f64bit);
         }// if(g_fDisasm)
 
         return 0;
@@ -94,7 +94,7 @@ int wmain(int argc, WCHAR **argv)
     {
         if (hFile != NULL && hFileObj != NULL && hFileView != NULL)
         {
-            fCloseFile(hFile, hFileObj, hFileView);
+            CloseFile(hFile, hFileObj, hFileView);
         }
     }
 
@@ -103,7 +103,7 @@ int wmain(int argc, WCHAR **argv)
 }// wmain()
 
 
-BOOL fCmdArgsHandler(int argc, WCHAR **argv, WCHAR *pwszInFile,
+BOOL CmdArgsHandler(int argc, WCHAR **argv, WCHAR *pwszInFile,
     DWORD dwInFileBufSize)
 {
     BOOL fInFile = FALSE;
@@ -144,7 +144,7 @@ BOOL fCmdArgsHandler(int argc, WCHAR **argv, WCHAR *pwszInFile,
 
             if (FAILED(hRes))
             {
-                wprintf_s(L"fCmdArgsHandler(): Unable to copy input file %s into buffer\n", argv[argc]);
+                wprintf_s(L"CmdArgsHandler(): Unable to copy input file %s into buffer\n", argv[argc]);
                 return FALSE;
             }
         }// if-else
@@ -166,17 +166,17 @@ BOOL fCmdArgsHandler(int argc, WCHAR **argv, WCHAR *pwszInFile,
         wprintf_s(L"File to disassemble? : ");
         if (wscanf_s(L"%s", pwszInFile, dwInFileBufSize) == EOF)
         {
-            logdbg(L"fCmdArgsHandler(): Unable to read input file path");
+            logdbg(L"CmdArgsHandler(): Unable to read input file path");
             return FALSE;
         }
     }
 
     return TRUE;
 
-}// fCmdArgsHandler()
+}// CmdArgsHandler()
 
 
-BOOL fOpenAndMapFile(WCHAR *pwszFilePath, HANDLE *hFile, HANDLE *hFileMapObj, HANDLE *hFileView)
+BOOL OpenAndMapFile(WCHAR *pwszFilePath, HANDLE *hFile, HANDLE *hFileMapObj, HANDLE *hFileView)
 {
     DWORD dwRetVal = 0;
     DWORD dwFileSize = 0;
@@ -229,9 +229,9 @@ BOOL fOpenAndMapFile(WCHAR *pwszFilePath, HANDLE *hFile, HANDLE *hFileMapObj, HA
     }
 
     return TRUE;
-}// fOpenAndMapFile()
+}// OpenAndMapFile()
 
-BOOL fCloseFile(HANDLE hFile, HANDLE hFileMapObj, HANDLE hFileView)
+BOOL CloseFile(HANDLE hFile, HANDLE hFileMapObj, HANDLE hFileView)
 {
     UnmapViewOfFile(hFileView);
     CloseHandle(hFileMapObj);
@@ -239,13 +239,13 @@ BOOL fCloseFile(HANDLE hFile, HANDLE hFileMapObj, HANDLE hFileView)
 
     return TRUE;
 
-}// fCloseFile()
+}// CloseFile()
 
 
 // Unit testing of individual functions
-void vRunTests()
+void RunTests()
 {
-    // Util_vSplitModRMByte()
+    // Util_SplitModRMByte()
     BYTE bModRM;
     BYTE bMod;
     BYTE bReg;
@@ -253,136 +253,136 @@ void vRunTests()
 
     bModRM = 0x7c;    // 01 111 100
     bMod = bReg = bRM = 0xff;
-    Util_vSplitModRMByte(bModRM, &bMod, &bReg, &bRM);
+    Util_SplitModRMByte(bModRM, &bMod, &bReg, &bRM);
     if (bMod != 1 || bReg != 7 || bRM != 4)
-        wprintf_s(L"!FAILED: Util_vSplitModRMByte(): %x, %x, %x, %x\n",
+        wprintf_s(L"!FAILED: Util_SplitModRMByte(): %x, %x, %x, %x\n",
             bModRM, bMod, bReg, bRM);
     else
-        wprintf_s(L"*Passed: Util_vSplitModRMByte(): %x, %x, %x, %x\n",
+        wprintf_s(L"*Passed: Util_SplitModRMByte(): %x, %x, %x, %x\n",
             bModRM, bMod, bReg, bRM);
 
     bModRM = 0xff;    // 11 111 111
     bMod = bReg = bRM = 0;
-    Util_vSplitModRMByte(bModRM, &bMod, &bReg, &bRM);
+    Util_SplitModRMByte(bModRM, &bMod, &bReg, &bRM);
     if (bMod != 3 || bReg != 7 || bRM != 7)
-        wprintf_s(L"!FAILED: Util_vSplitModRMByte(): %x, %x, %x, %x\n",
+        wprintf_s(L"!FAILED: Util_SplitModRMByte(): %x, %x, %x, %x\n",
             bModRM, bMod, bReg, bRM);
     else
-        wprintf_s(L"*Passed: Util_vSplitModRMByte(): %x, %x, %x, %x\n",
+        wprintf_s(L"*Passed: Util_SplitModRMByte(): %x, %x, %x, %x\n",
             bModRM, bMod, bReg, bRM);
 
-    // test Util_vGetDWBits()
+    // test Util_GetDWBits()
     BYTE bD;
     BYTE bW;
 
-    Util_vGetDWBits(0x00, &bD, &bW);
+    Util_GetDWBits(0x00, &bD, &bW);
     if (bD != 0 || bW != 0)
-        wprintf_s(L"!FAILED: Util_vGetDWBits(): %x, %x, %x\n", 0x00, bD, bW);
+        wprintf_s(L"!FAILED: Util_GetDWBits(): %x, %x, %x\n", 0x00, bD, bW);
     else
-        wprintf_s(L"*Passed: Util_vGetDWBits(): %x, %x, %x\n", 0x00, bD, bW);
+        wprintf_s(L"*Passed: Util_GetDWBits(): %x, %x, %x\n", 0x00, bD, bW);
 
-    Util_vGetDWBits(0x03, &bD, &bW);
+    Util_GetDWBits(0x03, &bD, &bW);
     if (bD != 1 || bW != 1)
-        wprintf_s(L"!FAILED: Util_vGetDWBits(): %x, %x, %x\n", 0x03, bD, bW);
+        wprintf_s(L"!FAILED: Util_GetDWBits(): %x, %x, %x\n", 0x03, bD, bW);
     else
-        wprintf_s(L"*Passed: Util_vGetDWBits(): %x, %x, %x\n", 0x03, bD, bW);
+        wprintf_s(L"*Passed: Util_GetDWBits(): %x, %x, %x\n", 0x03, bD, bW);
 
-    Util_vGetDWBits(0x01, &bD, &bW);
+    Util_GetDWBits(0x01, &bD, &bW);
     if (bD != 0 || bW != 1)
-        wprintf_s(L"!FAILED: Util_vGetDWBits(): %x, %x, %x\n", 0x01, bD, bW);
+        wprintf_s(L"!FAILED: Util_GetDWBits(): %x, %x, %x\n", 0x01, bD, bW);
     else
-        wprintf_s(L"*Passed: Util_vGetDWBits(): %x, %x, %x\n", 0x01, bD, bW);
+        wprintf_s(L"*Passed: Util_GetDWBits(): %x, %x, %x\n", 0x01, bD, bW);
 
-    Util_vGetDWBits(0x02, &bD, &bW);
+    Util_GetDWBits(0x02, &bD, &bW);
     if (bD != 1 || bW != 0)
-        wprintf_s(L"!FAILED: Util_vGetDWBits(): %x, %x, %x\n", 0x02, bD, bW);
+        wprintf_s(L"!FAILED: Util_GetDWBits(): %x, %x, %x\n", 0x02, bD, bW);
     else
-        wprintf_s(L"*Passed: Util_vGetDWBits(): %x, %x, %x\n", 0x02, bD, bW);
+        wprintf_s(L"*Passed: Util_GetDWBits(): %x, %x, %x\n", 0x02, bD, bW);
 
     /*
-     * Util_vTwosComplementByte()
+     * Util_TwosComplementByte()
      */
     BYTE ch = 0xe8;
     BYTE chCompl;    // 2's complement(ch)
-    Util_vTwosComplementByte(ch, &chCompl);
+    Util_TwosComplementByte(ch, &chCompl);
     if (chCompl != 0x18)
-        wprintf_s(L"!FAILED: Util_vTwosComplementByte(): %x, %x\n", ch, chCompl);
+        wprintf_s(L"!FAILED: Util_TwosComplementByte(): %x, %x\n", ch, chCompl);
     else
-        wprintf_s(L"*Passed: Util_vTwosComplementByte(): %x, %x\n", ch, chCompl);
+        wprintf_s(L"*Passed: Util_TwosComplementByte(): %x, %x\n", ch, chCompl);
 
     ch = 0x00;
-    Util_vTwosComplementByte(ch, &chCompl);
+    Util_TwosComplementByte(ch, &chCompl);
     if (chCompl != 0x00)
-        wprintf_s(L"!FAILED: Util_vTwosComplementByte(): %x, %x\n", ch, chCompl);
+        wprintf_s(L"!FAILED: Util_TwosComplementByte(): %x, %x\n", ch, chCompl);
     else
-        wprintf_s(L"*Passed: Util_vTwosComplementByte(): %x, %x\n", ch, chCompl);
+        wprintf_s(L"*Passed: Util_TwosComplementByte(): %x, %x\n", ch, chCompl);
 
     ch = 0x7f;
-    Util_vTwosComplementByte(ch, &chCompl);
+    Util_TwosComplementByte(ch, &chCompl);
     if (chCompl != (BYTE)0x81)
-        wprintf_s(L"!FAILED: Util_vTwosComplementByte(): %x, %x\n", ch, chCompl);
+        wprintf_s(L"!FAILED: Util_TwosComplementByte(): %x, %x\n", ch, chCompl);
     else
-        wprintf_s(L"*Passed: Util_vTwosComplementByte(): %x, %x\n", ch, chCompl);
+        wprintf_s(L"*Passed: Util_TwosComplementByte(): %x, %x\n", ch, chCompl);
 
     ch = 0xff;
-    Util_vTwosComplementByte(ch, &chCompl);
+    Util_TwosComplementByte(ch, &chCompl);
     if (chCompl != 0x01)
-        wprintf_s(L"!FAILED: Util_vTwosComplementByte(): %x, %x\n", ch, chCompl);
+        wprintf_s(L"!FAILED: Util_TwosComplementByte(): %x, %x\n", ch, chCompl);
     else
-        wprintf_s(L"*Passed: Util_vTwosComplementByte(): %x, %x\n", ch, chCompl);
+        wprintf_s(L"*Passed: Util_TwosComplementByte(): %x, %x\n", ch, chCompl);
 
     /*
-     * Util_vTwosComplementInt()
+     * Util_TwosComplementInt()
      */
     INT i = 0x002b34e8;
     INT iCompl;    // 2's complement(ch)
     INT iTemp;
 
     iTemp = ((i ^ 0xffffffff) + 1);
-    Util_vTwosComplementInt(i, &iCompl);
+    Util_TwosComplementInt(i, &iCompl);
     if (iCompl != iTemp)
-        wprintf_s(L"!FAILED: Util_vTwosComplementInt(): %x, %x\n", i, iCompl);
+        wprintf_s(L"!FAILED: Util_TwosComplementInt(): %x, %x\n", i, iCompl);
     else
-        wprintf_s(L"*Passed: Util_vTwosComplementInt(): %x, %x\n", i, iCompl);
+        wprintf_s(L"*Passed: Util_TwosComplementInt(): %x, %x\n", i, iCompl);
 
     i = 0x00;
     iTemp = ((i ^ 0xffffffff) + 1);
-    Util_vTwosComplementInt(i, &iCompl);
+    Util_TwosComplementInt(i, &iCompl);
     if (iCompl != iTemp)
-        wprintf_s(L"!FAILED: Util_vTwosComplementInt(): %x, %x\n", i, iCompl);
+        wprintf_s(L"!FAILED: Util_TwosComplementInt(): %x, %x\n", i, iCompl);
     else
-        wprintf_s(L"*Passed: Util_vTwosComplementInt(): %x, %x\n", i, iCompl);
+        wprintf_s(L"*Passed: Util_TwosComplementInt(): %x, %x\n", i, iCompl);
 
     i = 0x7fffffff;
     iTemp = ((i ^ 0xffffffff) + 1);
-    Util_vTwosComplementInt(i, &iCompl);
+    Util_TwosComplementInt(i, &iCompl);
     if (iCompl != iTemp)
-        wprintf_s(L"!FAILED: Util_vTwosComplementInt(): %x, %x\n", i, iCompl);
+        wprintf_s(L"!FAILED: Util_TwosComplementInt(): %x, %x\n", i, iCompl);
     else
-        wprintf_s(L"*Passed: Util_vTwosComplementInt(): %x, %x\n", i, iCompl);
+        wprintf_s(L"*Passed: Util_TwosComplementInt(): %x, %x\n", i, iCompl);
 
     i = 0xffffffff;
     iTemp = ((i ^ 0xffffffff) + 1);
-    Util_vTwosComplementInt(i, &iCompl);
+    Util_TwosComplementInt(i, &iCompl);
     if (iCompl != iTemp)
-        wprintf_s(L"!FAILED: Util_vTwosComplementInt(): %x, %x\n", i, iCompl);
+        wprintf_s(L"!FAILED: Util_TwosComplementInt(): %x, %x\n", i, iCompl);
     else
-        wprintf_s(L"*Passed: Util_vTwosComplementInt(): %x, %x\n", i, iCompl);
+        wprintf_s(L"*Passed: Util_TwosComplementInt(): %x, %x\n", i, iCompl);
 
     i = 0x8b00401b;
     iTemp = ((i ^ 0xffffffff) + 1);
-    Util_vTwosComplementInt(i, &iCompl);
+    Util_TwosComplementInt(i, &iCompl);
     if (iCompl != iTemp)
-        wprintf_s(L"!FAILED: Util_vTwosComplementInt(): %x, %x\n", i, iCompl);
+        wprintf_s(L"!FAILED: Util_TwosComplementInt(): %x, %x\n", i, iCompl);
     else
-        wprintf_s(L"*Passed: Util_vTwosComplementInt(): %x, %x\n", i, iCompl);
+        wprintf_s(L"*Passed: Util_TwosComplementInt(): %x, %x\n", i, iCompl);
 
     i = 0x80000000;
     iTemp = ((i ^ 0xffffffff) + 1);
-    Util_vTwosComplementInt(i, &iCompl);
+    Util_TwosComplementInt(i, &iCompl);
     if (iCompl != iTemp)
-        wprintf_s(L"!FAILED: Util_vTwosComplementInt(): %x, %x\n", i, iCompl);
+        wprintf_s(L"!FAILED: Util_TwosComplementInt(): %x, %x\n", i, iCompl);
     else
-        wprintf_s(L"*Passed: Util_vTwosComplementInt(): %x, %x\n", i, iCompl);
+        wprintf_s(L"*Passed: Util_TwosComplementInt(): %x, %x\n", i, iCompl);
 
-}// vRunTests()
+}// RunTests()

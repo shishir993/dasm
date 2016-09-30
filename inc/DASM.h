@@ -17,7 +17,6 @@
 
 int wmain(int argc, WCHAR **argv);
 BOOL CmdArgsHandler(int argc, WCHAR **argv, WCHAR *pwszInFile, DWORD dwInFileBufSize);
-void RunTests();
 BOOL OpenAndMapFile(WCHAR *pwszFilePath, HANDLE *hFile, HANDLE *hFileMapObj, HANDLE *hFileView);
 BOOL CloseFile(HANDLE hFile, HANDLE hFileMapObj, HANDLE hFileView);
 

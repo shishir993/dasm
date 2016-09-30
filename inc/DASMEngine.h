@@ -482,6 +482,17 @@ typedef struct _InsSplit {
 
 /* end of structures */
 
+#ifdef DASM_BUILD_FOR_UNITTEST
+
+extern PBYTE pByteInCode;
+extern BYTE bFullOpcode;
+extern BYTE bOpcodeLow;
+extern BYTE bOpcodeHigh;
+extern BYTE bFPUModRM;
+extern BYTE bFPUReg;
+
+#endif
+
 /*
  * function prototypes
  */

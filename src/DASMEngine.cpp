@@ -444,29 +444,29 @@ BOOL(*afpFPUModRMFullEx[8][0x40])(BYTE) =
 
 // IASD Vol2 - Table 3-1
 // Look for #defines for indexes into these arrays
-WCHAR awszRegCodes8[8][3] = { L"al", L"cl", L"dl", L"bl", L"ah", L"ch", L"dh", L"bh" };
-WCHAR awszRegCodes16[8][3] = { L"ax", L"cx", L"dx", L"bx", L"sp", L"bp", L"si", L"di" };
-WCHAR awszRegCodes32[8][4] = { L"eax", L"ecx", L"edx", L"ebx", L"esp", L"ebp", L"esi", L"edi" };
+WCHAR awszRegCodes8[8][3] =     { L"al",    L"cl",  L"dl",  L"bl",  L"ah",  L"ch",  L"dh",  L"bh" };
+WCHAR awszRegCodes16[8][3] =    { L"ax",    L"cx",  L"dx",  L"bx",  L"sp",  L"bp",  L"si",  L"di" };
+WCHAR awszRegCodes32[8][4] =    { L"eax",   L"ecx", L"edx", L"ebx", L"esp", L"ebp", L"esi", L"edi" };
 
 // IASD Vol2 - Table B-6: segment registers
-WCHAR awszSRegCodes[8][3] = { L"es", L"cs", L"ss", L"ds", L"fs", L"gs", L"!s", L"!s" };
+WCHAR awszSRegCodes[8][3] =     { L"es",    L"cs",  L"ss",  L"ds",  L"fs",  L"gs",  L"!s",  L"!s" };
 
 // IASD Vol2 - Table B-7: control registers
-WCHAR awszCRegCodes[8][4] = { L"cr0", L"!c", L"cr2", L"cr3", L"cr4", L"!c", L"!c", L"!c" };
+WCHAR awszCRegCodes[8][4] =     { L"cr0",   L"!c",  L"cr2", L"cr3", L"cr4", L"!c",  L"!c",  L"!c" };
 
 // IASD Vol2 - Table B-7: debug registers
-WCHAR awszDRegCodes[8][4] = { L"dr0", L"dr1", L"dr2", L"dr3", L"!d", L"!d", L"dr6", L"dr7" };
+WCHAR awszDRegCodes[8][4] =     { L"dr0",   L"dr1", L"dr2", L"dr3", L"!d",  L"!d",  L"dr6", L"dr7" };
 
 // IASD Vol1 - 8.1.1 MMX Registers
-WCHAR awszMMXRegCodes[8][4] = { L"mm0", L"mm1", L"mm2", L"mm3", L"mm4", L"mm5", L"mm6", L"mm7" };
+WCHAR awszMMXRegCodes[8][4] =   { L"mm0",   L"mm1", L"mm2", L"mm3", L"mm4", L"mm5", L"mm6", L"mm7" };
 
-WCHAR awszXMMRegCodes[8][5] = { L"xmm0", L"xmm1", L"xmm2", L"xmm3", L"xmm4", L"xmm5", L"xmm6", L"xmm7" };
+WCHAR awszXMMRegCodes[8][5] =   { L"xmm0",  L"xmm1", L"xmm2", L"xmm3", L"xmm4", L"xmm5", L"xmm6", L"xmm7" };
 
 // operand pointer strings
 static WCHAR awszPtrStr[][MAX_PTR_STR] = {
-    L"", L"byte ptr ", L"word ptr ", L"dword ptr ",
-    L"fword ptr ", L"qword ptr ", L"tbyte ptr ",
-    L"mmword ptr ", L"xmmword ptr " };
+    L"",            L"byte ptr ",   L"word ptr ",   L"dword ptr ",
+    L"fword ptr ",  L"qword ptr ",  L"tbyte ptr ",  L"mmword ptr ", 
+    L"xmmword ptr " };
 
 /*
  * ***********************************************************************
@@ -516,6 +516,53 @@ static DASM_STATE dsNextState;
  * **** End of static global variables ****
  */
 
+/*
+ * **** File local functions ****
+ */
+
+ // 16/32 bit offset based on address size prefix
+BYTE ImmTypeFromAddrSize() {
+    return (insCurIns.wPrefixTypes & PREFIX_ADSIZE) ? IMM_16BIT : IMM_32BIT;
+}
+
+BYTE ImmTypeFromOperandSize() {
+    return (insCurIns.wPrefixTypes & PREFIX_OPSIZE) ? IMM_16BIT : IMM_32BIT;
+}
+
+BYTE ImmTypeFromWbitOperandSize() {
+    if (insCurIns.bWBit == 0) {
+        return IMM_8BIT;
+    }
+    return ImmTypeFromOperandSize();
+}
+
+// Register string (AL/BH/ECX/ESI/...) from reg code and address size prefix
+WCHAR* RegStrFromAddrSize(int regCode) {
+    return (insCurIns.wPrefixTypes & PREFIX_ADSIZE) ? awszRegCodes16[regCode] : awszRegCodes32[regCode];
+}
+
+// Register string (AL/BH/ECX/ESI/...) from reg code and operand size prefix
+WCHAR* RegStrFromOperandSize(int regCode) {
+    return (insCurIns.wPrefixTypes & PREFIX_OPSIZE) ? awszRegCodes16[regCode] : awszRegCodes32[regCode];
+}
+
+WCHAR* RegStrFromWbitOperandSize(int regCode) {
+    if (insCurIns.bWBit == 0) {
+        return awszRegCodes8[regCode];
+    }
+    return RegStrFromOperandSize(regCode);
+}
+
+WCHAR* PtrStrFromOperandSize() {
+    if (insCurIns.bWBit == 0) {
+        return awszPtrStr[PTR_STR_INDEX_BYTE];
+    }
+    return (insCurIns.wPrefixTypes & PREFIX_OPSIZE) ? awszPtrStr[PTR_STR_INDEX_WORD] : awszPtrStr[PTR_STR_INDEX_DWORD];
+}
+
+ /*
+ * **** End of file local functions ****
+ */
 
  /* ExecDisassembler()
   * Entry point for the DasmEngine. Calls DoDisassembly() for all the
@@ -703,11 +750,11 @@ BOOL DoDisassembly(DWORD *pdwCodeSection, DWORD dwSizeOfCodeSection, DWORD dwVir
     }// while(1)
 
 AFT_WHILE:
-    wprintf_s(L"\n**** End of disassembly ****\n");
-    wprintf_s(L"Code begin        : %08Xh\n", (DWORD)pdwCodeSection);
-    wprintf_s(L"Code size         : %Xh\n", dwSizeOfCodeSection);
-    wprintf_s(L"Last byte decoded : %08Xh\n", (DWORD)pByteInCode - 1);
-    wprintf_s(L"Bytes decoded     : %Xh\n", (DWORD)pByteInCode - (DWORD)pdwCodeSection);
+    logdbg(L"\n**** End of disassembly ****\n");
+    logdbg(L"Code begin        : %08Xh\n", (DWORD)pdwCodeSection);
+    logdbg(L"Code size         : %Xh\n", dwSizeOfCodeSection);
+    logdbg(L"Last byte decoded : %08Xh\n", (DWORD)pByteInCode - 1);
+    logdbg(L"Bytes decoded     : %Xh\n", (DWORD)pByteInCode - (DWORD)pdwCodeSection);
 
     return TRUE;
 }// DoDisassembly
@@ -896,7 +943,7 @@ BOOL OPCHndlr_2ByteHandler(BYTE bOpcode)
 
 
 /* OPCHndlr_3ByteHandler()
- * This state processes the 2byte opcodes.
+ * This state processes the 3byte opcodes.
  *
  * Args:
  *
@@ -1740,7 +1787,7 @@ OPRTYPE_RETVAL MODRM_GetOperandFromReg(BYTE bReg, BYTE bOprSize, BYTE bRegType,
 
 BOOL MODRM_fSetPtrStr(BYTE bOperandSize, __out WCHAR *pwszPtrStr, DWORD dwPtrStrCount)
 {
-    ASSERT(bOperandSize >= OPERANDSIZE_UNDEF && bOperandSize <= OPERANDSIZE_64BIT);
+    ASSERT(OPERANDSIZE_UNDEF <= bOperandSize && bOperandSize <= OPERANDSIZE_64BIT);
 
     if (bOperandSize != OPERANDSIZE_UNDEF)
     {
@@ -1752,16 +1799,7 @@ BOOL MODRM_fSetPtrStr(BYTE bOperandSize, __out WCHAR *pwszPtrStr, DWORD dwPtrStr
 
     // If bOperandSize has not been determined earlier, then we must
     // determine it using wBit and opsize attrib
-    if (insCurIns.bWBit == 0)
-        StringCchCopy(pwszPtrStr, dwPtrStrCount, awszPtrStr[PTR_STR_INDEX_BYTE]);
-    else if (insCurIns.wPrefixTypes & PREFIX_OPSIZE)
-        // 16bit
-        StringCchCopy(pwszPtrStr, dwPtrStrCount, awszPtrStr[PTR_STR_INDEX_WORD]);
-    else
-        // 32bit
-        StringCchCopy(pwszPtrStr, dwPtrStrCount, awszPtrStr[PTR_STR_INDEX_DWORD]);
-
-    // todo: check ret val from StringCchCopy
+    StringCchCopy(pwszPtrStr, dwPtrStrCount, PtrStrFromOperandSize());
 
     return TRUE;
 }
@@ -2000,7 +2038,6 @@ BOOL StateDisp()
   */
 BOOL StateImm()
 {
-
     // Read the bImmType size of data from pByteInCode
 
     if (insCurIns.fCodeOffset)
@@ -2994,11 +3031,7 @@ BOOL OPCHndlrStack_PUSH(BYTE bOpcode)
             // Size of immediate value is 16/32bits depending on the
             // presence of the operand size override prefix
             insCurIns.fImm = TRUE;
-            if (insCurIns.wPrefixTypes & PREFIX_OPSIZE)
-                insCurIns.bImmType = IMM_16BIT;
-            else
-                insCurIns.bImmType = IMM_32BIT;
-
+            insCurIns.bImmType = ImmTypeFromOperandSize();
             dsNextState = DASM_STATE_IMM;
             break;
         }
@@ -3067,15 +3100,7 @@ BOOL OPCHndlrStack_PUSH(BYTE bOpcode)
         // Opcode is between 50h to 57h: PUSH reg
         // Get the register name
         WORD wReg = bOpcode - 0x50;
-
-        if (insCurIns.wPrefixTypes & PREFIX_OPSIZE) {
-            // 16bit reg
-            StringCchCopy(insCurIns.wszCurInsStrSrc, _countof(insCurIns.wszCurInsStrSrc), awszRegCodes16[wReg]);
-        }
-        else {
-            // 32bit reg
-            StringCchCopy(insCurIns.wszCurInsStrSrc, _countof(insCurIns.wszCurInsStrSrc), awszRegCodes32[wReg]);
-        }
+        StringCchCopy(insCurIns.wszCurInsStrSrc, _countof(insCurIns.wszCurInsStrSrc), RegStrFromOperandSize(wReg));
         insCurIns.fSrcStrSet = TRUE;
 
         // Next state is DUMP because there are no more 
@@ -3170,14 +3195,7 @@ BOOL OPCHndlrStack_POP(BYTE bOpcode)
 
         // Get the register name index
         WORD wReg = bOpcode - 0x58;
-
-        if (insCurIns.wPrefixTypes & PREFIX_OPSIZE) {
-            StringCchCopy(insCurIns.wszCurInsStrSrc, _countof(insCurIns.wszCurInsStrSrc), awszRegCodes16[wReg]);
-        }
-        else {
-            StringCchCopy(insCurIns.wszCurInsStrSrc, _countof(insCurIns.wszCurInsStrSrc), awszRegCodes32[wReg]);
-        }
-
+        StringCchCopy(insCurIns.wszCurInsStrSrc, _countof(insCurIns.wszCurInsStrSrc), RegStrFromOperandSize(wReg));
         insCurIns.fSrcStrSet = TRUE;
 
         // Next state is DUMP because there are no more
@@ -3197,10 +3215,8 @@ BOOL OPCHndlrStack_PUSHxx(BYTE bOpcode)
 {
     logdbg(L"%s(): %xh\n", __FUNCTIONW__, bOpcode);
 
-    // If operand size prefix is present,
-    // then 16bit mnemonic is used.
-    // Remember that 32bit mnemonic is already written
-    // in StateOpcode()
+    // If operand size prefix is present, then 16bit mnemonic is used.
+    // Remember that 32bit mnemonic is already written in StateOpcode().
     if (bOpcode == 0x60) {
         if (insCurIns.wPrefixTypes & PREFIX_OPSIZE) {
             StringCchPrintf(wszCurInsStr, _countof(wszCurInsStr), L"pusha");
@@ -3367,34 +3383,16 @@ BOOL OPCHndlrALU_ADD(BYTE bOpcode)
         break;
 
     case 0x04:
+    case 0x05:
     case 0x14:
+    case 0x15:
         insCurIns.fImm = TRUE;
-        insCurIns.bImmType = IMM_8BIT;
+        insCurIns.bImmType = ImmTypeFromWbitOperandSize();
 
         // Construct the output string
-        StringCchCopy(insCurIns.wszCurInsStrDes, _countof(insCurIns.wszCurInsStrDes), awszRegCodes8[REGCODE_AL]);
+        StringCchCopy(insCurIns.wszCurInsStrDes, _countof(insCurIns.wszCurInsStrDes), RegStrFromWbitOperandSize(REGCODE_AX));
         insCurIns.fDesStrSet = TRUE;
 
-        dsNextState = DASM_STATE_IMM;
-        break;
-
-    case 0x05:
-    case 0x15:
-        if (insCurIns.wPrefixTypes & PREFIX_OPSIZE)
-        {
-            insCurIns.bImmType = IMM_16BIT;
-            // Construct the output string
-            StringCchCopy(insCurIns.wszCurInsStrDes, _countof(insCurIns.wszCurInsStrDes), awszRegCodes16[REGCODE_AX]);
-            insCurIns.fDesStrSet = TRUE;
-        }
-        else
-        {
-            insCurIns.bImmType = IMM_32BIT;
-            // Construct the output string
-            StringCchCopy(insCurIns.wszCurInsStrDes, _countof(insCurIns.wszCurInsStrDes), awszRegCodes32[REGCODE_EAX]);
-            insCurIns.fDesStrSet = TRUE;
-        }
-        insCurIns.fImm = TRUE;
         dsNextState = DASM_STATE_IMM;
         break;
 
@@ -3467,41 +3465,20 @@ BOOL OPCHndlrALU_SUB(BYTE bOpcode)
     switch (bOpcode)
     {
     case 0x1c:
-    case 0x2c:
-        insCurIns.fImm = TRUE;
-        insCurIns.bImmType = IMM_8BIT;
-        StringCchCopy(insCurIns.wszCurInsStrDes, _countof(insCurIns.wszCurInsStrDes), awszRegCodes8[REGCODE_AL]);
-        insCurIns.fDesStrSet = TRUE;
-        dsNextState = DASM_STATE_IMM;
-        break;
-
     case 0x1d:
+    case 0x2c:
     case 0x2d:
     {
         insCurIns.fImm = TRUE;
-        if (insCurIns.wPrefixTypes & PREFIX_OPSIZE)
-        {
-            // 16bit operand
-            insCurIns.bImmType = IMM_16BIT;
-            StringCchCopy(insCurIns.wszCurInsStrDes, _countof(insCurIns.wszCurInsStrDes),
-                awszRegCodes16[REGCODE_AX]);
-            insCurIns.fDesStrSet = TRUE;
-        }
-        else
-        {
-            // 32bit
-            insCurIns.bImmType = IMM_32BIT;
-            StringCchCopy(insCurIns.wszCurInsStrDes, _countof(insCurIns.wszCurInsStrDes),
-                awszRegCodes32[REGCODE_EAX]);
-            insCurIns.fDesStrSet = TRUE;
-        }
-
+        insCurIns.bImmType = ImmTypeFromWbitOperandSize();
+        StringCchCopy(insCurIns.wszCurInsStrDes, _countof(insCurIns.wszCurInsStrDes), RegStrFromWbitOperandSize(REGCODE_AX));
+        insCurIns.fDesStrSet = TRUE;
         dsNextState = DASM_STATE_IMM;
         break;
     }
 
-    case 0x80:    // wbit and opsize attrib can be used to determine
-    case 0x81:    // size of operands
+    case 0x80:    // wbit and opsize attrib can be used to determine size of operands
+    case 0x81:
         insCurIns.fImm = TRUE;
         insCurIns.fModRM = TRUE;
         insCurIns.bModRMType = MODRM_TYPE_DIGIT;
@@ -3583,10 +3560,7 @@ BOOL OPCHndlrALU_MUL(BYTE bOpcode)
     case 0x69:
         insCurIns.bModRMType = MODRM_TYPE_R;
         insCurIns.fImm = TRUE;
-        if (insCurIns.wPrefixTypes & PREFIX_OPSIZE)
-            insCurIns.bImmType = IMM_16BIT;
-        else
-            insCurIns.bImmType = IMM_32BIT;
+        insCurIns.bImmType = ImmTypeFromWbitOperandSize();
         break;
 
     default:
@@ -3648,13 +3622,9 @@ BOOL OPCHndlrALU_INC(BYTE bOpcode)
     logdbg(L"%s(): %xh\n", __FUNCTIONW__, bOpcode);
 
     WORD wReg = bOpcode - OPC_INC_BEG;
-
-    if (bOpcode >= OPC_INC_BEG && bOpcode <= OPC_INC_END)
+    if (OPC_INC_BEG <= bOpcode && bOpcode <= OPC_INC_END)
     {
-        if (insCurIns.wPrefixTypes & PREFIX_OPSIZE)
-            StringCchCopy(insCurIns.wszCurInsStrSrc, _countof(insCurIns.wszCurInsStrSrc), awszRegCodes16[wReg]);
-        else
-            StringCchCopy(insCurIns.wszCurInsStrSrc, _countof(insCurIns.wszCurInsStrSrc), awszRegCodes32[wReg]);
+        StringCchCopy(insCurIns.wszCurInsStrSrc, _countof(insCurIns.wszCurInsStrSrc), RegStrFromOperandSize(wReg));
         insCurIns.fSrcStrSet = TRUE;
         dsNextState = DASM_STATE_DUMP;
     }
@@ -3686,13 +3656,9 @@ BOOL OPCHndlrALU_DEC(BYTE bOpcode)
     logdbg(L"%s(): %xh\n", __FUNCTIONW__, bOpcode);
 
     WORD wReg = bOpcode - OPC_DEC_BEG;
-
-    if (bOpcode >= OPC_DEC_BEG && bOpcode <= OPC_DEC_END)
+    if (OPC_DEC_BEG <= bOpcode && bOpcode <= OPC_DEC_END)
     {
-        if (insCurIns.wPrefixTypes & PREFIX_OPSIZE)
-            StringCchCopy(insCurIns.wszCurInsStrSrc, _countof(insCurIns.wszCurInsStrSrc), awszRegCodes16[wReg]);
-        else
-            StringCchCopy(insCurIns.wszCurInsStrSrc, _countof(insCurIns.wszCurInsStrSrc), awszRegCodes32[wReg]);
+        StringCchCopy(insCurIns.wszCurInsStrSrc, _countof(insCurIns.wszCurInsStrSrc), RegStrFromOperandSize(wReg));
         insCurIns.fSrcStrSet = TRUE;
         dsNextState = DASM_STATE_DUMP;
     }
@@ -3918,26 +3884,11 @@ BOOL OPCHndlrALU_OR(BYTE bOpcode)
     switch (bOpcode)
     {
     case 0x0c:
-        insCurIns.fImm = TRUE;
-        insCurIns.bImmType = IMM_8BIT;
-        StringCchCopy(insCurIns.wszCurInsStrDes, _countof(insCurIns.wszCurInsStrDes), awszRegCodes8[REGCODE_AL]);
-        insCurIns.fDesStrSet = TRUE;
-        dsNextState = DASM_STATE_IMM;
-        break;
-
     case 0x0d:
     {
         insCurIns.fImm = TRUE;
-        if (insCurIns.wPrefixTypes & PREFIX_OPSIZE)
-        {
-            insCurIns.bImmType = IMM_16BIT;
-            StringCchCopy(insCurIns.wszCurInsStrDes, _countof(insCurIns.wszCurInsStrDes), awszRegCodes16[REGCODE_AX]);
-        }
-        else
-        {
-            insCurIns.bImmType = IMM_32BIT;
-            StringCchCopy(insCurIns.wszCurInsStrDes, _countof(insCurIns.wszCurInsStrDes), awszRegCodes32[REGCODE_EAX]);
-        }
+        insCurIns.bImmType = ImmTypeFromWbitOperandSize();
+        StringCchCopy(insCurIns.wszCurInsStrDes, _countof(insCurIns.wszCurInsStrDes), RegStrFromWbitOperandSize(REGCODE_AX));
         insCurIns.fDesStrSet = TRUE;
         dsNextState = DASM_STATE_IMM;
         break;
@@ -3952,7 +3903,7 @@ BOOL OPCHndlrALU_OR(BYTE bOpcode)
         dsNextState = DASM_STATE_MOD_RM;
         break;
 
-    case 0x83:    // 83 /1 ib        OR r/m16,imm8
+    case 0x83:  // 83 /1 ib        OR r/m16,imm8
                 // 83 /1 ib        OR r/m32,imm8
         insCurIns.fImm = TRUE;
         insCurIns.bImmType = IMM_8BIT;
@@ -3962,7 +3913,7 @@ BOOL OPCHndlrALU_OR(BYTE bOpcode)
         dsNextState = DASM_STATE_MOD_RM;
         break;
 
-    case 0x08:    // 08 /r    OR r/m8,r8
+    case 0x08:  // 08 /r    OR r/m8,r8
     case 0x09:
     case 0x0a:
     case 0x0b:
@@ -4012,30 +3963,10 @@ BOOL OPCHndlrALU_AND(BYTE bOpcode)
         break;
 
     case 0x24:
-        insCurIns.fImm = TRUE;
-        insCurIns.bImmType = IMM_8BIT;
-
-        // Construct the output string
-        StringCchCopy(insCurIns.wszCurInsStrDes, _countof(insCurIns.wszCurInsStrDes), awszRegCodes8[REGCODE_AL]);
-        insCurIns.fDesStrSet = TRUE;
-
-        dsNextState = DASM_STATE_IMM;
-        break;
-
     case 0x25:
         insCurIns.fImm = TRUE;
-        if (insCurIns.wPrefixTypes & PREFIX_OPSIZE)
-        {
-            insCurIns.bImmType = IMM_16BIT;
-            // Construct the output string
-            StringCchCopy(insCurIns.wszCurInsStrDes, _countof(insCurIns.wszCurInsStrDes), awszRegCodes16[REGCODE_AX]);
-        }
-        else
-        {
-            insCurIns.bImmType = IMM_32BIT;
-            // Construct the output string
-            StringCchCopy(insCurIns.wszCurInsStrDes, _countof(insCurIns.wszCurInsStrDes), awszRegCodes32[REGCODE_EAX]);
-        }
+        insCurIns.bImmType = ImmTypeFromWbitOperandSize();
+        StringCchCopy(insCurIns.wszCurInsStrDes, _countof(insCurIns.wszCurInsStrDes), RegStrFromWbitOperandSize(REGCODE_AX));
         insCurIns.fDesStrSet = TRUE;
         dsNextState = DASM_STATE_IMM;
 
@@ -4091,33 +4022,11 @@ BOOL OPCHndlrALU_XOR(BYTE bOpcode)
     switch (bOpcode)
     {
     case 0x34:
-        insCurIns.fImm = TRUE;
-        insCurIns.bImmType = IMM_8BIT;
-
-        // Construct the output string
-        StringCchPrintf(insCurIns.wszCurInsStrDes, _countof(insCurIns.wszCurInsStrDes),
-            awszRegCodes8[REGCODE_AL]);
-        insCurIns.fDesStrSet = TRUE;
-        dsNextState = DASM_STATE_IMM;
-        break;
-
     case 0x35:
     {
         insCurIns.fImm = TRUE;
-        if (insCurIns.wPrefixTypes & PREFIX_OPSIZE)
-        {
-            insCurIns.bImmType = IMM_16BIT;
-            // Construct the output string
-            StringCchPrintf(insCurIns.wszCurInsStrDes, _countof(insCurIns.wszCurInsStrDes),
-                awszRegCodes16[REGCODE_AX]);
-        }
-        else
-        {
-            insCurIns.bImmType = IMM_32BIT;
-            // Construct the output string
-            StringCchPrintf(insCurIns.wszCurInsStrDes, _countof(insCurIns.wszCurInsStrDes),
-                awszRegCodes32[REGCODE_EAX]);
-        }
+        insCurIns.bImmType = ImmTypeFromWbitOperandSize();
+        StringCchPrintf(insCurIns.wszCurInsStrDes, _countof(insCurIns.wszCurInsStrDes), RegStrFromWbitOperandSize(REGCODE_AX));
         insCurIns.fDesStrSet = TRUE;
         dsNextState = DASM_STATE_IMM;
         break;
@@ -4296,26 +4205,13 @@ BOOL OPCHndlrMem_XCHG(BYTE bOpcode)
 {
     logdbg(L"%s(): %xh\n", __FUNCTIONW__, bOpcode);
 
-    if (bOpcode >= OPC_XCHG_BEG && bOpcode <= OPC_XCHG_END)
+    if (OPC_XCHG_BEG <= bOpcode && bOpcode <= OPC_XCHG_END)
     {
         BYTE bReg = bOpcode - OPC_XCHG_BEG;
-
-        if (insCurIns.wPrefixTypes & PREFIX_OPSIZE)
-        {
-            // 16bit regs
-            StringCchPrintf(insCurIns.wszCurInsStrDes, _countof(insCurIns.wszCurInsStrDes),
-                awszRegCodes16[REGCODE_AX]);
-            StringCchPrintf(insCurIns.wszCurInsStrSrc, _countof(insCurIns.wszCurInsStrSrc),
-                awszRegCodes16[bReg]);
-        }
-        else
-        {
-            // 32bit regs
-            StringCchPrintf(insCurIns.wszCurInsStrDes, _countof(insCurIns.wszCurInsStrDes),
-                awszRegCodes32[REGCODE_AX]);
-            StringCchPrintf(insCurIns.wszCurInsStrSrc, _countof(insCurIns.wszCurInsStrSrc),
-                awszRegCodes32[bReg]);
-        }
+        StringCchPrintf(insCurIns.wszCurInsStrDes, _countof(insCurIns.wszCurInsStrDes),
+            RegStrFromOperandSize(REGCODE_AX));
+        StringCchPrintf(insCurIns.wszCurInsStrSrc, _countof(insCurIns.wszCurInsStrSrc),
+            RegStrFromOperandSize(bReg));
         insCurIns.fSrcStrSet = TRUE;
         insCurIns.fDesStrSet = TRUE;
         dsNextState = DASM_STATE_DUMP;
@@ -4410,127 +4306,43 @@ BOOL OPCHndlrMem_MOV(BYTE bOpcode)
     }
 
     case 0xa0:    // A0    MOV AL,moffs8*        Move byte at (seg:offset) to AL
-    {
-        insCurIns.fDataOffset = TRUE;
-
-        // determine offset size using address size attrib
-        if (insCurIns.wPrefixTypes & PREFIX_ADSIZE)
-            // 16bit offset
-            insCurIns.bImmType = IMM_16BIT;
-        else
-            // 32bit offset
-            insCurIns.bImmType = IMM_32BIT;
-
-        insCurIns.pwszPtrStr = awszPtrStr[PTR_STR_INDEX_BYTE];
-        StringCchPrintf(insCurIns.wszCurInsStrDes, _countof(insCurIns.wszCurInsStrDes),
-            L"%s", awszRegCodes8[REGCODE_AL]);
-        insCurIns.fDesStrSet = TRUE;
-        dsNextState = DASM_STATE_IMM;
-        break;
-    }
-
     case 0xa1:    // A1    MOV AX,moffs16*
     {
         insCurIns.fDataOffset = TRUE;
-
-        // determine offset size using address size attrib
-        if (insCurIns.wPrefixTypes & PREFIX_ADSIZE)
-            // 16bit offset
-            insCurIns.bImmType = IMM_16BIT;
-        else
-            // 32bit offset
-            insCurIns.bImmType = IMM_32BIT;
-
-        // determine operand size using opsize attrib
-        if (insCurIns.wPrefixTypes & PREFIX_OPSIZE)
-        {
-            insCurIns.pwszPtrStr = awszPtrStr[PTR_STR_INDEX_WORD];
-            StringCchPrintf(insCurIns.wszCurInsStrDes, _countof(insCurIns.wszCurInsStrDes),
-                L"%s", awszRegCodes16[REGCODE_AX]);
-        }
-        else
-        {
-            insCurIns.pwszPtrStr = awszPtrStr[PTR_STR_INDEX_DWORD];
-            StringCchPrintf(insCurIns.wszCurInsStrDes, _countof(insCurIns.wszCurInsStrDes),
-                L"%s", awszRegCodes32[REGCODE_EAX]);
-        }
-
+        insCurIns.bImmType = ImmTypeFromAddrSize();
+        insCurIns.pwszPtrStr = PtrStrFromOperandSize();
+        StringCchPrintf(insCurIns.wszCurInsStrDes, _countof(insCurIns.wszCurInsStrDes),
+            L"%s", RegStrFromWbitOperandSize(REGCODE_AX));
         insCurIns.fDesStrSet = TRUE;
         dsNextState = DASM_STATE_IMM;
         break;
     }
 
     case 0xa2:    // A2    MOV moffs8*,AL
-    {
-        insCurIns.fDataOffset = TRUE;
-
-        // determine offset size using address size attrib
-        if (insCurIns.wPrefixTypes & PREFIX_ADSIZE)
-            // 16bit offset
-            insCurIns.bImmType = IMM_16BIT;
-        else
-            // 32bit offset
-            insCurIns.bImmType = IMM_32BIT;
-
-        insCurIns.pwszPtrStr = awszPtrStr[PTR_STR_INDEX_BYTE];
-        StringCchPrintf(insCurIns.wszCurInsStrSrc, _countof(insCurIns.wszCurInsStrSrc),
-            L"%s", awszRegCodes8[REGCODE_AL]);
-        insCurIns.fSrcStrSet = TRUE;
-        dsNextState = DASM_STATE_IMM;
-        break;
-    }
-
     case 0xa3:    // A3    MOV moffs16*,AX
     {
         insCurIns.fDataOffset = TRUE;
-        if (insCurIns.wPrefixTypes & PREFIX_ADSIZE)
-            // 16bit offset
-            insCurIns.bImmType = IMM_16BIT;
-        else
-            // 32bit offset
-            insCurIns.bImmType = IMM_32BIT;
-
-        // determine operand size using opsize attrib
-        if (insCurIns.wPrefixTypes & PREFIX_OPSIZE)
-        {
-            insCurIns.pwszPtrStr = awszPtrStr[PTR_STR_INDEX_WORD];
-            StringCchPrintf(insCurIns.wszCurInsStrSrc, _countof(insCurIns.wszCurInsStrSrc),
-                L"%s", awszRegCodes16[REGCODE_AX]);
-        }
-        else
-        {
-            insCurIns.pwszPtrStr = awszPtrStr[PTR_STR_INDEX_DWORD];
-            StringCchPrintf(insCurIns.wszCurInsStrSrc, _countof(insCurIns.wszCurInsStrSrc),
-                L"%s", awszRegCodes32[REGCODE_EAX]);
-        }
-
+        insCurIns.bImmType = ImmTypeFromAddrSize();
+        insCurIns.pwszPtrStr = PtrStrFromOperandSize();
+        StringCchPrintf(insCurIns.wszCurInsStrSrc, _countof(insCurIns.wszCurInsStrSrc),
+            L"%s", RegStrFromWbitOperandSize(REGCODE_AX));
         insCurIns.fSrcStrSet = TRUE;
         dsNextState = DASM_STATE_IMM;
         break;
     }
 
     case 0xc6:
-        insCurIns.fModRM = TRUE;
-        insCurIns.bModRMType = MODRM_TYPE_DIGIT;
-        insCurIns.fImm = TRUE;
-        insCurIns.bImmType = IMM_8BIT;
-        dsNextState = DASM_STATE_MOD_RM;
-        break;
-
     case 0xc7:
         insCurIns.fModRM = TRUE;
         insCurIns.bModRMType = MODRM_TYPE_DIGIT;
         insCurIns.fImm = TRUE;
-        if (insCurIns.wPrefixTypes & PREFIX_OPSIZE)
-            insCurIns.bImmType = IMM_16BIT;
-        else
-            insCurIns.bImmType = IMM_32BIT;
+        insCurIns.bImmType = ImmTypeFromWbitOperandSize();
         dsNextState = DASM_STATE_MOD_RM;
         break;
 
     default:
     {
-        if (bOpcode >= 0xb0 && bOpcode <= 0xb7)
+        if (0xb0 <= bOpcode && bOpcode <= 0xb7)
         {
             BYTE bReg = bOpcode - 0xb0;
             StringCchPrintf(insCurIns.wszCurInsStrDes, _countof(insCurIns.wszCurInsStrDes),
@@ -4540,23 +4352,13 @@ BOOL OPCHndlrMem_MOV(BYTE bOpcode)
             insCurIns.bImmType = IMM_8BIT;
             dsNextState = DASM_STATE_IMM;
         }
-        else if (bOpcode >= 0xb8 && bOpcode <= 0xbf)
+        else if (0xb8 <= bOpcode && bOpcode <= 0xbf)
         {
             BYTE bReg = bOpcode - 0xb8;
-            if (insCurIns.wPrefixTypes & PREFIX_OPSIZE)
-            {
-                StringCchPrintf(insCurIns.wszCurInsStrDes, _countof(insCurIns.wszCurInsStrDes),
-                    L"%s", awszRegCodes16[bReg]);
-                insCurIns.fDesStrSet = TRUE;
-                insCurIns.bImmType = IMM_16BIT;
-            }
-            else
-            {
-                StringCchPrintf(insCurIns.wszCurInsStrDes, _countof(insCurIns.wszCurInsStrDes),
-                    L"%s", awszRegCodes32[bReg]);
-                insCurIns.fDesStrSet = TRUE;
-                insCurIns.bImmType = IMM_32BIT;
-            }
+            insCurIns.bImmType = ImmTypeFromOperandSize();
+            StringCchPrintf(insCurIns.wszCurInsStrDes, _countof(insCurIns.wszCurInsStrDes),
+                L"%s", RegStrFromOperandSize(bReg));
+            insCurIns.fDesStrSet = TRUE;
             insCurIns.fImm = TRUE;
             dsNextState = DASM_STATE_IMM;
         }
@@ -4689,33 +4491,14 @@ BOOL OPCHndlrMem_LAHF(BYTE bOpcode)
 BOOL OPCHndlrMem_MOVS(BYTE bOpcode)
 {
     logdbg(L"%s(): %xh\n", __FUNCTIONW__, bOpcode);
+    UNREFERENCED_PARAMETER(bOpcode);
 
-    WCHAR *pwszxDI = NULL;
-    WCHAR *pwszxSI = NULL;
+    WCHAR *pwszxDI = RegStrFromAddrSize(REGCODE_DI);
+    WCHAR *pwszxSI = RegStrFromAddrSize(REGCODE_SI);
     WCHAR *pwszPtrStr = NULL;
 
-    // Determine DI/EDI based on address size attrib
-    if (insCurIns.wPrefixTypes & PREFIX_ADSIZE)
-    {
-        pwszxDI = awszRegCodes16[REGCODE_DI];
-        pwszxSI = awszRegCodes16[REGCODE_SI];
-    }
-    else
-    {
-        pwszxDI = awszRegCodes32[REGCODE_EDI];
-        pwszxSI = awszRegCodes32[REGCODE_ESI];
-    }
-
     // to print: movs    byte ptr es:[edi],byte ptr [esi]
-    if (bOpcode == 0xA4)
-        pwszPtrStr = awszPtrStr[PTR_STR_INDEX_BYTE];
-    else if (bOpcode == 0xA5)
-    {
-        if (insCurIns.wPrefixTypes & PREFIX_OPSIZE)
-            pwszPtrStr = awszPtrStr[PTR_STR_INDEX_WORD];
-        else
-            pwszPtrStr = awszPtrStr[PTR_STR_INDEX_DWORD];
-    }
+    pwszPtrStr = PtrStrFromOperandSize();
 
     // destination: <ptrStr> es:[(e)di]
     StringCchPrintf(insCurIns.wszCurInsStrDes, _countof(insCurIns.wszCurInsStrDes),
@@ -4741,25 +4524,10 @@ BOOL OPCHndlrMem_MOVS(BYTE bOpcode)
 BOOL OPCHndlrMem_LODS(BYTE bOpcode)
 {
     logdbg(L"%s(): %xh\n", __FUNCTIONW__, bOpcode);
+    UNREFERENCED_PARAMETER(bOpcode);
 
-    WCHAR *pwszxSI = NULL;
-    WCHAR *pwszPtrStr = NULL;
-
-    // Determine DI/EDI based on address size attrib
-    if (insCurIns.wPrefixTypes & PREFIX_ADSIZE)
-        pwszxSI = awszRegCodes16[REGCODE_SI];
-    else
-        pwszxSI = awszRegCodes32[REGCODE_ESI];
-
-    if (bOpcode == 0xAC)
-        pwszPtrStr = awszPtrStr[PTR_STR_INDEX_BYTE];
-    else if (bOpcode == 0xAD)
-    {
-        if (insCurIns.wPrefixTypes & PREFIX_OPSIZE)
-            pwszPtrStr = awszPtrStr[PTR_STR_INDEX_WORD];
-        else
-            pwszPtrStr = awszPtrStr[PTR_STR_INDEX_DWORD];
-    }
+    WCHAR *pwszxSI = RegStrFromAddrSize(REGCODE_SI);
+    WCHAR *pwszPtrStr = PtrStrFromOperandSize();
 
     // to print: lods        dword ptr [esi]
     StringCchPrintf(insCurIns.wszCurInsStrSrc, _countof(insCurIns.wszCurInsStrSrc), L"%s[%s]", pwszPtrStr, pwszxSI);
@@ -4779,25 +4547,10 @@ BOOL OPCHndlrMem_LODS(BYTE bOpcode)
 BOOL OPCHndlrMem_STOS(BYTE bOpcode)
 {
     logdbg(L"%s(): %xh\n", __FUNCTIONW__, bOpcode);
+    UNREFERENCED_PARAMETER(bOpcode);
 
-    WCHAR *pwszxDI = NULL;
-    WCHAR *pwszPtrStr = NULL;
-
-    // Determine DI/EDI based on address size attrib
-    if (insCurIns.wPrefixTypes & PREFIX_ADSIZE)
-        pwszxDI = awszRegCodes16[REGCODE_DI];
-    else
-        pwszxDI = awszRegCodes32[REGCODE_EDI];
-
-    if (bOpcode == 0xAA)
-        pwszPtrStr = awszPtrStr[PTR_STR_INDEX_BYTE];
-    else if (bOpcode == 0xAB)
-    {
-        if (insCurIns.wPrefixTypes & PREFIX_OPSIZE)
-            pwszPtrStr = awszPtrStr[PTR_STR_INDEX_WORD];
-        else
-            pwszPtrStr = awszPtrStr[PTR_STR_INDEX_DWORD];
-    }
+    WCHAR *pwszxDI = RegStrFromAddrSize(REGCODE_DI);
+    WCHAR *pwszPtrStr = PtrStrFromOperandSize();
 
     // to print: stos        word ptr es:[edi]
     StringCchPrintf(insCurIns.wszCurInsStrSrc, _countof(insCurIns.wszCurInsStrSrc), L"%ses:[%s]", pwszPtrStr, pwszxDI);
@@ -4812,9 +4565,8 @@ BOOL OPCHndlrMem_STOS(BYTE bOpcode)
  */
 BOOL OPCHndlrMem_LES(BYTE bOpcode)
 {
-    DBG_UNREFERENCED_PARAMETER(bOpcode);
-
     logdbg(L"%s(): %xh\n", __FUNCTIONW__, bOpcode);
+    UNREFERENCED_PARAMETER(bOpcode);
 
     insCurIns.fModRM = TRUE;
     insCurIns.bModRMType = MODRM_TYPE_R;
@@ -4841,9 +4593,8 @@ BOOL OPCHndlrMem_LES(BYTE bOpcode)
  */
 BOOL OPCHndlrMem_LDS(BYTE bOpcode)
 {
-    DBG_UNREFERENCED_PARAMETER(bOpcode);
-
     logdbg(L"%s(): %xh\n", __FUNCTIONW__, bOpcode);
+    UNREFERENCED_PARAMETER(bOpcode);
 
     insCurIns.fModRM = TRUE;
     insCurIns.bModRMType = MODRM_TYPE_R;
@@ -4870,9 +4621,8 @@ BOOL OPCHndlrMem_LDS(BYTE bOpcode)
  */
 BOOL OPCHndlrMem_XLAT(BYTE bOpcode)
 {
-    DBG_UNREFERENCED_PARAMETER(bOpcode);
-
     logdbg(L"%s(): %xh\n", __FUNCTIONW__, bOpcode);
+    DBG_UNREFERENCED_PARAMETER(bOpcode);
 
     // XLAT m8 is only for documentation purposes in the code
     dsNextState = DASM_STATE_DUMP;
@@ -4908,33 +4658,11 @@ BOOL OPCHndlrCC_CMP(BYTE bOpcode)
     {
 
     case 0x3c:
-    {
-        insCurIns.bImmType = IMM_8BIT;
-        // Construct the output string
-        StringCchPrintf(insCurIns.wszCurInsStrDes, _countof(insCurIns.wszCurInsStrDes),
-            awszRegCodes8[REGCODE_AL]);
-        insCurIns.fDesStrSet = TRUE;
-        insCurIns.fImm = TRUE;
-        dsNextState = DASM_STATE_IMM;
-        break;
-    }
-
     case 0x3d:
     {
-        if (insCurIns.wPrefixTypes & PREFIX_OPSIZE)
-        {
-            insCurIns.bImmType = IMM_16BIT;
-            // Construct the output string
-            StringCchPrintf(insCurIns.wszCurInsStrDes, _countof(insCurIns.wszCurInsStrDes),
-                awszRegCodes16[REGCODE_AX]);
-        }
-        else
-        {
-            insCurIns.bImmType = IMM_32BIT;
-            // Construct the output string
-            StringCchPrintf(insCurIns.wszCurInsStrDes, _countof(insCurIns.wszCurInsStrDes),
-                awszRegCodes16[REGCODE_EAX]);
-        }
+        insCurIns.bImmType = ImmTypeFromWbitOperandSize();
+        StringCchPrintf(insCurIns.wszCurInsStrDes, _countof(insCurIns.wszCurInsStrDes),
+            RegStrFromWbitOperandSize(REGCODE_AX));
         insCurIns.fDesStrSet = TRUE;
         insCurIns.fImm = TRUE;
         dsNextState = DASM_STATE_IMM;
@@ -5073,19 +4801,16 @@ BOOL OPCHndlrCC_JUMP(BYTE bOpcode)
 {
     logdbg(L"%s(): %xh\n", __FUNCTIONW__, bOpcode);
 
-    if (bOpcode >= OPC_JMP_BEG && bOpcode <= OPC_JMP_END)
+    if (OPC_JMP_BEG <= bOpcode && bOpcode <= OPC_JMP_END)
     {
         insCurIns.fCodeOffset = TRUE;
         insCurIns.bImmType = IMM_8BIT;
         dsNextState = DASM_STATE_IMM;
     }
-    else if (bOpcode >= 0x80 && bOpcode <= 0x8f)    // 2byte opcodes
+    else if (0x80 <= bOpcode && bOpcode <= 0x8f)    // 2byte opcodes
     {
         insCurIns.fCodeOffset = TRUE;
-        if (insCurIns.wPrefixTypes & PREFIX_OPSIZE)
-            insCurIns.bImmType = IMM_16BIT;
-        else
-            insCurIns.bImmType = IMM_32BIT;
+        insCurIns.bImmType = ImmTypeFromOperandSize();
         dsNextState = DASM_STATE_IMM;
     }
     else
@@ -5110,10 +4835,7 @@ BOOL OPCHndlrCC_JUMP(BYTE bOpcode)
 
         case 0xe9:
             insCurIns.fCodeOffset = TRUE;
-            if (insCurIns.wPrefixTypes & PREFIX_OPSIZE)
-                insCurIns.bImmType = IMM_16BIT;
-            else
-                insCurIns.bImmType = IMM_32BIT;
+            insCurIns.bImmType = ImmTypeFromWbitOperandSize();
             dsNextState = DASM_STATE_IMM;
             break;
 
@@ -5189,32 +4911,11 @@ BOOL OPCHndlrCC_TEST(BYTE bOpcode)
     switch (bOpcode)
     {
     case 0xa8:
-        insCurIns.fImm = TRUE;
-        insCurIns.bImmType = IMM_8BIT;
-
-        // Construct the output string
-        StringCchPrintf(insCurIns.wszCurInsStrDes, _countof(insCurIns.wszCurInsStrDes),
-            awszRegCodes8[REGCODE_AL]);
-        insCurIns.fDesStrSet = TRUE;
-        dsNextState = DASM_STATE_IMM;
-        break;
-
     case 0xa9:
         insCurIns.fImm = TRUE;
-        if (insCurIns.wPrefixTypes & PREFIX_OPSIZE)
-        {
-            insCurIns.bImmType = IMM_16BIT;
-            // Construct the output string
-            StringCchPrintf(insCurIns.wszCurInsStrDes, _countof(insCurIns.wszCurInsStrDes),
-                awszRegCodes16[REGCODE_AX]);
-        }
-        else
-        {
-            insCurIns.bImmType = IMM_32BIT;
-            // Construct the output string
-            StringCchPrintf(insCurIns.wszCurInsStrDes, _countof(insCurIns.wszCurInsStrDes),
-                awszRegCodes32[REGCODE_EAX]);
-        }
+        insCurIns.bImmType = ImmTypeFromWbitOperandSize();
+        StringCchPrintf(insCurIns.wszCurInsStrDes, _countof(insCurIns.wszCurInsStrDes),
+            RegStrFromWbitOperandSize(REGCODE_EAX));
         insCurIns.fDesStrSet = TRUE;
         dsNextState = DASM_STATE_IMM;
         break;
@@ -5259,33 +4960,13 @@ BOOL OPCHndlrCC_TEST(BYTE bOpcode)
 BOOL OPCHndlrCC_CMPS(BYTE bOpcode)
 {
     logdbg(L"%s(): %xh\n", __FUNCTIONW__, bOpcode);
+    DBG_UNREFERENCED_PARAMETER(bOpcode);
 
-    WCHAR *pwszxDI = NULL;
-    WCHAR *pwszxSI = NULL;
-    WCHAR *pwszPtrStr = NULL;
-
-    // Determine DI/EDI based on address size attrib
-    if (insCurIns.wPrefixTypes & PREFIX_ADSIZE)
-    {
-        pwszxDI = awszRegCodes16[REGCODE_DI];
-        pwszxSI = awszRegCodes16[REGCODE_SI];
-    }
-    else
-    {
-        pwszxDI = awszRegCodes32[REGCODE_EDI];
-        pwszxSI = awszRegCodes32[REGCODE_ESI];
-    }
+    WCHAR *pwszxDI = RegStrFromAddrSize(REGCODE_DI);
+    WCHAR *pwszxSI = RegStrFromAddrSize(REGCODE_SI);
+    WCHAR *pwszPtrStr = PtrStrFromOperandSize();
 
     // to print: cmps        byte ptr [esi],byte ptr es:[edi]
-    if (bOpcode == 0xA6)
-        pwszPtrStr = awszPtrStr[PTR_STR_INDEX_BYTE];
-    else if (bOpcode == 0xA7)
-    {
-        if (insCurIns.wPrefixTypes & PREFIX_OPSIZE)
-            pwszPtrStr = awszPtrStr[PTR_STR_INDEX_WORD];
-        else
-            pwszPtrStr = awszPtrStr[PTR_STR_INDEX_DWORD];
-    }
 
     // destination: <ptrStr>[(e)si]
     StringCchPrintf(insCurIns.wszCurInsStrDes, _countof(insCurIns.wszCurInsStrDes),
@@ -5311,25 +4992,10 @@ BOOL OPCHndlrCC_CMPS(BYTE bOpcode)
 BOOL OPCHndlrCC_SCAS(BYTE bOpcode)
 {
     logdbg(L"%s(): %xh\n", __FUNCTIONW__, bOpcode);
+    DBG_UNREFERENCED_PARAMETER(bOpcode);
 
-    WCHAR *pwszxDI = NULL;
-    WCHAR *pwszPtrStr = NULL;
-
-    // Determine DI/EDI based on address size attrib
-    if (insCurIns.wPrefixTypes & PREFIX_ADSIZE)
-        pwszxDI = awszRegCodes16[REGCODE_DI];
-    else
-        pwszxDI = awszRegCodes32[REGCODE_EDI];
-
-    if (bOpcode == 0xAE)
-        pwszPtrStr = awszPtrStr[PTR_STR_INDEX_BYTE];
-    else if (bOpcode == 0xAF)
-    {
-        if (insCurIns.wPrefixTypes & PREFIX_OPSIZE)
-            pwszPtrStr = awszPtrStr[PTR_STR_INDEX_WORD];
-        else
-            pwszPtrStr = awszPtrStr[PTR_STR_INDEX_DWORD];
-    }
+    WCHAR *pwszxDI = RegStrFromAddrSize(REGCODE_DI);
+    WCHAR *pwszPtrStr = PtrStrFromOperandSize();
 
     // to print: scas   dword ptr es:[edi]
     StringCchPrintf(insCurIns.wszCurInsStrSrc, _countof(insCurIns.wszCurInsStrSrc),
@@ -5376,8 +5042,9 @@ BOOL OPCHndlrCC_IRETD(BYTE bOpcode)
     // "iret" if opsize = 16bit
     // else, "iretd" is already written to 
     // wszCurInsStr
-    if (insCurIns.wPrefixTypes & PREFIX_OPSIZE)
+    if (insCurIns.wPrefixTypes & PREFIX_OPSIZE) {
         StringCchPrintf(wszCurInsStr, _countof(wszCurInsStr), L"iret");
+    }
 
     dsNextState = DASM_STATE_DUMP;
     return TRUE;
@@ -5424,17 +5091,7 @@ BOOL OPCHndlrCC_CALL(BYTE bOpcode)
     {
 
     case 0xe8:
-        if (insCurIns.wPrefixTypes & PREFIX_OPSIZE)
-        {
-            // rel16
-            // Handled in IMM state
-            insCurIns.bImmType = IMM_16BIT;
-        }
-        else
-        {
-            // rel32
-            insCurIns.bImmType = IMM_32BIT;
-        }
+        insCurIns.bImmType = ImmTypeFromOperandSize();
         insCurIns.fCodeOffset = TRUE;
         dsNextState = DASM_STATE_IMM;
         break;
@@ -5456,9 +5113,9 @@ BOOL OPCHndlrCC_CALL(BYTE bOpcode)
                 L"word ptr [%04xh]:%04xh", wPtr, sOffset);
             iError = wcscat_s(wszCurInsStr, _countof(wszCurInsStr), wszCurInsTempStr);
 
-            if (iError)
+            if (iError) {
                 wprintf_s(L"OPCHndlrCC_CALL(): 3 wcscat_s() error %d\n", iError);
-
+            }
         }
         else
         {
@@ -5476,9 +5133,9 @@ BOOL OPCHndlrCC_CALL(BYTE bOpcode)
                 L"word ptr [%04xh]:%08xh", wPtr, iOffset);
             iError = wcscat_s(wszCurInsStr, _countof(wszCurInsStr), wszCurInsTempStr);
 
-            if (iError)
+            if (iError) {
                 wprintf_s(L"OPCHndlrCC_CALL(): 3 wcscat_s() error %d\n", iError);
-
+            }
         }
 
         dsNextState = DASM_STATE_DUMP;
@@ -5558,38 +5215,15 @@ BOOL OPCHndlrCC_EFLAGS(BYTE bOpcode)    // EFLAGS manipulators: CMC, CLC, STC, .
 BOOL OPCHndlrSysIO_INS(BYTE bOpcode)
 {
     logdbg(L"%s(): %xh\n", __FUNCTIONW__, bOpcode);
+    DBG_UNREFERENCED_PARAMETER(bOpcode);
 
     // 004011CC: 6D        ins        dword ptr es:[edi],dx
 
-    WCHAR *pwszxDI = NULL;
+    WCHAR *pwszxDI = RegStrFromAddrSize(REGCODE_DI);
 
-    // Determine DI/EDI based on address size attrib
-    if (insCurIns.wPrefixTypes & PREFIX_ADSIZE)
-        pwszxDI = awszRegCodes16[REGCODE_DI];
-    else
-        pwszxDI = awszRegCodes32[REGCODE_EDI];
-
-    if (bOpcode == 0x6C)
-    {
-        // byte ptr es:[(e)di]
-        StringCchPrintf(insCurIns.wszCurInsStrDes, _countof(insCurIns.wszCurInsStrDes),
-            L"%ses:[%s]", awszPtrStr[PTR_STR_INDEX_BYTE], pwszxDI);
-    }
-    else if (bOpcode == 0x6D)
-    {
-        if (insCurIns.wPrefixTypes & PREFIX_OPSIZE)
-        {
-            // word ptr es:[(e)di]
-            StringCchPrintf(insCurIns.wszCurInsStrDes, _countof(insCurIns.wszCurInsStrDes),
-                L"%ses:[%s]", awszPtrStr[PTR_STR_INDEX_WORD], pwszxDI);
-        }
-        else
-        {
-            // dword ptr es:[(e)di]
-            StringCchPrintf(insCurIns.wszCurInsStrDes, _countof(insCurIns.wszCurInsStrDes),
-                L"%ses:[%s]", awszPtrStr[PTR_STR_INDEX_DWORD], pwszxDI);
-        }
-    }
+    // {byte|word|dword} ptr es:[(e)di]
+    StringCchPrintf(insCurIns.wszCurInsStrDes, _countof(insCurIns.wszCurInsStrDes),
+        L"%ses:[%s]", PtrStrFromOperandSize(), pwszxDI);
 
     // source is always dx: port address is in dx
     StringCchCopy(insCurIns.wszCurInsStrSrc, _countof(insCurIns.wszCurInsStrSrc),
@@ -5608,36 +5242,13 @@ BOOL OPCHndlrSysIO_INS(BYTE bOpcode)
 BOOL OPCHndlrSysIO_OUTS(BYTE bOpcode)
 {
     logdbg(L"%s(): %xh\n", __FUNCTIONW__, bOpcode);
+    DBG_UNREFERENCED_PARAMETER(bOpcode);
 
-    WCHAR *pwszxDI = NULL;
+    WCHAR *pwszxDI = RegStrFromAddrSize(REGCODE_DI);
 
-    // Determine DI/EDI based on address size attrib
-    if (insCurIns.wPrefixTypes & PREFIX_ADSIZE)
-        pwszxDI = awszRegCodes16[REGCODE_DI];
-    else
-        pwszxDI = awszRegCodes32[REGCODE_EDI];
-
-    if (bOpcode == 0x6E)
-    {
-        // byte ptr ds:[(e)di]
-        StringCchPrintf(insCurIns.wszCurInsStrSrc, _countof(insCurIns.wszCurInsStrSrc),
-            L"%sds:[%s]", awszPtrStr[PTR_STR_INDEX_BYTE], pwszxDI);
-    }
-    else if (bOpcode == 0x6F)
-    {
-        if (insCurIns.wPrefixTypes & PREFIX_OPSIZE)
-        {
-            // word ptr ds:[(e)di]
-            StringCchPrintf(insCurIns.wszCurInsStrSrc, _countof(insCurIns.wszCurInsStrSrc),
-                L"%sds:[%s]", awszPtrStr[PTR_STR_INDEX_WORD], pwszxDI);
-        }
-        else
-        {
-            // dword ptr ds:[(e)di]
-            StringCchPrintf(insCurIns.wszCurInsStrSrc, _countof(insCurIns.wszCurInsStrSrc),
-                L"%sds:[%s]", awszPtrStr[PTR_STR_INDEX_DWORD], pwszxDI);
-        }
-    }
+    // {byte|word|dword} ptr ds:[(e)di]
+    StringCchPrintf(insCurIns.wszCurInsStrSrc, _countof(insCurIns.wszCurInsStrSrc),
+        L"%sds:[%s]", PtrStrFromOperandSize(), pwszxDI);
 
     // destination is always dx: port address is in dx
     StringCchCopy(insCurIns.wszCurInsStrDes, _countof(insCurIns.wszCurInsStrDes),
@@ -5654,9 +5265,8 @@ BOOL OPCHndlrSysIO_OUTS(BYTE bOpcode)
  */
 BOOL OPCHndlrSysIO_WAIT(BYTE bOpcode)
 {
-    DBG_UNREFERENCED_PARAMETER(bOpcode);
-
     logdbg(L"%s(): %xh\n", __FUNCTIONW__, bOpcode);
+    DBG_UNREFERENCED_PARAMETER(bOpcode);
 
     dsNextState = DASM_STATE_DUMP;
     return TRUE;
@@ -5701,12 +5311,10 @@ BOOL OPCHndlrSysIO_INT(BYTE bOpcode)    //    int3/intn/intO
 
 BOOL OPCHndlrSysIO_IceBP(BYTE bOpcode)    // undocumented INT1
 {
+    logdbg(L"%s(): %xh\n", __FUNCTIONW__, bOpcode);
     DBG_UNREFERENCED_PARAMETER(bOpcode);
 
-    logdbg(L"%s(): %xh\n", __FUNCTIONW__, bOpcode);
-
     dsNextState = DASM_STATE_DUMP;
-
     return TRUE;
 }
 
@@ -5720,19 +5328,10 @@ BOOL OPCHndlrSysIO_IN(BYTE bOpcode)    // IN imm
     logdbg(L"%s(): %xh\n", __FUNCTIONW__, bOpcode);
 
     // w, opsize attrib
-    if (bOpcode == 0xE4)
+    if (bOpcode == 0xE4 || bOpcode == 0xE5)
     {
         StringCchPrintf(insCurIns.wszCurInsStrDes, _countof(insCurIns.wszCurInsStrDes),
-            awszRegCodes8[REGCODE_AL]);
-    }
-    else if (bOpcode == 0xE5)
-    {
-        if (insCurIns.wPrefixTypes & PREFIX_OPSIZE)
-            StringCchPrintf(insCurIns.wszCurInsStrDes, _countof(insCurIns.wszCurInsStrDes),
-                awszRegCodes8[REGCODE_AX]);
-        else
-            StringCchPrintf(insCurIns.wszCurInsStrDes, _countof(insCurIns.wszCurInsStrDes),
-                awszRegCodes8[REGCODE_EAX]);
+            RegStrFromWbitOperandSize(REGCODE_AX));
     }
     else
     {
@@ -5758,19 +5357,10 @@ BOOL OPCHndlrSysIO_OUT(BYTE bOpcode)    // OUT imm
     BYTE bPortAddr;
 
     // w, opsize attrib
-    if (bOpcode == 0xE6)
+    if (bOpcode == 0xE6 || bOpcode == 0xE7)
     {
         StringCchPrintf(insCurIns.wszCurInsStrSrc, _countof(insCurIns.wszCurInsStrSrc),
-            awszRegCodes8[REGCODE_AL]);
-    }
-    else if (bOpcode == 0xE7)
-    {
-        if (insCurIns.wPrefixTypes & PREFIX_OPSIZE)
-            StringCchPrintf(insCurIns.wszCurInsStrSrc, _countof(insCurIns.wszCurInsStrSrc),
-                awszRegCodes8[REGCODE_AX]);
-        else
-            StringCchPrintf(insCurIns.wszCurInsStrSrc, _countof(insCurIns.wszCurInsStrSrc),
-                awszRegCodes8[REGCODE_EAX]);
+            RegStrFromWbitOperandSize(REGCODE_AX));
     }
     else
     {
@@ -5785,8 +5375,7 @@ BOOL OPCHndlrSysIO_OUT(BYTE bOpcode)    // OUT imm
     bPortAddr = *pByteInCode;
     ++pByteInCode;
     ++nBytesCurIns;
-    StringCchPrintf(insCurIns.wszCurInsStrDes, _countof(insCurIns.wszCurInsStrDes),
-        L"%Xh", bPortAddr);
+    StringCchPrintf(insCurIns.wszCurInsStrDes, _countof(insCurIns.wszCurInsStrDes), L"%Xh", bPortAddr);
     insCurIns.fDesStrSet = TRUE;
     dsNextState = DASM_STATE_DUMP;
     return TRUE;
@@ -5802,19 +5391,10 @@ BOOL OPCHndlrSysIO_INDX(BYTE bOpcode)
     logdbg(L"%s(): %xh\n", __FUNCTIONW__, bOpcode);
 
     // w, opsize attrib
-    if (bOpcode == 0xEC)
+    if (bOpcode == 0xEC || bOpcode == 0xED)
     {
         StringCchPrintf(insCurIns.wszCurInsStrDes, _countof(insCurIns.wszCurInsStrDes),
-            awszRegCodes8[REGCODE_AL]);
-    }
-    else if (bOpcode == 0xED)
-    {
-        if (insCurIns.wPrefixTypes & PREFIX_OPSIZE)
-            StringCchPrintf(insCurIns.wszCurInsStrDes, _countof(insCurIns.wszCurInsStrDes),
-                awszRegCodes8[REGCODE_AX]);
-        else
-            StringCchPrintf(insCurIns.wszCurInsStrDes, _countof(insCurIns.wszCurInsStrDes),
-                awszRegCodes8[REGCODE_EAX]);
+            RegStrFromWbitOperandSize(REGCODE_AX));
     }
     else
     {
@@ -5841,19 +5421,10 @@ BOOL OPCHndlrSysIO_OUTDX(BYTE bOpcode)
     logdbg(L"%s(): %xh\n", __FUNCTIONW__, bOpcode);
 
     // w, opsize attrib
-    if (bOpcode == 0xEE)
+    if (bOpcode == 0xEE || bOpcode == 0xEF)
     {
         StringCchPrintf(insCurIns.wszCurInsStrSrc, _countof(insCurIns.wszCurInsStrSrc),
-            awszRegCodes8[REGCODE_AL]);
-    }
-    else if (bOpcode == 0xEF)
-    {
-        if (insCurIns.wPrefixTypes & PREFIX_OPSIZE)
-            StringCchPrintf(insCurIns.wszCurInsStrSrc, _countof(insCurIns.wszCurInsStrSrc),
-                awszRegCodes16[REGCODE_AX]);
-        else
-            StringCchPrintf(insCurIns.wszCurInsStrSrc, _countof(insCurIns.wszCurInsStrSrc),
-                awszRegCodes32[REGCODE_EAX]);
+            RegStrFromWbitOperandSize(REGCODE_AX));
     }
     else
     {
